@@ -1,7 +1,7 @@
 """Mock LLM provider for testing."""
 
 from app.ai.provider import LLMProvider, T
-from app.ai.schemas import EvaluationOutput, FollowUpOutput, QuestionGenerationOutput
+from app.ai.schemas import EvaluationOutput, FollowUpOutput, QuestionGenerationOutput, ReportAnalysisOutput
 
 
 MOCK_QUESTIONS = [
@@ -79,5 +79,14 @@ class MockProvider(LLMProvider):
 
         if output_schema is EvaluationOutput:
             return MOCK_EVALUATION  # type: ignore[return-value]
+
+        if output_schema is ReportAnalysisOutput:
+            return ReportAnalysisOutput(
+                summary="The candidate demonstrated solid foundational knowledge with room for growth in depth and practical application.",
+                strengths=["Clear communication style", "Good understanding of core concepts", "Structured approach to answers"],
+                weaknesses=["Could go deeper into trade-offs", "Limited practical examples", "Missing edge case discussions"],
+                recommendations=["Practice explaining concepts with real-world examples", "Study system design patterns", "Review advanced data structures"],
+                recommended_topics=["System design basics", "Database optimization", "API design patterns"],
+            )  # type: ignore[return-value]
 
         raise ValueError(f"MockProvider does not support schema: {output_schema}")

@@ -128,3 +128,30 @@ class Evaluation(BaseModel):
     prompt_version: Mapped[str] = mapped_column(String(20), nullable=False, default="v1")
 
     answer: Mapped[InterviewAnswer] = relationship(back_populates="evaluation", lazy="joined")
+
+
+class InterviewReport(BaseModel):
+    __tablename__ = "interview_reports"
+
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("interview_sessions.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+    )
+    overall_score: Mapped[float] = mapped_column(Float, nullable=False)
+    technical_score: Mapped[float] = mapped_column(Float, nullable=False)
+    communication_score: Mapped[float] = mapped_column(Float, nullable=False)
+    problem_solving_score: Mapped[float] = mapped_column(Float, nullable=False)
+    confidence_score: Mapped[float] = mapped_column(Float, nullable=False)
+    readiness_level: Mapped[str] = mapped_column(String(20), nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    strengths: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    weaknesses: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    recommendations: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    recommended_topics: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    category_breakdown: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    questions_data: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    prompt_version: Mapped[str] = mapped_column(String(20), nullable=False, default="v1")
+
+    session: Mapped[InterviewSession] = relationship(lazy="joined")

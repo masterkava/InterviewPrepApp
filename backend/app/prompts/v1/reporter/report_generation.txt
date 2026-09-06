@@ -1,0 +1,28 @@
+Analyze the following completed technical interview and produce a qualitative assessment.
+
+Role: {role_name}
+Experience level: {experience_level}
+Questions answered: {questions_answered}
+Overall score: {overall_score}/100
+Technical score: {technical_score}/100
+Communication score: {communication_score}/100
+Problem-solving score: {problem_solving_score}/100
+
+Interview transcript with per-question evaluations:
+{transcript}
+
+Based on the full interview, provide:
+1. A 2-3 sentence summary of the candidate's performance
+2. Top 3-5 specific strengths demonstrated
+3. Top 3-5 specific areas for improvement
+4. 3-5 actionable study recommendations
+5. 3-5 specific topics to study
+
+Respond with JSON:
+{{
+  "summary": "2-3 sentence performance summary",
+  "strengths": ["specific strength 1", "specific strength 2", "..."],
+  "weaknesses": ["specific area for improvement 1", "..."],
+  "recommendations": ["actionable recommendation 1", "..."],
+  "recommended_topics": ["topic to study 1", "..."]
+}}

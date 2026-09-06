@@ -11,7 +11,8 @@ from sqlalchemy.orm import selectinload
 from app.ai.provider import LLMProvider
 from app.exceptions import ConflictError, NotFoundError, ValidationError
 from app.interview.engine import InterviewEngine
-from app.models.interview import InterviewQuestion, InterviewSession
+from app.interview.report_generator import ReportGenerator
+from app.models.interview import InterviewQuestion, InterviewReport, InterviewSession
 from app.repositories.interview_repository import InterviewRepository
 from app.repositories.role_repository import RoleRepository
 from app.repositories.user_repository import UserRepository
@@ -182,6 +183,45 @@ class InterviewService:
             question_budget=interview.question_budget,
             message="Interview ended early. Your report will be generated based on the questions answered.",
         )
+
+    async def get_report(self, interview_id: UUID) -> InterviewReport:
+        interview = await self._get_interview(interview_id)
+        if interview.status != "completed":
+            raise ConflictError("Interview has not been completed yet")
+
+        result = await self._db.execute(
+            select(InterviewReport).where(InterviewReport.session_id == interview_id)
+        )
+        existing = result.scalars().one_or_none()
+        if existing:
+            return existing
+
+        if self._llm_provider is None:
+            raise ValidationError("LLM provider not configured")
+        generator = ReportGenerator(self._llm_provider, self._db)
+        report = await generator.generate_report(interview)
+        await self._db.commit()
+        return report
+
+    async def get_user_interviews(
+        self, user_id: UUID, limit: int = 20, offset: int = 0,
+    ) -> tuple[list[InterviewSession], int]:
+        from sqlalchemy import func
+        count_result = await self._db.execute(
+            select(func.count()).select_from(InterviewSession).where(InterviewSession.user_id == user_id)
+        )
+        total = count_result.scalar() or 0
+
+        result = await self._db.execute(
+            select(InterviewSession)
+            .where(InterviewSession.user_id == user_id)
+            .options(selectinload(InterviewSession.role))
+            .order_by(InterviewSession.created_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        interviews = list(result.scalars().all())
+        return interviews, total
 
     async def _get_interview(self, interview_id: UUID) -> InterviewSession:
         interview = await self._interview_repo.get_by_id(interview_id)

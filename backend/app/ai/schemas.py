@@ -31,3 +31,11 @@ class EvaluationOutput(BaseModel):
     feedback: str
     follow_up_recommended: bool
     follow_up_reason: str | None = None
+
+
+class ReportAnalysisOutput(BaseModel):
+    summary: str
+    strengths: list[str]
+    weaknesses: list[str]
+    recommendations: list[str]
+    recommended_topics: list[str]
