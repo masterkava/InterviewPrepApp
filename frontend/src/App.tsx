@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
+import InterviewSetupPage from './pages/InterviewSetupPage';
 import LandingPage from './pages/LandingPage';
 import NotFoundPage from './pages/NotFoundPage';
 
@@ -20,6 +21,7 @@ export default function App() {
         <Routes>
           <Route element={<AppLayout />}>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/interview/setup" element={<InterviewSetupPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>
         </Routes>

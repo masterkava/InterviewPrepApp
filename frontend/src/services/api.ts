@@ -44,4 +44,24 @@ export async function getHealth(): Promise<HealthResponse> {
   return request<HealthResponse>('/health');
 }
 
+// --- Roles ---
+import type { RolesListResponse, RoleSkillsResponse } from '../types/role';
+import type { InterviewConfig, InterviewSession } from '../types/interview';
+
+export async function getRoles(): Promise<RolesListResponse> {
+  return request<RolesListResponse>('/roles');
+}
+
+export async function getRoleSkills(roleId: string): Promise<RoleSkillsResponse> {
+  return request<RoleSkillsResponse>(`/roles/${roleId}/skills`);
+}
+
+// --- Interviews ---
+export async function createInterview(config: InterviewConfig): Promise<InterviewSession> {
+  return request<InterviewSession>('/interviews', {
+    method: 'POST',
+    body: JSON.stringify(config),
+  });
+}
+
 export { ApiError };
