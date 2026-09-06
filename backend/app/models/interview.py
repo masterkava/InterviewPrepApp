@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import GUID, JSONType, BaseModel
@@ -99,3 +99,32 @@ class InterviewAnswer(BaseModel):
     response_time_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     question: Mapped[InterviewQuestion] = relationship(back_populates="answer", lazy="joined")
+    evaluation: Mapped[Evaluation | None] = relationship(
+        back_populates="answer", lazy="selectin", uselist=False
+    )
+
+
+class Evaluation(BaseModel):
+    __tablename__ = "evaluations"
+
+    answer_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("interview_answers.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+    )
+    technical_correctness: Mapped[float] = mapped_column(Float, nullable=False)
+    conceptual_depth: Mapped[float] = mapped_column(Float, nullable=False)
+    communication_clarity: Mapped[float] = mapped_column(Float, nullable=False)
+    relevance: Mapped[float] = mapped_column(Float, nullable=False)
+    problem_solving: Mapped[float] = mapped_column(Float, nullable=False)
+    completeness: Mapped[float] = mapped_column(Float, nullable=False)
+    overall_score: Mapped[float] = mapped_column(Float, nullable=False)
+    feedback: Mapped[str] = mapped_column(Text, nullable=False)
+    strengths: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    weaknesses: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    follow_up_recommended: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    follow_up_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    prompt_version: Mapped[str] = mapped_column(String(20), nullable=False, default="v1")
+
+    answer: Mapped[InterviewAnswer] = relationship(back_populates="evaluation", lazy="joined")

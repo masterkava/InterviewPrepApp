@@ -1,0 +1,37 @@
+Evaluate the following interview answer.
+
+Role: {role_name}
+Experience level: {experience_level}
+Question: {question_text}
+Candidate's answer: {answer_text}
+
+Score this answer as you would evaluate a {experience_level} candidate.
+- A fresher (0-1 yr) is expected to know fundamentals. Practical experience not expected.
+- A junior (1-2 yr) is expected to know fundamentals well and have some practical experience.
+- A mid-level (3-5 yr) is expected to demonstrate depth, trade-off analysis, and real-world experience.
+- A senior (5+ yr) is expected to demonstrate mastery, system-level thinking, and mentoring-level clarity.
+
+SCORING RUBRIC (0-10 scale for each dimension):
+
+Technical Correctness: How factually and technically accurate is the answer?
+Conceptual Depth: Does the candidate understand why, not just what?
+Communication Clarity: Can the candidate explain their thinking clearly?
+Relevance: Does the answer address the question that was asked?
+Problem Solving: Does the candidate demonstrate analytical thinking?
+Completeness: Does the answer cover the expected scope for this experience level?
+
+Respond with JSON:
+{{
+  "technical_correctness": 0-10,
+  "conceptual_depth": 0-10,
+  "communication_clarity": 0-10,
+  "relevance": 0-10,
+  "problem_solving": 0-10,
+  "completeness": 0-10,
+  "overall_score": 0-10,
+  "strengths": ["specific strength 1", "specific strength 2"],
+  "weaknesses": ["specific area for improvement 1", "specific area for improvement 2"],
+  "feedback": "2-3 sentence constructive feedback",
+  "follow_up_recommended": true/false,
+  "follow_up_reason": "reason for follow-up or null"
+}}

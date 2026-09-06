@@ -1,0 +1,14 @@
+Generate a follow-up question based on the candidate's previous answer.
+
+Original question: {original_question}
+Candidate's answer: {candidate_answer}
+Evaluation summary: Score {overall_score}/10. {follow_up_reason}
+
+The follow-up should {follow_up_purpose}.
+
+Respond with JSON:
+{{
+  "question_text": "the follow-up question",
+  "difficulty": "easy|medium|hard",
+  "follow_up_purpose": "probe_deeper|clarify|explore_practical|correct_misconception"
+}}
