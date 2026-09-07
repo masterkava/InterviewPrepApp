@@ -5,13 +5,21 @@ Target skill area: {target_skill}
 Target difficulty: {target_difficulty}
 
 Skills already covered: {skills_covered}
-Questions already asked (avoid repeating topics):
+
+Questions already asked (you MUST NOT repeat or rephrase any of these):
 {previous_questions}
 
 {last_exchange}
 
-Generate exactly one question appropriate for a {experience_level} {role_name} candidate.
-The question should test {target_skill} at {target_difficulty} difficulty.
+IMPORTANT RULES:
+1. Generate a COMPLETELY DIFFERENT question from all previous ones — do not rephrase or ask the same concept again
+2. The question MUST test the "{target_skill}" skill area specifically
+3. Match the difficulty level "{target_difficulty}" precisely:
+   - easy: definitions, basic concepts, "what is X?", simple use cases
+   - medium: "how does X work?", implementation details, comparisons, practical scenarios
+   - hard: system design, trade-offs, debugging scenarios, architecture decisions, edge cases
+4. Tailor complexity to a {experience_level} {role_name} candidate
+5. Ask open-ended questions that reveal depth of understanding, not yes/no questions
 
 Respond with JSON:
 {{

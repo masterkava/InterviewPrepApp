@@ -4,13 +4,15 @@ import json
 
 import structlog
 from openai import AsyncOpenAI
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 
 from app.ai.provider import LLMProvider, T
 from app.config import settings
 from app.exceptions import AIError
 
 logger = structlog.get_logger()
+
+STRUCTURED_OUTPUT_MODELS = {"gpt-4o", "gpt-4o-mini", "gpt-4o-2024-08-06"}
 
 
 class OpenAIProvider(LLMProvider):
@@ -26,6 +28,51 @@ class OpenAIProvider(LLMProvider):
         model = model or settings.llm_model_generation
         max_retries = settings.llm_max_retries
 
+        if self._supports_structured_output(model):
+            return await self._structured_completion(messages, output_schema, model, max_retries)
+        return await self._json_completion(messages, output_schema, model, max_retries)
+
+    def _supports_structured_output(self, model: str) -> bool:
+        return any(model.startswith(m) for m in STRUCTURED_OUTPUT_MODELS)
+
+    async def _structured_completion(
+        self,
+        messages: list[dict[str, str]],
+        output_schema: type[T],
+        model: str,
+        max_retries: int,
+    ) -> T:
+        for attempt in range(max_retries):
+            try:
+                response = await self._client.beta.chat.completions.parse(
+                    model=model,
+                    messages=messages,
+                    response_format=output_schema,
+                    temperature=0.7,
+                    timeout=settings.llm_timeout_seconds,
+                )
+                parsed = response.choices[0].message.parsed
+                if parsed is None:
+                    refusal = response.choices[0].message.refusal
+                    raise AIError(f"LLM refused to respond: {refusal}")
+                return parsed
+
+            except AIError:
+                raise
+            except Exception as e:
+                logger.warning("llm.structured_output_failed", attempt=attempt + 1, error=str(e))
+                if attempt < max_retries - 1:
+                    continue
+                raise AIError(f"OpenAI structured output failed after {max_retries} attempts: {e}") from e
+
+    async def _json_completion(
+        self,
+        messages: list[dict[str, str]],
+        output_schema: type[T],
+        model: str,
+        max_retries: int,
+    ) -> T:
+        content = ""
         for attempt in range(max_retries):
             try:
                 response = await self._client.chat.completions.create(
@@ -43,11 +90,7 @@ class OpenAIProvider(LLMProvider):
                 return output_schema.model_validate(data)
 
             except ValidationError as e:
-                logger.warning(
-                    "llm.schema_validation_failed",
-                    attempt=attempt + 1,
-                    error=str(e),
-                )
+                logger.warning("llm.schema_validation_failed", attempt=attempt + 1, error=str(e))
                 if attempt < max_retries - 1:
                     messages.append({"role": "assistant", "content": content})
                     messages.append({

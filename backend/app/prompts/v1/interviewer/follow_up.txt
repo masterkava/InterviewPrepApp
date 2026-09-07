@@ -6,6 +6,12 @@ Evaluation summary: Score {overall_score}/10. {follow_up_reason}
 
 The follow-up should {follow_up_purpose}.
 
+RULES:
+1. The follow-up must be directly related to the candidate's answer — reference specific claims or gaps
+2. Do NOT repeat the original question in any form
+3. If the candidate scored low, ask a simpler clarifying question to give them a chance
+4. If the candidate scored high, probe deeper into a specific aspect they mentioned
+
 Respond with JSON:
 {{
   "question_text": "the follow-up question",

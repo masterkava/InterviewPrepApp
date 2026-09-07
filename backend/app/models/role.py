@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import GUID, BaseModel
+from app.models.base import GUID, JSONType, BaseModel
 
 if TYPE_CHECKING:
     pass
@@ -74,6 +74,9 @@ class SeedQuestion(BaseModel):
     question_text: Mapped[str] = mapped_column(Text, nullable=False)
     difficulty: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
     question_type: Mapped[str] = mapped_column(String(20), nullable=False, default="standard")
+    expected_concepts: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    reference_answer: Mapped[str | None] = mapped_column(Text, nullable=True)
+    time_limit_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=90)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     role: Mapped[Role] = relationship(back_populates="seed_questions", lazy="joined")

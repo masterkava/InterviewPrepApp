@@ -179,25 +179,80 @@ class ReportGenerator:
         transcript: str,
         questions_answered: int,
     ) -> ReportAnalysisOutput:
-        user_prompt = render_prompt(
-            settings.prompt_version, "reporter", "report_generation",
-            role_name=interview.role.name,
-            experience_level=interview.experience_level,
-            questions_answered=questions_answered,
-            overall_score=round(scores.overall_score),
-            technical_score=round(scores.technical_score),
-            communication_score=round(scores.communication_score),
-            problem_solving_score=round(scores.problem_solving_score),
-            transcript=transcript or "No transcript available.",
-        )
+        try:
+            user_prompt = render_prompt(
+                settings.prompt_version, "reporter", "report_generation",
+                role_name=interview.role.name,
+                experience_level=interview.experience_level,
+                questions_answered=questions_answered,
+                overall_score=round(scores.overall_score),
+                technical_score=round(scores.technical_score),
+                communication_score=round(scores.communication_score),
+                problem_solving_score=round(scores.problem_solving_score),
+                transcript=transcript or "No transcript available.",
+            )
 
-        return await self._provider.chat_completion(
-            messages=[
-                {"role": "system", "content": "You are an expert interview report analyst. Produce insightful, actionable feedback. Respond only with valid JSON."},
-                {"role": "user", "content": user_prompt},
-            ],
-            output_schema=ReportAnalysisOutput,
-            model=settings.llm_model_evaluation,
+            return await self._provider.chat_completion(
+                messages=[
+                    {"role": "system", "content": "You are an expert interview report analyst. Produce insightful, actionable feedback. Respond only with valid JSON."},
+                    {"role": "user", "content": user_prompt},
+                ],
+                output_schema=ReportAnalysisOutput,
+                model=settings.llm_model_evaluation,
+            )
+        except Exception:
+            logger.warning("llm.report_analysis_failed_using_deterministic_fallback")
+            return self._deterministic_analysis(interview, scores)
+
+    def _deterministic_analysis(
+        self,
+        interview: InterviewSession,
+        scores: ScoreAggregation,
+    ) -> ReportAnalysisOutput:
+        role = interview.role.name
+        level = interview.experience_level
+        overall = scores.overall_score
+
+        if overall >= 71:
+            summary = f"Strong performance in the {role} interview. The candidate demonstrated solid technical knowledge appropriate for {level}-level expectations."
+        elif overall >= 51:
+            summary = f"Adequate performance in the {role} interview. The candidate showed understanding of core concepts but has room for improvement in several areas."
+        elif overall >= 31:
+            summary = f"Below-average performance in the {role} interview. Several fundamental concepts need further study and practice."
+        else:
+            summary = f"The candidate struggled with most topics in the {role} interview. A focused study plan is recommended before reattempting."
+
+        strengths = []
+        weaknesses = []
+        recommendations = []
+        weak_topics = []
+
+        breakdown = scores.category_breakdown
+        for cat, score in breakdown.items():
+            label = cat.replace("_", " ").title()
+            if score >= 70:
+                strengths.append(f"Good {label} ({score}/100)")
+            elif score < 40:
+                weaknesses.append(f"Weak {label} ({score}/100)")
+                weak_topics.append(label)
+
+        if not strengths:
+            strengths.append("Participated and attempted all questions")
+        if not weaknesses:
+            weaknesses.append("Could provide more depth and real-world examples")
+
+        if weak_topics:
+            recommendations.append(f"Focus study on: {', '.join(weak_topics[:3])}")
+        recommendations.append("Practice explaining concepts clearly and concisely")
+        if overall < 51:
+            recommendations.append("Review fundamental concepts before attempting more advanced topics")
+
+        return ReportAnalysisOutput(
+            summary=summary,
+            strengths=strengths[:5],
+            weaknesses=weaknesses[:5],
+            recommendations=recommendations[:5],
+            recommended_topics=weak_topics[:5] if weak_topics else ["General review"],
         )
 
     async def _load_questions(self, session_id: uuid.UUID) -> list[InterviewQuestion]:

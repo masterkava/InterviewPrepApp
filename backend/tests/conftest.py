@@ -1,3 +1,7 @@
+import os
+
+os.environ["OPENAI_API_KEY"] = "mock"
+
 from collections.abc import AsyncGenerator
 
 import pytest
