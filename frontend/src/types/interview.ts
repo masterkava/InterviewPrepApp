@@ -124,3 +124,21 @@ export interface ReportResponse {
   questions: ReportQuestion[];
   created_at: string;
 }
+
+export interface InterviewHistoryItem {
+  id: string;
+  role_name: string;
+  experience_level: string;
+  status: string;
+  overall_score: number | null;
+  questions_asked: number;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface InterviewHistoryResponse {
+  interviews: InterviewHistoryItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}

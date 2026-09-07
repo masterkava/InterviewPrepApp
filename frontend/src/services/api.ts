@@ -51,6 +51,7 @@ import type {
   AnswerResponse,
   InterviewCompleteResponse,
   InterviewConfig,
+  InterviewHistoryResponse,
   InterviewSession,
   InterviewStartResponse,
   ReportResponse,
@@ -99,6 +100,17 @@ export async function completeInterview(
 // --- Reports ---
 export async function getReport(interviewId: string): Promise<ReportResponse> {
   return request<ReportResponse>(`/interviews/${interviewId}/report`);
+}
+
+// --- History ---
+export async function getUserInterviews(
+  userId: string,
+  limit = 20,
+  offset = 0,
+): Promise<InterviewHistoryResponse> {
+  return request<InterviewHistoryResponse>(
+    `/users/${userId}/interviews?limit=${limit}&offset=${offset}`,
+  );
 }
 
 export { ApiError };
