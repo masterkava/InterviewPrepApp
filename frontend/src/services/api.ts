@@ -113,4 +113,29 @@ export async function getUserInterviews(
   );
 }
 
+// --- Question Bank ---
+import type { QuestionBankResponse, QuestionBankMetaResponse } from '../types/interview';
+
+export async function getQuestionBank(params: {
+  category?: string;
+  topic?: string;
+  difficulty?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}): Promise<QuestionBankResponse> {
+  const qs = new URLSearchParams();
+  if (params.category) qs.set('category', params.category);
+  if (params.topic) qs.set('topic', params.topic);
+  if (params.difficulty) qs.set('difficulty', params.difficulty);
+  if (params.search) qs.set('search', params.search);
+  if (params.page) qs.set('page', String(params.page));
+  if (params.limit) qs.set('limit', String(params.limit));
+  return request<QuestionBankResponse>(`/question-bank?${qs.toString()}`);
+}
+
+export async function getQuestionBankMeta(): Promise<QuestionBankMetaResponse> {
+  return request<QuestionBankMetaResponse>('/question-bank/meta');
+}
+
 export { ApiError };

@@ -12,6 +12,7 @@ from sqlalchemy.orm import selectinload
 from app.ai.provider import LLMProvider
 from app.ai.schemas import ReportAnalysisOutput
 from app.config import settings
+from app.interview.concept_evaluator import _tokenize
 from app.models.interview import (
     Evaluation,
     InterviewAnswer,
@@ -19,6 +20,7 @@ from app.models.interview import (
     InterviewReport,
     InterviewSession,
 )
+from app.models.role import SeedQuestion
 from app.prompts.manager import render_prompt
 
 logger = structlog.get_logger()
@@ -112,6 +114,7 @@ class ReportGenerator:
 
     async def generate_report(self, interview: InterviewSession) -> InterviewReport:
         questions_with_evals = await self._load_questions(interview.id)
+        seed_lookup = await self._load_seed_lookup(interview.role_id)
 
         evaluations = []
         questions_data = []
@@ -123,7 +126,7 @@ class ReportGenerator:
             ev = q.answer.evaluation
             evaluations.append(ev)
 
-            questions_data.append({
+            entry: dict = {
                 "sequence_number": q.sequence_number,
                 "question_text": q.question_text,
                 "answer_text": q.answer.answer_text,
@@ -133,7 +136,27 @@ class ReportGenerator:
                     "strengths": ev.strengths,
                     "weaknesses": ev.weaknesses,
                 },
-            })
+            }
+
+            seed = seed_lookup.get(q.question_text)
+            if seed and seed.reference_answer:
+                entry["reference_answer"] = seed.reference_answer
+                concepts = seed.expected_concepts or []
+                entry["expected_concepts"] = concepts
+                if concepts:
+                    answer_tokens = set(_tokenize(q.answer.answer_text))
+                    matched = []
+                    missed = []
+                    for concept in concepts:
+                        concept_words = set(_tokenize(concept))
+                        if concept_words & answer_tokens:
+                            matched.append(concept)
+                        else:
+                            missed.append(concept)
+                    entry["matched_concepts"] = matched
+                    entry["missed_concepts"] = missed
+
+            questions_data.append(entry)
 
             transcript_lines.append(
                 f"Q{q.sequence_number}: {q.question_text}\n"
@@ -254,6 +277,12 @@ class ReportGenerator:
             recommendations=recommendations[:5],
             recommended_topics=weak_topics[:5] if weak_topics else ["General review"],
         )
+
+    async def _load_seed_lookup(self, role_id: uuid.UUID) -> dict[str, SeedQuestion]:
+        result = await self._db.execute(
+            select(SeedQuestion).where(SeedQuestion.role_id == role_id)
+        )
+        return {sq.question_text: sq for sq in result.scalars().all()}
 
     async def _load_questions(self, session_id: uuid.UUID) -> list[InterviewQuestion]:
         result = await self._db.execute(

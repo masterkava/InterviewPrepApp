@@ -15,6 +15,12 @@ export default function AppLayout() {
             </Link>
             <nav className="flex items-center gap-6">
               <Link
+                to="/question-bank"
+                className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
+              >
+                Question Bank
+              </Link>
+              <Link
                 to="/history"
                 className="text-sm text-gray-600 hover:text-primary-600 transition-colors"
               >

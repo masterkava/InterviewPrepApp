@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getReport } from '../services/api';
@@ -209,12 +210,16 @@ function CategoryBar({ label, score }: { label: string; score: number }) {
 }
 
 function QuestionReview({ question }: { question: ReportResponse['questions'][number] }) {
+  const [showModel, setShowModel] = useState(false);
+
   const scoreColor =
     question.evaluation.overall_score >= 7
       ? 'bg-green-100 text-green-800'
       : question.evaluation.overall_score >= 4
         ? 'bg-amber-100 text-amber-800'
         : 'bg-red-100 text-red-800';
+
+  const hasModelAnswer = !!question.reference_answer;
 
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -251,6 +256,58 @@ function QuestionReview({ question }: { question: ReportResponse['questions'][nu
                 {question.evaluation.weaknesses.map((w, i) => (
                   <p key={i} className="text-amber-700">- {w}</p>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {hasModelAnswer && (
+          <div className="pt-2 border-t border-gray-100">
+            <button
+              onClick={() => setShowModel(!showModel)}
+              className="flex items-center gap-2 text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors cursor-pointer"
+            >
+              <span className={`inline-block transition-transform duration-200 ${showModel ? 'rotate-90' : ''}`}>
+                &#9654;
+              </span>
+              {showModel ? 'Hide' : 'Show'} Model Answer
+            </button>
+
+            {showModel && (
+              <div className="mt-3 space-y-3">
+                <div className="bg-emerald-50 rounded-lg px-3 py-2 border border-emerald-200">
+                  <p className="text-xs text-emerald-700 font-medium mb-1">Model Answer</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap">{question.reference_answer}</p>
+                </div>
+
+                {question.expected_concepts && question.expected_concepts.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-gray-500 mb-2">Key Concepts</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {question.matched_concepts?.map((c) => (
+                        <span
+                          key={c}
+                          className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 border border-green-200"
+                        >
+                          &#10003; {c}
+                        </span>
+                      ))}
+                      {question.missed_concepts?.map((c) => (
+                        <span
+                          key={c}
+                          className="px-2 py-0.5 text-xs rounded-full bg-orange-100 text-orange-800 border border-orange-200"
+                        >
+                          &#10007; {c}
+                        </span>
+                      ))}
+                    </div>
+                    {question.expected_concepts.length > 0 && (
+                      <p className="text-xs text-gray-400 mt-1.5">
+                        {question.matched_concepts?.length ?? 0}/{question.expected_concepts.length} concepts covered
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

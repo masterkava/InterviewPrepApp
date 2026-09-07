@@ -104,6 +104,10 @@ export interface ReportQuestion {
   question_text: string;
   answer_text: string;
   evaluation: QuestionEvaluation;
+  reference_answer?: string;
+  expected_concepts?: string[];
+  matched_concepts?: string[];
+  missed_concepts?: string[];
 }
 
 export interface ReportResponse {
@@ -141,4 +145,37 @@ export interface InterviewHistoryResponse {
   total: number;
   limit: number;
   offset: number;
+}
+
+// --- Question Bank ---
+export interface QuestionBankItem {
+  id: string;
+  category: string;
+  category_label: string;
+  topic: string;
+  difficulty: string;
+  question_type: string;
+  question_text: string;
+  answer: string;
+  key_concepts: string[];
+}
+
+export interface QuestionBankCategory {
+  slug: string;
+  label: string;
+  topics: string[];
+  count: number;
+}
+
+export interface QuestionBankResponse {
+  questions: QuestionBankItem[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
+export interface QuestionBankMetaResponse {
+  categories: QuestionBankCategory[];
+  total: number;
 }

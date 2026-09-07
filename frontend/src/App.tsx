@@ -9,6 +9,7 @@ import InterviewReportPage from './pages/InterviewReportPage';
 import InterviewSetupPage from './pages/InterviewSetupPage';
 import LandingPage from './pages/LandingPage';
 import NotFoundPage from './pages/NotFoundPage';
+import QuestionBankPage from './pages/QuestionBankPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,6 +28,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<LandingPage />} />
             <Route path="/history" element={<InterviewHistoryPage />} />
+            <Route path="/question-bank" element={<QuestionBankPage />} />
             <Route path="/interview/setup" element={<InterviewSetupPage />} />
             <Route path="/interview/:interviewId/lobby" element={<InterviewLobbyPage />} />
             <Route path="/interview/:interviewId/session" element={<InterviewPage />} />
