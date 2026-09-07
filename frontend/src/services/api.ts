@@ -46,7 +46,14 @@ export async function getHealth(): Promise<HealthResponse> {
 
 // --- Roles ---
 import type { RolesListResponse, RoleSkillsResponse } from '../types/role';
-import type { InterviewConfig, InterviewSession } from '../types/interview';
+import type {
+  AnswerRequest,
+  AnswerResponse,
+  InterviewCompleteResponse,
+  InterviewConfig,
+  InterviewSession,
+  InterviewStartResponse,
+} from '../types/interview';
 
 export async function getRoles(): Promise<RolesListResponse> {
   return request<RolesListResponse>('/roles');
@@ -61,6 +68,30 @@ export async function createInterview(config: InterviewConfig): Promise<Intervie
   return request<InterviewSession>('/interviews', {
     method: 'POST',
     body: JSON.stringify(config),
+  });
+}
+
+export async function startInterview(interviewId: string): Promise<InterviewStartResponse> {
+  return request<InterviewStartResponse>(`/interviews/${interviewId}/start`, {
+    method: 'POST',
+  });
+}
+
+export async function submitAnswer(
+  interviewId: string,
+  answer: AnswerRequest,
+): Promise<AnswerResponse> {
+  return request<AnswerResponse>(`/interviews/${interviewId}/answer`, {
+    method: 'POST',
+    body: JSON.stringify(answer),
+  });
+}
+
+export async function completeInterview(
+  interviewId: string,
+): Promise<InterviewCompleteResponse> {
+  return request<InterviewCompleteResponse>(`/interviews/${interviewId}/complete`, {
+    method: 'POST',
   });
 }
 

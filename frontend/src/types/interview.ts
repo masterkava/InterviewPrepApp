@@ -22,3 +22,72 @@ export interface InterviewSession {
   status: string;
   created_at: string;
 }
+
+export interface Question {
+  id: string;
+  sequence_number: number;
+  question_text: string;
+  difficulty: string;
+  skill: string;
+  question_type: string;
+  parent_question_id?: string | null;
+}
+
+export interface Progress {
+  current: number;
+  total: number;
+  skills_covered: string[];
+  skills_remaining: string[];
+}
+
+export interface InterviewStartResponse {
+  session_id: string;
+  status: string;
+  interviewer_message: string;
+  question: Question;
+  progress: Progress;
+}
+
+export interface EvaluationResponse {
+  question_id: string;
+  overall_score: number;
+  technical_correctness: number;
+  conceptual_depth: number;
+  communication_clarity: number;
+  relevance: number;
+  problem_solving: number;
+  completeness: number;
+  feedback: string;
+  strengths: string[];
+  weaknesses: string[];
+}
+
+export interface AnswerRequest {
+  question_id: string;
+  answer_text: string;
+  response_time_seconds?: number;
+}
+
+export interface AnswerResponse {
+  evaluation: EvaluationResponse;
+  next_question: Question | null;
+  progress: Progress;
+  interview_complete: boolean;
+  closing_message: string | null;
+}
+
+export interface InterviewCompleteResponse {
+  session_id: string;
+  status: string;
+  questions_asked: number;
+  question_budget: number;
+  message: string;
+}
+
+export interface ConversationEntry {
+  type: 'question' | 'answer' | 'system';
+  text: string;
+  question?: Question;
+  evaluation?: EvaluationResponse;
+  timestamp: number;
+}
