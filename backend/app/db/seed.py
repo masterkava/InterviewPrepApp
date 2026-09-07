@@ -1,4 +1,7 @@
-"""Seed data for roles, skills, role-skill mappings, and question bank."""
+"""Seed data for roles, skills, role-skill mappings, and question bank.
+
+Reads questions from question_banks/*.json (the single source of truth).
+"""
 
 import asyncio
 import json
@@ -14,6 +17,8 @@ from app.models.role import Role, RoleSkill, SeedQuestion, Skill
 
 logger = structlog.get_logger()
 
+BANKS_DIR = Path(__file__).parent / "question_banks"
+
 SKILLS: list[dict[str, str]] = [
     {"slug": "python", "name": "Python", "category": "language"},
     {"slug": "machine-learning", "name": "Machine Learning", "category": "concept"},
@@ -28,6 +33,13 @@ SKILLS: list[dict[str, str]] = [
     {"slug": "web-frameworks", "name": "Web Frameworks", "category": "framework"},
     {"slug": "databases", "name": "Databases", "category": "concept"},
     {"slug": "testing", "name": "Testing", "category": "concept"},
+    # New skills for backend domains
+    {"slug": "api-design", "name": "API Design", "category": "concept"},
+    {"slug": "system-design", "name": "System Design", "category": "concept"},
+    {"slug": "security", "name": "Security", "category": "concept"},
+    {"slug": "caching", "name": "Caching", "category": "concept"},
+    {"slug": "distributed-systems", "name": "Distributed Systems", "category": "concept"},
+    {"slug": "messaging", "name": "Messaging & Async", "category": "concept"},
 ]
 
 ROLES: list[dict] = [
@@ -73,41 +85,80 @@ ROLES: list[dict] = [
         "description": (
             "Technical interview for Python developer roles. "
             "Covers Python Core, Data Structures, OOP, "
-            "Web Frameworks, Databases, and Testing."
+            "Web Frameworks, Databases, API Design, System Design, "
+            "and Security."
         ),
         "display_order": 3,
         "skills": [
             ("python", 9),
-            ("data-structures", 8),
-            ("oop", 8),
-            ("web-frameworks", 7),
-            ("databases", 7),
-            ("testing", 7),
+            ("data-structures", 7),
+            ("oop", 7),
+            ("web-frameworks", 6),
+            ("databases", 8),
+            ("api-design", 7),
+            ("system-design", 6),
+            ("security", 6),
+            ("caching", 5),
+            ("distributed-systems", 5),
+            ("messaging", 5),
+            ("testing", 6),
         ],
     },
 ]
 
-TOPIC_TO_SLUG = {
-    "Python": "python",
-    "Python Core": "python",
-    "Machine Learning": "machine-learning",
-    "Deep Learning": "deep-learning",
-    "MLOps": "mlops",
-    "Statistics": "statistics",
-    "Data Structures": "data-structures",
-    "SQL": "sql",
-    "Data Analysis": "data-analysis",
-    "Feature Engineering": "feature-engineering",
-    "OOP": "oop",
-    "Web Frameworks": "web-frameworks",
-    "Databases": "databases",
-    "Testing": "testing",
+
+# --- Question bank file → role and topic/domain → skill mappings ---
+
+PYTHON_TOPIC_TO_SKILL: dict[str, str] = {
+    "Python Fundamentals": "python",
+    "Functions & Modules": "python",
+    "Collections & Iteration": "python",
+    "Object-Oriented Python": "oop",
+    "Exceptions, Concurrency & Advanced Python": "python",
+    "Advanced Python": "python",
 }
 
-ROLE_NAME_TO_SLUG = {
-    "AI/ML Engineer": "ai-ml-engineer",
-    "Data Scientist": "data-scientist",
-    "Python Developer": "python-developer",
+AI_ML_TOPIC_TO_SKILL: dict[str, str] = {
+    "AI Fundamentals": "machine-learning",
+    "Machine Learning Fundamentals": "machine-learning",
+    "Statistics & Probability": "statistics",
+    "Supervised Learning": "machine-learning",
+    "Unsupervised & Representation Learning": "machine-learning",
+    "Feature Engineering & Data Preparation": "feature-engineering",
+    "Model Evaluation & Experimentation": "data-analysis",
+    "Deep Learning": "deep-learning",
+    "Computer Vision": "deep-learning",
+    "NLP & Transformers": "deep-learning",
+    "Generative AI & LLMs": "deep-learning",
+    "MLOps & Model Serving": "mlops",
+    "AI System Design & Production Scenarios": "mlops",
+}
+
+BACKEND_DOMAIN_TO_SKILL: dict[str, str] = {
+    "backend_fundamentals": "web-frameworks",
+    "http_api": "api-design",
+    "databases_sql": "databases",
+    "authentication_security": "security",
+    "caching": "caching",
+    "messaging_async": "messaging",
+    "distributed_systems": "distributed-systems",
+    "microservices": "system-design",
+    "performance_observability": "system-design",
+    "system_design_production": "system-design",
+}
+
+# Which files seed which roles
+FILE_TO_ROLES: dict[str, list[str]] = {
+    "python.json": ["ai-ml-engineer", "data-scientist", "python-developer"],
+    "ai_ml.json": ["ai-ml-engineer", "data-scientist"],
+    "backend.json": ["python-developer"],
+}
+
+DIFFICULTY_NORMALIZE: dict[str, str] = {
+    "easy": "easy",
+    "medium": "medium",
+    "hard": "hard",
+    "expert": "hard",
 }
 
 
@@ -169,48 +220,78 @@ async def _seed_questions(
     role_map: dict[str, uuid.UUID],
     skill_map: dict[str, uuid.UUID],
 ) -> int:
-    bank_path = Path(__file__).parent / "question_bank.json"
-    if not bank_path.exists():
-        logger.warning("seed.question_bank_not_found", path=str(bank_path))
-        return 0
-
-    with open(bank_path, encoding="utf-8") as f:
-        bank = json.load(f)
-
     count = 0
-    for role_data in bank["roles"]:
-        role_slug = ROLE_NAME_TO_SLUG.get(role_data["role_name"])
-        if not role_slug or role_slug not in role_map:
-            logger.warning("seed.unknown_role", role_name=role_data["role_name"])
+
+    for filename, role_slugs in FILE_TO_ROLES.items():
+        bank_path = BANKS_DIR / filename
+        if not bank_path.exists():
+            logger.warning("seed.bank_not_found", path=str(bank_path))
             continue
 
-        role_id = role_map[role_slug]
+        with open(bank_path, encoding="utf-8") as f:
+            bank = json.load(f)
 
-        for topic in role_data["topics"]:
-            skill_slug = TOPIC_TO_SLUG.get(topic["topic_name"])
+        questions = bank["question_bank"]["questions"]
+        cfg = BANK_CONFIG[filename]
+        topic_map = cfg["topic_map"]
+        topic_field = cfg["topic_field"]
+
+        for q in questions:
+            topic_key = q.get(topic_field, "")
+            skill_slug = topic_map.get(topic_key)
             if not skill_slug or skill_slug not in skill_map:
-                logger.warning("seed.unknown_topic", topic=topic["topic_name"])
-                continue
+                skill_slug = cfg["fallback_skill"]
 
-            skill_id = skill_map[skill_slug]
+            difficulty = DIFFICULTY_NORMALIZE.get(q["difficulty"].lower(), "medium")
+            concepts = q.get("key_concepts", [])
+            answer = q.get("answer", "")
 
-            for q in topic["questions"]:
+            for role_slug in role_slugs:
+                if role_slug not in role_map:
+                    continue
+                # Check the role actually has this skill
+                role_id = role_map[role_slug]
+                skill_id = skill_map.get(skill_slug)
+                if skill_id is None:
+                    continue
+
                 seed_q = SeedQuestion(
                     id=uuid.uuid4(),
                     role_id=role_id,
                     skill_id=skill_id,
-                    question_text=q["question_text"],
-                    difficulty=q["difficulty"],
-                    expected_concepts=q.get("expected_concepts"),
-                    reference_answer=q.get("reference_answer"),
-                    time_limit_seconds=q.get("time_limit_seconds", 90),
+                    question_text=q["question"],
+                    difficulty=difficulty,
+                    expected_concepts=concepts if concepts else None,
+                    reference_answer=answer if answer else None,
+                    time_limit_seconds=90,
                     question_type="standard",
                     is_active=True,
                 )
                 session.add(seed_q)
                 count += 1
 
+        logger.info("seed.bank_loaded", file=filename, questions=len(questions), roles=role_slugs)
+
     return count
+
+
+BANK_CONFIG: dict[str, dict] = {
+    "python.json": {
+        "topic_field": "topic",
+        "topic_map": PYTHON_TOPIC_TO_SKILL,
+        "fallback_skill": "python",
+    },
+    "ai_ml.json": {
+        "topic_field": "topic",
+        "topic_map": AI_ML_TOPIC_TO_SKILL,
+        "fallback_skill": "machine-learning",
+    },
+    "backend.json": {
+        "topic_field": "domain",
+        "topic_map": BACKEND_DOMAIN_TO_SKILL,
+        "fallback_skill": "web-frameworks",
+    },
+}
 
 
 async def run_seed() -> None:

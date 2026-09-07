@@ -10,9 +10,9 @@ router = APIRouter(prefix="/question-bank", tags=["question-bank"])
 BANK_DIR = Path(__file__).resolve().parent.parent / "db" / "question_banks"
 
 CATEGORY_CONFIG = {
-    "python": {"file": "python.json", "label": "Python"},
-    "ai_ml": {"file": "ai_ml.json", "label": "AI/ML"},
-    "backend": {"file": "backend.json", "label": "Backend Engineering"},
+    "python": {"file": "python.json", "label": "Python", "topic_field": "topic"},
+    "ai_ml": {"file": "ai_ml.json", "label": "AI/ML", "topic_field": "topic"},
+    "backend": {"file": "backend.json", "label": "Backend Engineering", "topic_field": "domain"},
 }
 
 _cache: list[dict] | None = None
@@ -27,11 +27,12 @@ def _load_all() -> list[dict]:
         data = json.loads(filepath.read_text(encoding="utf-8"))
         raw = data.get("question_bank", data).get("questions", [])
         for q in raw:
+            topic = q.get(cfg["topic_field"], "") or q.get("topic", "")
             questions.append({
                 "id": q.get("id", ""),
                 "category": category,
                 "category_label": cfg["label"],
-                "topic": q.get("topic", ""),
+                "topic": topic,
                 "difficulty": q.get("difficulty", "Medium"),
                 "question_type": q.get("question_type", "conceptual"),
                 "question_text": q.get("question", ""),
