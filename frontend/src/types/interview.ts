@@ -91,3 +91,36 @@ export interface ConversationEntry {
   evaluation?: EvaluationResponse;
   timestamp: number;
 }
+
+export interface QuestionEvaluation {
+  overall_score: number;
+  feedback: string;
+  strengths: string[];
+  weaknesses: string[];
+}
+
+export interface ReportQuestion {
+  sequence_number: number;
+  question_text: string;
+  answer_text: string;
+  evaluation: QuestionEvaluation;
+}
+
+export interface ReportResponse {
+  id: string;
+  session_id: string;
+  overall_score: number;
+  technical_score: number;
+  communication_score: number;
+  problem_solving_score: number;
+  confidence_score: number;
+  readiness_level: string;
+  summary: string;
+  strengths: string[];
+  weaknesses: string[];
+  recommendations: string[];
+  recommended_topics: string[];
+  category_breakdown: Record<string, number>;
+  questions: ReportQuestion[];
+  created_at: string;
+}

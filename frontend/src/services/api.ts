@@ -53,6 +53,7 @@ import type {
   InterviewConfig,
   InterviewSession,
   InterviewStartResponse,
+  ReportResponse,
 } from '../types/interview';
 
 export async function getRoles(): Promise<RolesListResponse> {
@@ -93,6 +94,11 @@ export async function completeInterview(
   return request<InterviewCompleteResponse>(`/interviews/${interviewId}/complete`, {
     method: 'POST',
   });
+}
+
+// --- Reports ---
+export async function getReport(interviewId: string): Promise<ReportResponse> {
+  return request<ReportResponse>(`/interviews/${interviewId}/report`);
 }
 
 export { ApiError };
