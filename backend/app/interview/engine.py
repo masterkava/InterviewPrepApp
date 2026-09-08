@@ -98,11 +98,13 @@ class InterviewEngine:
         question: InterviewQuestion,
         answer_text: str,
         response_time_seconds: int | None = None,
+        audio_url: str | None = None,
     ) -> AnswerResult:
         answer = InterviewAnswer(
             id=uuid.uuid4(),
             question_id=question.id,
             answer_text=answer_text,
+            audio_url=audio_url,
             response_time_seconds=response_time_seconds,
         )
         self._db.add(answer)

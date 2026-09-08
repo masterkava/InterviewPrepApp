@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     llm_max_retries: int = 3
     llm_timeout_seconds: int = 30
 
+    # Voice
+    tts_model: str = "tts-1"
+    tts_voice: str = "nova"
+
     # Interview
     default_question_budget: int = 10
     max_follow_ups_per_topic: int = 2

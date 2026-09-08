@@ -13,6 +13,7 @@ class InterviewCreateRequest(BaseModel):
     difficulty: str = Field(default="adaptive", pattern=r"^(easy|medium|hard|adaptive)$")
     duration_minutes: int = Field(default=30, ge=10, le=60)
     focus_areas: list[str] | None = None
+    interview_mode: str = Field(default="text", pattern=r"^(text|voice)$")
 
 
 class InterviewRoleInfo(BaseModel):
@@ -64,6 +65,7 @@ class AnswerRequest(BaseModel):
     question_id: UUID
     answer_text: str = Field(min_length=1)
     response_time_seconds: int | None = None
+    audio_url: str | None = None
 
 
 class EvaluationResponse(BaseModel):

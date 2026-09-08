@@ -138,4 +138,55 @@ export async function getQuestionBankMeta(): Promise<QuestionBankMetaResponse> {
   return request<QuestionBankMetaResponse>('/question-bank/meta');
 }
 
+// --- Voice ---
+export interface TTSResponse {
+  audio_url: string;
+  cached: boolean;
+}
+
+export interface STTResponse {
+  text: string;
+}
+
+export async function textToSpeech(text: string): Promise<TTSResponse> {
+  return request<TTSResponse>('/voice/tts', {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+  });
+}
+
+export async function speechToText(audioBlob: Blob): Promise<STTResponse> {
+  const formData = new FormData();
+  formData.append('audio', audioBlob, 'recording.webm');
+
+  const response = await fetch(`${API_BASE}/voice/stt`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, body?.error?.code || 'UNKNOWN', body?.detail || response.statusText);
+  }
+
+  return response.json() as Promise<STTResponse>;
+}
+
+export async function uploadAudio(audioBlob: Blob): Promise<{ audio_url: string }> {
+  const formData = new FormData();
+  formData.append('audio', audioBlob, 'answer.webm');
+
+  const response = await fetch(`${API_BASE}/voice/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new ApiError(response.status, body?.error?.code || 'UNKNOWN', body?.detail || response.statusText);
+  }
+
+  return response.json();
+}
+
 export { ApiError };

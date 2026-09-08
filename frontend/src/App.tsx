@@ -7,6 +7,7 @@ import InterviewLobbyPage from './pages/InterviewLobbyPage';
 import InterviewPage from './pages/InterviewPage';
 import InterviewReportPage from './pages/InterviewReportPage';
 import InterviewSetupPage from './pages/InterviewSetupPage';
+import VoiceInterviewPage from './pages/VoiceInterviewPage';
 import LandingPage from './pages/LandingPage';
 import NotFoundPage from './pages/NotFoundPage';
 import QuestionBankPage from './pages/QuestionBankPage';
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/interview/setup" element={<InterviewSetupPage />} />
             <Route path="/interview/:interviewId/lobby" element={<InterviewLobbyPage />} />
             <Route path="/interview/:interviewId/session" element={<InterviewPage />} />
+            <Route path="/interview/:interviewId/voice-session" element={<VoiceInterviewPage />} />
             <Route path="/interview/:interviewId/complete" element={<InterviewCompletePage />} />
             <Route path="/interview/:interviewId/report" element={<InterviewReportPage />} />
             <Route path="*" element={<NotFoundPage />} />

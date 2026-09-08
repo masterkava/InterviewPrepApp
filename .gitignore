@@ -47,6 +47,9 @@ docker/data/
 *.db
 *.sqlite3
 
+# Audio uploads
+backend/uploads/
+
 # Coverage
 htmlcov/
 .coverage

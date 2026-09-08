@@ -4,7 +4,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { getRoles, createInterview } from '../services/api';
 import { useSessionId } from '../hooks/useSessionId';
 import type { Role } from '../types/role';
-import type { ExperienceLevel, Difficulty } from '../types/interview';
+import type { ExperienceLevel, Difficulty, InterviewMode } from '../types/interview';
 
 const EXPERIENCE_LEVELS: { value: ExperienceLevel; label: string; description: string }[] = [
   { value: 'fresher', label: 'Fresher', description: '0-1 years experience' },
@@ -31,6 +31,7 @@ export default function InterviewSetupPage() {
   const [difficulty, setDifficulty] = useState<Difficulty>('adaptive');
   const [duration, setDuration] = useState(30);
   const [focusAreas, setFocusAreas] = useState<string[]>([]);
+  const [interviewMode, setInterviewMode] = useState<InterviewMode>('text');
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['roles'],
@@ -40,7 +41,9 @@ export default function InterviewSetupPage() {
   const mutation = useMutation({
     mutationFn: createInterview,
     onSuccess: (session) => {
-      navigate(`/interview/${session.id}/lobby`);
+      navigate(`/interview/${session.id}/lobby`, {
+        state: { interview_mode: interviewMode },
+      });
     },
   });
 
@@ -53,6 +56,7 @@ export default function InterviewSetupPage() {
       difficulty,
       duration_minutes: duration,
       focus_areas: focusAreas.length > 0 ? focusAreas : undefined,
+      interview_mode: interviewMode,
     });
   };
 
@@ -197,10 +201,54 @@ export default function InterviewSetupPage() {
             </div>
           </section>
 
+          {/* Step 6: Interview Mode */}
+          <section className="mt-10">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">6. Interview Mode</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => setInterviewMode('text')}
+                className={`text-left rounded-xl p-5 border-2 transition-all cursor-pointer ${
+                  interviewMode === 'text'
+                    ? 'border-primary-500 bg-primary-50 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-sm'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">
+                    <svg className="w-7 h-7 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z" />
+                    </svg>
+                  </span>
+                  <h3 className="font-semibold text-gray-900 text-lg">Text Mode</h3>
+                </div>
+                <p className="text-sm text-gray-600">Type your answers in a chat-style interface. Read questions and respond at your own pace.</p>
+              </button>
+              <button
+                onClick={() => setInterviewMode('voice')}
+                className={`text-left rounded-xl p-5 border-2 transition-all cursor-pointer ${
+                  interviewMode === 'voice'
+                    ? 'border-primary-500 bg-primary-50 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-sm'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">
+                    <svg className="w-7 h-7 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                    </svg>
+                  </span>
+                  <h3 className="font-semibold text-gray-900 text-lg">Voice Mode</h3>
+                </div>
+                <p className="text-sm text-gray-600">Hear questions spoken by AI and respond with your microphone. Closest to a real interview experience.</p>
+                <p className="text-xs text-amber-600 mt-2 font-medium">Requires microphone access</p>
+              </button>
+            </div>
+          </section>
+
           {/* Summary & Start */}
           <section className="mt-12 bg-gray-50 rounded-xl p-6 border border-gray-200">
             <h2 className="text-lg font-semibold text-gray-800 mb-4">Interview Summary</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
               <div>
                 <span className="text-gray-500">Role</span>
                 <p className="font-medium text-gray-900">{selectedRole.name}</p>
@@ -216,6 +264,10 @@ export default function InterviewSetupPage() {
               <div>
                 <span className="text-gray-500">Duration</span>
                 <p className="font-medium text-gray-900">{duration} minutes</p>
+              </div>
+              <div>
+                <span className="text-gray-500">Mode</span>
+                <p className="font-medium text-gray-900 capitalize">{interviewMode}</p>
               </div>
             </div>
             {focusAreas.length > 0 && (

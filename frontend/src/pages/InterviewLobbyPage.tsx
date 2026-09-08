@@ -1,18 +1,25 @@
-import { useNavigate, useParams } from 'react-router-dom';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 import { startInterview } from '../services/api';
 import InterviewerAvatar from '../components/InterviewerAvatar';
+import type { InterviewMode } from '../types/interview';
 
 export default function InterviewLobbyPage() {
   const { interviewId } = useParams<{ interviewId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const interviewMode: InterviewMode =
+    (location.state as { interview_mode?: InterviewMode })?.interview_mode ?? 'text';
+
+  const sessionRoute = interviewMode === 'voice' ? 'voice-session' : 'session';
 
   const startMutation = useMutation({
     mutationFn: () => startInterview(interviewId!),
     onSuccess: (data) => {
-      navigate(`/interview/${interviewId}/session`, {
+      navigate(`/interview/${interviewId}/${sessionRoute}`, {
         state: {
           startData: data,
+          interview_mode: interviewMode,
         },
         replace: true,
       });
@@ -39,6 +46,14 @@ export default function InterviewLobbyPage() {
         {/* Instructions */}
         <div className="px-8 py-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Before You Begin</h2>
+          {interviewMode === 'voice' && (
+            <div className="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-lg text-sm text-primary-800 flex items-center gap-2">
+              <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+              </svg>
+              <span><strong>Voice Mode</strong> — Questions will be spoken aloud. Use your microphone to answer.</span>
+            </div>
+          )}
           <ul className="space-y-3">
             <Instruction
               number={1}
@@ -46,7 +61,10 @@ export default function InterviewLobbyPage() {
             />
             <Instruction
               number={2}
-              text="Type your answers as you would speak in a real interview. Be clear and structured."
+              text={interviewMode === 'voice'
+                ? "Click the microphone button to record your answer. You can review the transcript before submitting."
+                : "Type your answers as you would speak in a real interview. Be clear and structured."
+              }
             />
             <Instruction
               number={3}

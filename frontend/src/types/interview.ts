@@ -1,3 +1,5 @@
+export type InterviewMode = 'text' | 'voice';
+
 export interface InterviewConfig {
   user_id?: string;
   role_id: string;
@@ -5,6 +7,7 @@ export interface InterviewConfig {
   difficulty: Difficulty;
   duration_minutes: number;
   focus_areas?: string[];
+  interview_mode: InterviewMode;
 }
 
 export type ExperienceLevel = 'fresher' | 'junior' | 'mid' | 'senior';
@@ -66,6 +69,7 @@ export interface AnswerRequest {
   question_id: string;
   answer_text: string;
   response_time_seconds?: number;
+  audio_url?: string;
 }
 
 export interface AnswerResponse {

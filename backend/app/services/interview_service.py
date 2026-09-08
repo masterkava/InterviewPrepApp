@@ -65,6 +65,7 @@ class InterviewService:
             focus_areas=req.focus_areas,
             question_budget=question_budget,
             questions_asked=0,
+            interview_mode=req.interview_mode,
         )
         await self._interview_repo.create(interview)
         await self._db.commit()
@@ -127,6 +128,7 @@ class InterviewService:
             question=question,
             answer_text=req.answer_text,
             response_time_seconds=req.response_time_seconds,
+            audio_url=req.audio_url,
         )
         await self._db.commit()
 
