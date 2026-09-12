@@ -1,0 +1,316 @@
+{
+  "question_bank": {
+    "id": "backend-nosql-data-modeling-35",
+    "title": "NoSQL & Data Modeling Interview Question Bank",
+    "description": "Production-oriented interview questions covering NoSQL fundamentals, access-pattern-driven modeling, partitioning, consistency, concurrency, multi-region architecture, capacity planning, and end-to-end system design.",
+    "language": "Technology-neutral NoSQL concepts with concrete examples where useful",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "question_count": 35,
+    "difficulty_distribution": {
+      "Easy": 0,
+      "Medium": 2,
+      "Hard": 4,
+      "Expert": 29
+    },
+    "questions": [
+      {
+        "id": "BE-236",
+        "domain": "nosql_data_modeling",
+        "topic": "Partitioning & Hot Keys",
+        "subtopic": "Hot Partition Incident Mitigation",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "Your production NoSQL database suddenly develops severe latency during a flash sale. Overall traffic has increased only 2x, but a small set of popular product keys is receiving a disproportionate share of requests and the affected partitions are timing out while others are mostly idle. How would you diagnose and mitigate this without simply adding more database nodes?",
+        "answer": "First confirm the skew with partition-level throughput, latency, throttling, and key-frequency metrics. Immediate mitigation can include caching hot reads, rate limiting, isolating hot traffic, and increasing capacity where useful. The durable fix is to redesign the access pattern or partition key, often by deterministically bucketing a hot logical key across multiple physical partitions. The design must then define how reads aggregate buckets and how concurrent writes remain correct.",
+        "key_concepts": [
+          "partition-key cardinality",
+          "hot keys",
+          "traffic skew",
+          "key bucketing",
+          "caching",
+          "partition-level capacity"
+        ],
+        "expected_points": [
+          "Use partition-level metrics and key-frequency analysis to prove the skew.",
+          "Separate immediate incident mitigation from the durable data-model fix.",
+          "Explain deterministic bucketing or sharding of hot logical keys.",
+          "Discuss the added read/write and consistency complexity."
+        ],
+        "common_mistakes": [
+          "Assuming more nodes automatically redistribute a single hot key.",
+          "Changing the partition key without checking access patterns.",
+          "Randomly scattering records without a deterministic lookup strategy."
+        ],
+        "example": "A highly popular product can use keys such as SKU123#00 through SKU123#15, with a deterministic bucket derived from a reservation or order identifier, instead of placing every write under one physical key.",
+        "follow_up_questions": [
+          "How would you choose the number of buckets and change it as traffic grows?",
+          "What consistency problems arise when one logical entity spans multiple partitions?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives a generic answer with little attention to the failure mode or workload.",
+          "average": "Identifies the main concept but misses important production trade-offs.",
+          "good": "Provides a technically sound design and explains the key trade-offs.",
+          "excellent": "Provides a production-grade answer with explicit assumptions, failure handling, observability, scaling, and consistency trade-offs."
+        },
+        "skills": [
+          "NoSQL",
+          "partitioning",
+          "data_modeling",
+          "scalability",
+          "production_troubleshooting"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "hot_partition",
+          "hot_key",
+          "partition_key",
+          "sharding",
+          "traffic_skew"
+        ]
+      },
+      {
+        "id": "BE-237",
+        "domain": "nosql_data_modeling",
+        "topic": "Concurrency & Consistency",
+        "subtopic": "Conditional Writes & Optimistic Concurrency",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "Two horizontally scaled instances can update the same order document. During a production incident, one update sometimes overwrites fields written by the other, causing lost updates. How would you redesign the write path to prevent this while keeping the service horizontally scalable?",
+        "answer": "Use optimistic concurrency rather than unconditional last-write-wins read-modify-write. Store a version or equivalent concurrency token and make the database update conditional on the version still matching the value the client read. If the condition fails, reload the current state and either safely merge the operation or return a conflict. Retries must also be idempotent so a successful write or external side effect is not duplicated.",
+        "key_concepts": [
+          "lost updates",
+          "optimistic concurrency control",
+          "conditional writes",
+          "versioning",
+          "conflict handling",
+          "idempotency"
+        ],
+        "expected_points": [
+          "Explain why unconditional read-modify-write loses concurrent changes.",
+          "Use a version or equivalent token in a conditional update.",
+          "Define behavior when the condition fails.",
+          "Consider idempotency and external side effects during retries."
+        ],
+        "common_mistakes": [
+          "Relying on client timestamps without considering ordering.",
+          "Blindly retrying failed writes.",
+          "Using transactions for every operation when a conditional single-item update is sufficient."
+        ],
+        "example": "An order at version 7 is updated with a condition requiring version 7 and writes version 8. If another writer already changed it to version 8, the second update fails instead of overwriting the newer state.",
+        "follow_up_questions": [
+          "When would a transaction be preferable to optimistic concurrency on a single item?",
+          "How would you handle two valid concurrent updates that modify different fields?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives a generic answer with little attention to the failure mode or workload.",
+          "average": "Identifies the main concept but misses important production trade-offs.",
+          "good": "Provides a technically sound design and explains the key trade-offs.",
+          "excellent": "Provides a production-grade answer with explicit assumptions, failure handling, observability, scaling, and consistency trade-offs."
+        },
+        "skills": [
+          "NoSQL",
+          "concurrency",
+          "consistency",
+          "distributed_systems",
+          "API_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "optimistic_concurrency",
+          "conditional_write",
+          "lost_update",
+          "versioning",
+          "conflict_resolution"
+        ]
+      },
+      {
+        "id": "BE-238",
+        "domain": "nosql_data_modeling",
+        "topic": "Multi-Region NoSQL",
+        "subtopic": "Regional Failure & Consistency Trade-offs",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "You operate a globally distributed user-preferences service in three regions. It must remain writable when one region is unavailable. During a network partition, different regions accept conflicting updates to the same user record. Design the consistency and conflict-resolution strategy, and explain what guarantees you deliberately give up.",
+        "answer": "Start by classifying fields according to whether concurrent updates can be safely merged. Mergeable fields can use per-field versions, logical timestamps, version vectors, or another deterministic convergent strategy. Non-mergeable fields may require a home region, stronger coordination, or an explicit conflict state. The API should state its actual guarantee, such as eventual convergence with read-your-writes where feasible, rather than claiming global strong consistency while permitting independent writes during a partition. After recovery, replicas must reconcile and unresolved conflicts must be observable.",
+        "key_concepts": [
+          "multi-region replication",
+          "network partition",
+          "conflict resolution",
+          "eventual consistency",
+          "read-your-writes",
+          "convergence"
+        ],
+        "expected_points": [
+          "Classify data by whether concurrent updates are safely mergeable.",
+          "Choose deterministic conflict resolution for mergeable data.",
+          "Define an explicit consistency contract.",
+          "Explain reconciliation after the partition heals."
+        ],
+        "common_mistakes": [
+          "Using last-write-wins for every field without considering lost updates.",
+          "Claiming strong global consistency while allowing independent regional writes.",
+          "Ignoring post-partition reconciliation."
+        ],
+        "example": "Independent notification preferences such as email_enabled and sms_enabled can merge by field, while a single preferred_currency value may require a single-writer policy or explicit conflict resolution.",
+        "follow_up_questions": [
+          "How would you preserve read-your-writes when requests can move between regions?",
+          "Which data would you intentionally keep single-region despite lower availability?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives a generic answer with little attention to the failure mode or workload.",
+          "average": "Identifies the main concept but misses important production trade-offs.",
+          "good": "Provides a technically sound design and explains the key trade-offs.",
+          "excellent": "Provides a production-grade answer with explicit assumptions, failure handling, observability, scaling, and consistency trade-offs."
+        },
+        "skills": [
+          "NoSQL",
+          "distributed_systems",
+          "consistency",
+          "multi_region_architecture",
+          "conflict_resolution"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "multi_region",
+          "eventual_consistency",
+          "conflict_resolution",
+          "network_partition",
+          "replication"
+        ]
+      },
+      {
+        "id": "BE-239",
+        "domain": "nosql_data_modeling",
+        "topic": "Capacity Planning & Throughput",
+        "subtopic": "Workload Modeling, Backpressure & Scaling",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "Design the capacity strategy for a NoSQL-backed event ingestion service receiving 50,000 events/second normally and 250,000 events/second during a five-minute burst. Events must be durably stored, consumers process them asynchronously, and each database partition has a finite write-throughput limit. Explain capacity estimation, partitioning, burst absorption, and overload protection.",
+        "answer": "Model peak traffic rather than only the average, including event size, write amplification, indexing, replication, request distribution, and per-partition limits. Choose a partition key with enough cardinality and predictable distribution. A durable queue or log can absorb bursts and decouple ingestion from database writes. Consumers should scale from backlog and processing latency, while bounded retries, backpressure, rate limiting, and dead-letter handling prevent a throttled database from causing a retry storm. Load testing should use realistic key distributions and include headroom.",
+        "key_concepts": [
+          "capacity planning",
+          "partition throughput",
+          "burst absorption",
+          "backpressure",
+          "durable queues",
+          "retry storms"
+        ],
+        "expected_points": [
+          "Model peak throughput and storage/write amplification.",
+          "Size partitions from distribution and per-partition limits.",
+          "Use a durable buffer to absorb bursts.",
+          "Control retries and downstream pressure with bounded concurrency and backpressure."
+        ],
+        "common_mistakes": [
+          "Sizing only for the 50,000/second average.",
+          "Assuming total database capacity eliminates per-partition limits.",
+          "Using unlimited retries while the database is throttling."
+        ],
+        "example": "In a 250,000/second burst, ingestion can append to a durable stream first and consumers can write to the NoSQL database at a controlled rate using sufficiently distributed partition keys.",
+        "follow_up_questions": [
+          "How would you calculate the number of buckets from a measured per-partition throughput limit?",
+          "Which metrics determine when to scale consumers versus applying producer backpressure?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives a generic answer with little attention to the failure mode or workload.",
+          "average": "Identifies the main concept but misses important production trade-offs.",
+          "good": "Provides a technically sound design and explains the key trade-offs.",
+          "excellent": "Provides a production-grade answer with explicit assumptions, failure handling, observability, scaling, and consistency trade-offs."
+        },
+        "skills": [
+          "NoSQL",
+          "capacity_planning",
+          "scalability",
+          "messaging",
+          "reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "throughput",
+          "capacity_planning",
+          "backpressure",
+          "burst_traffic",
+          "partitioning"
+        ]
+      },
+      {
+        "id": "BE-240",
+        "domain": "nosql_data_modeling",
+        "topic": "End-to-End NoSQL Architecture",
+        "subtopic": "Production Design Under Explicit Access Patterns",
+        "difficulty": "Expert",
+        "question_type": "system_design",
+        "question": "Design a production NoSQL architecture for a global notification platform storing user preferences, notification events, delivery status, and queryable user history. It must support high write volume, user-level history queries, retention, multi-region operation, retries, and regional failure. Walk through access patterns first, then data model, partition keys, consistency, indexes, retention, recovery, and scaling.",
+        "answer": "Begin with concrete access patterns: read preferences, record delivery attempts, update status, retrieve recent history for one user, and expire old events. Model history using user plus bounded time buckets so high-volume users do not create unbounded partitions. Use deterministic identifiers for idempotent delivery retries. Add secondary indexes only for proven access patterns because they increase write and storage cost. Choose consistency separately for preferences, status, and history. Use TTL or an equivalent lifecycle mechanism for retention, archive when required, and combine asynchronous processing with bounded retries, dead-letter handling, throttling, metrics, and tested regional recovery.",
+        "key_concepts": [
+          "access-pattern-driven modeling",
+          "time-bucketed partitioning",
+          "idempotency",
+          "TTL and retention",
+          "multi-region replication",
+          "failure recovery"
+        ],
+        "expected_points": [
+          "List access patterns before choosing the schema.",
+          "Use bounded partitions for history.",
+          "Make delivery operations idempotent under retries.",
+          "Define consistency, retention, replication, and recovery explicitly."
+        ],
+        "common_mistakes": [
+          "Starting with a normalized generic schema.",
+          "Partitioning all history only by user_id despite extreme users.",
+          "Treating retries as harmless without idempotency."
+        ],
+        "example": "A history item can use a partition key such as user_id#YYYYMM and a sort key containing event time plus notification_id. Delivery status can use notification_id plus channel as an idempotent key, while preferences remain a point-readable user record with optimistic concurrency.",
+        "follow_up_questions": [
+          "How would you redesign if one enterprise customer suddenly generated 100x average traffic?",
+          "How would you reconcile delivery status when two regions process the same retry during a network partition?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives a generic answer with little attention to the failure mode or workload.",
+          "average": "Identifies the main concept but misses important production trade-offs.",
+          "good": "Provides a technically sound design and explains the key trade-offs.",
+          "excellent": "Provides a production-grade answer with explicit assumptions, failure handling, observability, scaling, and consistency trade-offs."
+        },
+        "skills": [
+          "NoSQL",
+          "system_design",
+          "data_modeling",
+          "distributed_systems",
+          "reliability",
+          "scalability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "end_to_end_design",
+          "notification_system",
+          "access_patterns",
+          "time_bucketing",
+          "multi_region",
+          "retention"
+        ]
+      }
+    ]
+  }
+}

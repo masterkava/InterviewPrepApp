@@ -1,0 +1,1093 @@
+{
+  "question_bank": {
+    "id": "backend-engineering-500",
+    "title": "Backend Engineering Interview Question Bank — NoSQL & Data Modeling — Batch 01",
+    "description": "Production-oriented interview questions covering NoSQL fundamentals, distributed data concepts, access-pattern-driven modeling, and major NoSQL database models.",
+    "language": "Technology-neutral NoSQL",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "domain": "nosql_data_modeling",
+    "question_count": 19,
+    "batch": {
+      "batch_number": 1,
+      "batch_size": 19,
+      "domain_target": 35,
+      "question_id_range": [
+        "BE-206",
+        "BE-224"
+      ]
+    },
+    "intended_use": [
+      "preparation",
+      "mock_interview",
+      "ai_evaluation",
+      "adaptive_follow_up"
+    ],
+    "roles": [
+      "backend_developer",
+      "software_developer",
+      "full_stack_developer"
+    ],
+    "questions": [
+      {
+        "id": "BE-206",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Fundamentals",
+        "subtopic": "Definition and Motivation",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is a NoSQL database, and what problems is it designed to solve that can be difficult to address with a traditional relational database?",
+        "answer": "NoSQL is a broad category of databases that use non-relational data models such as document, key-value, wide-column, or graph models. They are commonly designed for workloads requiring flexible data models, very high scale, high write or read throughput, or distribution across many nodes. The important point is that NoSQL is not simply 'SQL without tables'; different NoSQL systems make different trade-offs around querying, consistency, transactions, and scaling. A relational database may still be the better choice when strong relational integrity, joins, and complex transactional queries are central to the workload.",
+        "key_concepts": [
+          "NoSQL",
+          "non-relational data models",
+          "horizontal scaling",
+          "schema flexibility",
+          "workload-driven database selection"
+        ],
+        "expected_points": [
+          "Explains that NoSQL is a category rather than one specific database technology.",
+          "Identifies common models such as document, key-value, wide-column, and graph.",
+          "Connects NoSQL adoption to workload requirements such as scale, throughput, distribution, or flexible data structures.",
+          "Acknowledges that relational databases remain preferable for many transactional and relational workloads."
+        ],
+        "common_mistakes": [
+          "Saying NoSQL means 'no SQL' or that SQL cannot be used with any NoSQL database.",
+          "Claiming NoSQL is always faster or more scalable than relational databases.",
+          "Treating schema flexibility as the only reason to use NoSQL."
+        ],
+        "example": "A telemetry platform receiving millions of sensor events per minute may choose a distributed NoSQL store because its access patterns are simple, write-heavy, and horizontally scalable. An order-management system requiring complex relationships, foreign-key integrity, and multi-record transactions may remain relational.",
+        "follow_up_questions": [
+          "If a PostgreSQL database can also be horizontally scaled, what workload characteristics would still make you consider NoSQL?",
+          "What requirements would make you reject NoSQL even if the application expects very high traffic?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines NoSQL vaguely as a database without tables or SQL and gives no meaningful reason for its use.",
+          "average": "Identifies flexible schemas and scalability but treats NoSQL as a single technology and misses workload trade-offs.",
+          "good": "Correctly explains the major NoSQL models, common motivations, and why database choice depends on workload.",
+          "excellent": "Clearly frames NoSQL as a family of data models and explains scale, distribution, access patterns, consistency, and transactional trade-offs while identifying cases where relational databases are still superior."
+        },
+        "skills": [
+          "Database Fundamentals",
+          "NoSQL",
+          "Database Selection"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "nosql",
+          "database-selection",
+          "scalability",
+          "data-modeling"
+        ]
+      },
+      {
+        "id": "BE-207",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Fundamentals",
+        "subtopic": "Relational vs NoSQL Trade-offs",
+        "difficulty": "Easy",
+        "question_type": "comparison",
+        "question": "What are the main trade-offs between using a relational database and a NoSQL database for a backend application?",
+        "answer": "Relational databases organize data into structured tables and are strong when relationships, constraints, joins, and multi-row transactions matter. NoSQL databases use models such as documents or key-value pairs and often make it easier to distribute workloads horizontally and model data around specific access patterns. The trade-off is that some NoSQL systems provide fewer relational features or require denormalization and application-level handling of relationships. The correct choice depends on data relationships, transaction requirements, query patterns, consistency needs, scale, and operational constraints rather than on a blanket claim that one category is better.",
+        "key_concepts": [
+          "relational model",
+          "NoSQL models",
+          "transactions",
+          "joins",
+          "denormalization",
+          "workload trade-offs"
+        ],
+        "expected_points": [
+          "Compares relational structure and constraints with NoSQL's alternative data models.",
+          "Discusses transaction and relationship requirements.",
+          "Explains that NoSQL commonly favors access-pattern-driven modeling and may use denormalization.",
+          "Uses workload requirements rather than popularity or scale alone as the selection criteria."
+        ],
+        "common_mistakes": [
+          "Saying relational databases cannot scale horizontally.",
+          "Saying NoSQL databases cannot support transactions at all.",
+          "Choosing NoSQL solely because the application is expected to have many users."
+        ],
+        "example": "An accounting system with strict relationships and transactional updates may favor a relational database. A content-delivery application serving denormalized user feeds may benefit from a document or key-value model optimized for its read patterns.",
+        "follow_up_questions": [
+          "Suppose your application needs both complex reporting and extremely high-volume operational writes. Would you necessarily choose only one database?",
+          "How can denormalization in NoSQL affect correctness and maintenance?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Lists superficial differences such as tables versus JSON without discussing engineering trade-offs.",
+          "average": "Mentions scalability and schema flexibility but gives inaccurate or absolute claims about transactions or relational databases.",
+          "good": "Compares relationships, transactions, schema, querying, and scaling and ties the decision to workload characteristics.",
+          "excellent": "Explains the trade-space precisely, including denormalization, access patterns, consistency, operational complexity, and the possibility of using different stores for different workloads."
+        },
+        "skills": [
+          "Database Fundamentals",
+          "Database Architecture",
+          "Trade-off Analysis"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "sql-vs-nosql",
+          "database-selection",
+          "transactions",
+          "denormalization"
+        ]
+      },
+      {
+        "id": "BE-208",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Fundamentals",
+        "subtopic": "Schema Flexibility",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What does 'schema flexibility' mean in a NoSQL database, and what are the advantages and risks of using it?",
+        "answer": "Schema flexibility means the database can often store records with different fields or structures without requiring every record to conform to one rigid table definition. This can be useful when attributes evolve frequently, when records naturally have different shapes, or when development needs to move quickly. However, flexibility does not eliminate the need for a schema; the schema may effectively move into application code, validation rules, and data-model conventions. Without governance, different versions of a record can accumulate and make querying, migrations, and data quality harder.",
+        "key_concepts": [
+          "schema flexibility",
+          "schema-on-read",
+          "data validation",
+          "schema evolution",
+          "data quality"
+        ],
+        "expected_points": [
+          "Explains that records can have varying structures depending on the database model.",
+          "Identifies benefits for evolving or heterogeneous data.",
+          "Recognizes that schema rules still exist somewhere in the application or data pipeline.",
+          "Discusses risks such as inconsistent records, complex migrations, and harder queries."
+        ],
+        "common_mistakes": [
+          "Claiming NoSQL has no schema.",
+          "Assuming schema flexibility automatically improves data quality.",
+          "Ignoring backward compatibility and migration concerns."
+        ],
+        "example": "A product catalog may contain different attributes for laptops, clothing, and furniture. A document model can represent these differing attributes naturally, but the service should still validate required fields and versions.",
+        "follow_up_questions": [
+          "How would you prevent schema flexibility from becoming uncontrolled data inconsistency?",
+          "When would a rigid relational schema be an advantage rather than a limitation?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that NoSQL has no schema and identifies no risks.",
+          "average": "Explains flexible fields and one benefit but misses governance and data-quality concerns.",
+          "good": "Explains schema flexibility, schema evolution, validation, and operational risks accurately.",
+          "excellent": "Explains how schema responsibility shifts toward application contracts, versioning, validation, and migration strategies and weighs flexibility against long-term consistency."
+        },
+        "skills": [
+          "NoSQL",
+          "Schema Design",
+          "Data Governance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "schema-flexibility",
+          "schema-evolution",
+          "validation",
+          "data-quality"
+        ]
+      },
+      {
+        "id": "BE-209",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Fundamentals",
+        "subtopic": "Horizontal Scaling",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Why are many NoSQL databases well suited to horizontal scaling, and what new problems can appear when data is distributed across multiple nodes?",
+        "answer": "Many NoSQL systems are designed around partitioning data across multiple nodes, allowing capacity and throughput to increase by adding machines rather than relying only on a larger single server. Distribution introduces challenges such as choosing partition keys, balancing data, routing requests, handling node failures, coordinating replicas, and maintaining consistency across copies. Cross-partition operations can also be more expensive or restricted than operations against one partition. Therefore, horizontal scaling changes the data-modeling problem: the schema must consider how data will be distributed and accessed.",
+        "key_concepts": [
+          "horizontal scaling",
+          "partitioning",
+          "replication",
+          "partition key",
+          "distributed systems"
+        ],
+        "expected_points": [
+          "Explains scale-out by distributing data and workload across nodes.",
+          "Identifies partitioning as a core mechanism.",
+          "Discusses new concerns such as hotspots, routing, replication, and node failures.",
+          "Connects partition-key and access-pattern decisions to distributed performance."
+        ],
+        "common_mistakes": [
+          "Saying horizontal scaling simply means adding CPU to one server.",
+          "Ignoring data distribution and hotspots.",
+          "Assuming adding nodes automatically improves every query."
+        ],
+        "example": "If customer records are partitioned by customer_id, requests for one customer can usually be routed to one partition. If all records are partitioned by a value such as country where one country dominates traffic, a hot partition can develop.",
+        "follow_up_questions": [
+          "What properties would you look for when choosing a partition key?",
+          "Why can a poorly chosen partition key prevent a cluster from scaling even after more nodes are added?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Describes horizontal scaling as adding resources to one machine and cannot explain distribution.",
+          "average": "Understands adding nodes but gives little detail about partitioning or distributed-system problems.",
+          "good": "Explains partitioning, replication, routing, hotspots, and why data modeling affects scalability.",
+          "excellent": "Connects partition-key design, access patterns, failure handling, replication, and cross-partition operations into a coherent scaling strategy."
+        },
+        "skills": [
+          "NoSQL",
+          "Distributed Systems",
+          "Scalability",
+          "Data Partitioning"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "horizontal-scaling",
+          "partitioning",
+          "replication",
+          "partition-key"
+        ]
+      },
+      {
+        "id": "BE-210",
+        "domain": "nosql_data_modeling",
+        "topic": "Distributed Data Concepts",
+        "subtopic": "CAP Theorem",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Explain the CAP theorem in the context of a distributed database. What does it imply when a network partition occurs?",
+        "answer": "CAP states that a distributed system cannot simultaneously guarantee strong consistency, availability, and partition tolerance under a network partition. Partition tolerance is generally required in distributed systems because communication failures can occur, so the key trade-off during a partition is between consistency and availability. A consistency-oriented system may reject or delay some operations until it can preserve a consistent view, while an availability-oriented system may continue serving requests and reconcile divergent state later. CAP is specifically about guarantees during partitions; it is not a statement that a database simply chooses two permanent features under normal operation.",
+        "key_concepts": [
+          "CAP theorem",
+          "consistency",
+          "availability",
+          "partition tolerance",
+          "network partition"
+        ],
+        "expected_points": [
+          "Defines consistency, availability, and partition tolerance in distributed-system terms.",
+          "Explains that partitions force a trade-off between consistency and availability.",
+          "Describes different behavior a system may choose during a partition.",
+          "Avoids the oversimplified interpretation that every database permanently 'picks two' regardless of failure conditions."
+        ],
+        "common_mistakes": [
+          "Saying CAP means a database can only ever provide two of the three properties.",
+          "Treating partition tolerance as optional in a distributed system.",
+          "Confusing consistency in CAP with database isolation levels such as READ COMMITTED."
+        ],
+        "example": "For a globally distributed inventory service, the system might prefer rejecting a write during a partition to avoid overselling. A social reaction counter may instead accept writes and reconcile counts later.",
+        "follow_up_questions": [
+          "Why is partition tolerance generally unavoidable in a distributed database?",
+          "How would your CAP trade-off differ between an inventory system and a social-media like counter?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot define the three CAP properties or describes CAP as a simple permanent two-out-of-three rule.",
+          "average": "Defines the terms but does not explain what happens during a partition.",
+          "good": "Correctly explains the consistency-versus-availability trade-off during a partition.",
+          "excellent": "Precisely distinguishes CAP consistency from transactional isolation and applies the theorem to business workloads and failure behavior."
+        },
+        "skills": [
+          "Distributed Systems",
+          "CAP Theorem",
+          "Database Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cap",
+          "consistency",
+          "availability",
+          "partition-tolerance"
+        ]
+      },
+      {
+        "id": "BE-211",
+        "domain": "nosql_data_modeling",
+        "topic": "Distributed Data Concepts",
+        "subtopic": "Consistency Models",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between strong consistency and eventual consistency? Give an example of a workload where eventual consistency is acceptable.",
+        "answer": "Strong consistency aims to ensure that a read observes the latest committed value according to the system's consistency contract, while eventual consistency allows replicas to temporarily return different values with the expectation that they converge if updates stop. Stronger guarantees can increase coordination, latency, or reduce availability under certain failure conditions. Eventual consistency can be appropriate when temporary staleness has low business impact, such as social-media reaction counts, recommendation data, or some analytics dashboards. The acceptable model should be derived from the business invariant, not simply from performance goals.",
+        "key_concepts": [
+          "strong consistency",
+          "eventual consistency",
+          "replication",
+          "staleness",
+          "business invariants"
+        ],
+        "expected_points": [
+          "Defines both models accurately.",
+          "Explains the cost and benefit of stronger consistency.",
+          "Provides a realistic workload where temporary staleness is acceptable.",
+          "Relates consistency requirements to business correctness."
+        ],
+        "common_mistakes": [
+          "Saying eventual consistency means data is permanently inconsistent.",
+          "Claiming strong consistency always means every replica is synchronously updated.",
+          "Choosing eventual consistency only because it is faster without identifying an acceptable business invariant."
+        ],
+        "example": "A product recommendation service can tolerate a few seconds of stale recommendations. A payment balance usually cannot tolerate a stale value being used to authorize a withdrawal.",
+        "follow_up_questions": [
+          "What does 'eventual' mean operationally if a replica remains permanently unavailable?",
+          "How could an application provide a good user experience when the underlying store is eventually consistent?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Confuses eventual consistency with incorrect or lost data and cannot provide a valid example.",
+          "average": "Defines the two models broadly but gives weak reasoning about business impact.",
+          "good": "Explains staleness, convergence, trade-offs, and appropriate workloads.",
+          "excellent": "Frames consistency as an explicit application-level requirement, discusses replication and failure implications, and distinguishes acceptable staleness from correctness violations."
+        },
+        "skills": [
+          "Distributed Systems",
+          "Consistency",
+          "Database Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "strong-consistency",
+          "eventual-consistency",
+          "replication",
+          "staleness"
+        ]
+      },
+      {
+        "id": "BE-212",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Data Modeling",
+        "subtopic": "Access-Pattern-Driven Modeling",
+        "difficulty": "Medium",
+        "question_type": "data_modeling",
+        "question": "Why is access-pattern-driven data modeling especially important in NoSQL databases? How would you use application queries to design a NoSQL data model?",
+        "answer": "Many NoSQL systems optimize around predictable key-based or partition-based access rather than arbitrary relational joins. Therefore, the model should start with the queries the application must serve, then choose keys, document boundaries, indexes, and denormalization to make those queries efficient. A practical process is to list the highest-value read and write patterns, estimate their volume, identify required consistency, and design the data around those operations. The model should then be tested against expected cardinality, partition size, throughput, and future access patterns.",
+        "key_concepts": [
+          "access patterns",
+          "query-driven modeling",
+          "partition keys",
+          "denormalization",
+          "cardinality",
+          "throughput"
+        ],
+        "expected_points": [
+          "Starts modeling from application access patterns rather than entity relationships alone.",
+          "Identifies important reads, writes, filters, and lookup keys.",
+          "Uses access patterns to choose partition keys, document boundaries, and indexes.",
+          "Validates the model against scale, cardinality, consistency, and operational constraints."
+        ],
+        "common_mistakes": [
+          "Copying a normalized relational schema directly into NoSQL.",
+          "Designing entities first and assuming queries will work efficiently later.",
+          "Adding indexes for every possible query without considering write cost and storage."
+        ],
+        "example": "For an order service where the dominant query is 'list recent orders for customer 123,' the model might be organized around customer_id and time so that the query can be served without scanning unrelated partitions.",
+        "follow_up_questions": [
+          "What would you do if the product later introduces a query that does not fit your original NoSQL model?",
+          "How do read-heavy and write-heavy access patterns influence your modeling choices?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that NoSQL is flexible and provides no modeling method.",
+          "average": "Mentions queries but cannot connect them to keys, partitions, or denormalization.",
+          "good": "Explains query-first modeling and connects it to keys, document boundaries, indexes, and scale.",
+          "excellent": "Describes a disciplined workload-first process including access frequency, cardinality, consistency, partition distribution, write amplification, and future evolution."
+        },
+        "skills": [
+          "NoSQL",
+          "Data Modeling",
+          "Query Design",
+          "Scalability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "access-patterns",
+          "query-driven-modeling",
+          "denormalization",
+          "partition-key"
+        ]
+      },
+      {
+        "id": "BE-213",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Data Modeling",
+        "subtopic": "Embedding vs Referencing",
+        "difficulty": "Hard",
+        "question_type": "data_modeling",
+        "question": "In a document database, when would you embed related data inside a document, and when would you store it as a separate referenced document?",
+        "answer": "Embedding is useful when related data is usually read with its parent, has a bounded size, and shares a lifecycle with that parent. Referencing is preferable when related data is large, independently updated, shared by many entities, or queried independently. Embedding can reduce round trips and simplify reads, but excessive embedding can create large documents and expensive updates. Referencing reduces duplication and can isolate independently changing data, but it may require additional reads or application-side joins.",
+        "key_concepts": [
+          "embedding",
+          "referencing",
+          "document boundaries",
+          "cardinality",
+          "data duplication",
+          "update patterns"
+        ],
+        "expected_points": [
+          "Uses access patterns and lifecycle as primary decision factors.",
+          "Considers cardinality and bounded versus unbounded relationships.",
+          "Explains the read-efficiency benefit of embedding.",
+          "Explains duplication, document growth, and additional-read trade-offs of each approach."
+        ],
+        "common_mistakes": [
+          "Always embedding because document databases are supposed to avoid joins.",
+          "Always referencing because duplication is considered bad.",
+          "Ignoring unbounded arrays and independently updated data."
+        ],
+        "example": "A user's profile preferences are usually a good embedded structure because they are small and read with the profile. A user's millions of historical transactions should not normally be embedded into one user document because the collection is unbounded and transactions have their own access patterns.",
+        "follow_up_questions": [
+          "How would your decision change if the embedded child records were updated independently thousands of times per second?",
+          "What problems can occur when an embedded array grows without a practical upper bound?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish embedding from referencing or bases the decision on a single rule.",
+          "average": "Understands the basic trade-off but misses cardinality, lifecycle, or update behavior.",
+          "good": "Correctly evaluates access patterns, size, cardinality, lifecycle, and update independence.",
+          "excellent": "Demonstrates nuanced modeling judgment, including boundedness, duplication, write amplification, document growth, consistency implications, and query frequency."
+        },
+        "skills": [
+          "NoSQL",
+          "Document Modeling",
+          "Data Modeling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "embedding",
+          "referencing",
+          "document-database",
+          "cardinality"
+        ]
+      },
+      {
+        "id": "BE-214",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Data Modeling",
+        "subtopic": "Denormalization",
+        "difficulty": "Hard",
+        "question_type": "data_modeling",
+        "question": "Why is denormalization common in NoSQL databases, and what consistency problems can it introduce?",
+        "answer": "Denormalization stores information in more than one place so that common application queries can be served efficiently without expensive joins or multiple lookups. It can improve read latency and throughput, but duplicated fields create multiple copies that must remain consistent when the source value changes. The application may need carefully defined update paths, asynchronous propagation, versioning, or reconciliation processes. Denormalization should therefore be driven by measured access patterns and explicit consistency requirements rather than applied everywhere.",
+        "key_concepts": [
+          "denormalization",
+          "data duplication",
+          "read optimization",
+          "write amplification",
+          "consistency"
+        ],
+        "expected_points": [
+          "Explains why duplication can improve read performance in NoSQL systems.",
+          "Identifies multiple copies as a consistency-management problem.",
+          "Discusses update propagation or reconciliation strategies.",
+          "Balances read efficiency against write complexity and storage."
+        ],
+        "common_mistakes": [
+          "Calling all denormalization bad database design.",
+          "Assuming duplicated data updates itself automatically.",
+          "Ignoring stale copies and partial update failures."
+        ],
+        "example": "An order document might store the customer's display name so order-history reads do not require a second lookup. If the customer changes their name, the system must decide whether old orders retain the historical name or whether all copies should be updated.",
+        "follow_up_questions": [
+          "When would intentionally keeping a stale duplicated value be the correct business decision?",
+          "How would you detect and repair inconsistent duplicated records in production?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines denormalization as simply removing tables and cannot discuss consistency.",
+          "average": "Understands duplication for faster reads but misses update and failure scenarios.",
+          "good": "Explains read optimization, duplication, write amplification, and consistency management.",
+          "excellent": "Connects denormalization to access patterns and explicitly reasons about source-of-truth semantics, propagation, failure recovery, reconciliation, and historical versus current values."
+        },
+        "skills": [
+          "NoSQL",
+          "Data Modeling",
+          "Consistency",
+          "System Design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "denormalization",
+          "data-duplication",
+          "consistency",
+          "read-optimization"
+        ]
+      },
+      {
+        "id": "BE-215",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Data Modeling",
+        "subtopic": "One-to-Many Relationships",
+        "difficulty": "Hard",
+        "question_type": "data_modeling",
+        "question": "You need to model a one-to-many relationship in a NoSQL database, such as customer → orders. What factors determine whether you embed the orders or store them separately?",
+        "answer": "The main factors are the expected number of child records, how the records are accessed, whether they share the parent's lifecycle, and how frequently they are updated independently. A small, bounded set of child records that is almost always read with the parent may be embedded. A potentially large or unbounded set, such as a customer's long order history, is usually better stored separately and partitioned or indexed for the required access pattern. The design should also consider document size limits, write contention, pagination, retention, and whether individual child records need independent lifecycle management.",
+        "key_concepts": [
+          "one-to-many modeling",
+          "bounded versus unbounded relationships",
+          "embedding",
+          "partitioning",
+          "pagination",
+          "write contention"
+        ],
+        "expected_points": [
+          "Evaluates relationship cardinality and whether it is bounded.",
+          "Considers read patterns and independent updates.",
+          "Recognizes document growth and pagination concerns.",
+          "Considers partitioning, contention, retention, and lifecycle management."
+        ],
+        "common_mistakes": [
+          "Embedding all children regardless of cardinality.",
+          "Ignoring document growth and pagination.",
+          "Assuming one-to-many always requires references."
+        ],
+        "example": "A customer document could embed a few notification preferences, but embedding every order would cause the document to grow indefinitely and make order-history queries and updates increasingly problematic.",
+        "follow_up_questions": [
+          "How would you model a customer's most recent 20 orders if the customer can have millions of historical orders?",
+          "What happens if many concurrent requests frequently update different embedded children in the same parent document?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Uses a fixed rule such as always embedding one-to-many relationships.",
+          "average": "Mentions size and access patterns but misses concurrency or lifecycle concerns.",
+          "good": "Considers cardinality, access patterns, document growth, pagination, and independent updates.",
+          "excellent": "Designs around boundedness, hot documents, partitioning, retention, concurrency, query locality, and operational behavior rather than relationship type alone."
+        },
+        "skills": [
+          "NoSQL",
+          "Data Modeling",
+          "Scalability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "one-to-many",
+          "embedding",
+          "partitioning",
+          "pagination"
+        ]
+      },
+      {
+        "id": "BE-216",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Data Modeling",
+        "subtopic": "Many-to-Many Relationships",
+        "difficulty": "Hard",
+        "question_type": "data_modeling",
+        "question": "How would you model a many-to-many relationship in a NoSQL database, such as students enrolled in courses, when both sides need efficient queries?",
+        "answer": "The model should be designed around the required access patterns rather than trying to reproduce a relational junction table mechanically. If the relationship set is small and bounded, it may be embedded. For larger or independently queried relationships, a dedicated relationship representation or duplicated access-oriented records may be appropriate. If the application frequently asks both 'courses for student' and 'students for course,' it may require two access paths, potentially with duplicated relationship data that is maintained consistently. Cardinality, update frequency, consistency requirements, and partition distribution determine the final design.",
+        "key_concepts": [
+          "many-to-many",
+          "access patterns",
+          "relationship modeling",
+          "denormalization",
+          "cardinality",
+          "partitioning"
+        ],
+        "expected_points": [
+          "Identifies both required query directions.",
+          "Explains that a single representation may not efficiently support both access patterns.",
+          "Considers dedicated relationship records or duplicated access paths.",
+          "Evaluates cardinality, update frequency, consistency, and partition distribution."
+        ],
+        "common_mistakes": [
+          "Copying a normalized SQL junction table without considering NoSQL query patterns.",
+          "Embedding huge lists on both sides without considering growth.",
+          "Ignoring the consistency cost of maintaining duplicated relationships."
+        ],
+        "example": "For a course platform, one access path could efficiently retrieve course IDs for a student, while another can retrieve student IDs for a course. If both lists can become very large, the relationship can be stored as independently partitioned records rather than giant embedded arrays.",
+        "follow_up_questions": [
+          "How would you prevent the two duplicated relationship views from becoming inconsistent?",
+          "How would your design change if a course could have ten million students?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Attempts to force the relational junction-table model without considering NoSQL access patterns.",
+          "average": "Understands separate relationship records but does not address both query directions or scale.",
+          "good": "Designs explicit access paths and considers cardinality, duplication, and consistency.",
+          "excellent": "Produces a query-driven model for both directions, anticipates high-cardinality relationships and hotspots, and explains consistency/reconciliation implications of duplicated views."
+        },
+        "skills": [
+          "NoSQL",
+          "Data Modeling",
+          "Distributed Systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "many-to-many",
+          "relationship-modeling",
+          "denormalization",
+          "cardinality"
+        ]
+      },
+      {
+        "id": "BE-217",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Data Modeling",
+        "subtopic": "Unbounded Data Growth",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A team has embedded all events for a customer inside the customer's NoSQL document. After several years, some customer documents have become extremely large and updates are getting slower. How would you redesign the model?",
+        "answer": "I would first identify the access patterns, event retention requirements, update frequency, and document-size characteristics rather than simply moving everything out. A common redesign is to keep stable customer attributes in one document and store events separately using a partitioning strategy that supports the required customer-and-time queries. Time bucketing can prevent a single customer from becoming one permanently growing partition, while pagination and retention policies control query and storage costs. Historical data can also be moved to an analytical or archival store if the application rarely needs it operationally.",
+        "key_concepts": [
+          "unbounded data",
+          "document growth",
+          "time bucketing",
+          "partitioning",
+          "retention",
+          "access patterns"
+        ],
+        "expected_points": [
+          "Recognizes unbounded embedded collections as a modeling problem.",
+          "Separates stable entity data from high-volume event data.",
+          "Uses an appropriate partitioning or time-bucketing strategy.",
+          "Considers pagination, retention, and archival requirements."
+        ],
+        "common_mistakes": [
+          "Simply increasing document limits or server capacity.",
+          "Moving events to another collection without designing its partition key.",
+          "Ignoring historical-data retention and query requirements."
+        ],
+        "example": "Instead of one customer document containing every event, events could be partitioned by customer_id and time bucket, allowing recent events to be queried efficiently while old buckets can be archived or expired according to policy.",
+        "follow_up_questions": [
+          "What partition-key design would you consider if a small number of customers generate far more events than the rest?",
+          "How would you migrate existing oversized documents without causing a large production outage?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests only increasing infrastructure or document limits without changing the model.",
+          "average": "Moves events to another collection but gives no strategy for partitioning or growth.",
+          "good": "Separates event data, uses bounded partitions or time buckets, and addresses retention and pagination.",
+          "excellent": "Diagnoses the workload, redesigns partition boundaries around scale and access patterns, handles skew, migration, retention, and operational rollout, and explains why the new model avoids repeating the original failure."
+        },
+        "skills": [
+          "NoSQL",
+          "Data Modeling",
+          "Scalability",
+          "Production Troubleshooting"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "unbounded-data",
+          "time-bucketing",
+          "partitioning",
+          "data-migration"
+        ]
+      },
+      {
+        "id": "BE-218",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Database Models",
+        "subtopic": "Document Databases",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What characteristics make a document database a good fit for an application, and what kinds of workloads are a poor fit?",
+        "answer": "Document databases are a good fit when application data naturally forms aggregates or documents, fields evolve over time, and most important queries can be served within or near a document boundary. They work particularly well for content, catalogs, profiles, and other data where nested structures are useful. They become less attractive when the workload depends heavily on complex cross-entity joins, strict relational constraints, or large numbers of relationships that are difficult to model efficiently as documents. The decision should still be based on access patterns and consistency requirements.",
+        "key_concepts": [
+          "document database",
+          "aggregates",
+          "nested data",
+          "schema evolution",
+          "access patterns"
+        ],
+        "expected_points": [
+          "Explains the document/aggregate model.",
+          "Identifies workloads with natural nested structures.",
+          "Identifies relationship-heavy or join-heavy workloads as potential poor fits.",
+          "Connects the choice to query patterns and constraints rather than document format alone."
+        ],
+        "common_mistakes": [
+          "Choosing a document database just because the API sends JSON.",
+          "Claiming document databases cannot represent relationships.",
+          "Ignoring query and consistency requirements."
+        ],
+        "example": "A product catalog with category-specific attributes can map naturally to documents. A highly interconnected financial ledger with many strict relationships may be better served by a relational model.",
+        "follow_up_questions": [
+          "How can a document model simplify an API compared with a normalized relational model?",
+          "What is the biggest warning sign that an application's document model is becoming unnatural?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines a document database as 'JSON storage' without discussing workload fit.",
+          "average": "Identifies nested data and flexible fields but misses relationship and query trade-offs.",
+          "good": "Explains aggregates, schema evolution, query locality, and poor-fit workloads.",
+          "excellent": "Demonstrates document-oriented modeling judgment and identifies when the application's relationships, constraints, and access patterns overwhelm the advantages of document storage."
+        },
+        "skills": [
+          "NoSQL",
+          "Document Databases",
+          "Data Modeling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "document-database",
+          "aggregates",
+          "schema-evolution",
+          "access-patterns"
+        ]
+      },
+      {
+        "id": "BE-219",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Database Models",
+        "subtopic": "Key-Value Databases",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is a key-value database, and what makes a key-value model particularly effective for some backend workloads?",
+        "answer": "A key-value database stores data primarily as values addressed by unique keys. This simple access model can provide very efficient lookups when the application knows the key and does not need complex relational queries. It is useful for workloads such as sessions, feature flags, counters, simple user preferences, and other data that can be retrieved or updated by a predictable identifier. The limitation is that applications requiring flexible queries across many attributes or complex relationships may need a richer data model or an additional indexing layer.",
+        "key_concepts": [
+          "key-value model",
+          "key-based lookup",
+          "low-latency access",
+          "predictable access patterns",
+          "query limitations"
+        ],
+        "expected_points": [
+          "Explains key-to-value addressing.",
+          "Identifies predictable key-based access as the main strength.",
+          "Provides realistic backend use cases.",
+          "Recognizes limitations for ad hoc queries and relationships."
+        ],
+        "common_mistakes": [
+          "Assuming key-value databases are only useful for caching.",
+          "Claiming key-value databases automatically provide low latency for every workload.",
+          "Ignoring the importance of access-pattern predictability."
+        ],
+        "example": "A session service can store session_id as the key and the session state as the value, allowing the backend to retrieve the session directly without scanning other users.",
+        "follow_up_questions": [
+          "What would you do if product requirements suddenly required querying sessions by user_id instead of session_id?",
+          "Why can a key-value model be a poor choice for relationship-heavy data?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the key-value access model and gives unrelated examples.",
+          "average": "Understands key-based retrieval but treats it only as a caching technique.",
+          "good": "Explains predictable access, common use cases, and query limitations.",
+          "excellent": "Clearly evaluates key-value storage based on access patterns, latency, data shape, query flexibility, and whether secondary access paths are operationally appropriate."
+        },
+        "skills": [
+          "NoSQL",
+          "Key-Value Databases",
+          "Backend Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "key-value",
+          "low-latency",
+          "sessions",
+          "access-patterns"
+        ]
+      },
+      {
+        "id": "BE-220",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Database Models",
+        "subtopic": "Partition Keys",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "What makes a good partition key in a distributed NoSQL database? Explain the trade-off between query locality and even distribution.",
+        "answer": "A good partition key should support the application's important queries while distributing data and traffic sufficiently evenly across partitions. A key with strong query locality can make reads efficient because related records are colocated, but if a small number of key values receive disproportionate traffic it can create hot partitions. Conversely, a highly random key may distribute load well but make related queries require multiple partitions. The design therefore balances query locality, cardinality, access frequency, partition size, and traffic distribution.",
+        "key_concepts": [
+          "partition key",
+          "query locality",
+          "hot partitions",
+          "cardinality",
+          "load distribution"
+        ],
+        "expected_points": [
+          "Explains that partition keys determine data and traffic distribution.",
+          "Balances efficient query routing against even load distribution.",
+          "Considers cardinality and skew.",
+          "Recognizes that the correct key depends on actual access patterns."
+        ],
+        "common_mistakes": [
+          "Choosing the most frequently queried field without checking traffic skew.",
+          "Choosing a random key that destroys required query locality.",
+          "Evaluating only storage distribution and ignoring request distribution."
+        ],
+        "example": "customer_id may be an excellent partition key if customer traffic is reasonably balanced and most queries are customer-scoped. If one customer generates a huge percentage of traffic, customer_id alone may create a hotspot and require bucketing or another access strategy.",
+        "follow_up_questions": [
+          "How would you detect that a partition key is causing a hotspot in production?",
+          "How could time-based bucketing help when one partition key receives an unbounded stream of writes?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines a partition key only as an ID and does not discuss distribution.",
+          "average": "Understands partitioning but misses traffic skew or query locality.",
+          "good": "Balances cardinality, locality, skew, partition size, and traffic distribution.",
+          "excellent": "Reasons quantitatively about request distribution and partition growth and proposes practical techniques such as bucketing when a natural key is too hot."
+        },
+        "skills": [
+          "NoSQL",
+          "Distributed Systems",
+          "Data Partitioning",
+          "Scalability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "partition-key",
+          "hot-partition",
+          "query-locality",
+          "cardinality"
+        ]
+      },
+      {
+        "id": "BE-221",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Database Models",
+        "subtopic": "Hot Keys and Hot Partitions",
+        "difficulty": "Hard",
+        "question_type": "troubleshooting",
+        "question": "A distributed NoSQL cluster has many healthy nodes, but latency is high because most requests are hitting a small subset of partitions. How would you diagnose and fix the problem?",
+        "answer": "I would first confirm the skew using per-partition request rate, latency, storage size, and resource metrics, then identify which partition-key values are responsible. I would compare the hot values with the application's traffic patterns and determine whether the skew comes from a popular tenant, celebrity user, time bucket, or another concentrated workload. The fix depends on the access pattern and may include key salting, time bucketing, splitting a logical entity across partitions, or changing the data model. Adding nodes alone may not solve the problem if the same hot keys continue routing requests to the same partitions.",
+        "key_concepts": [
+          "hot partition",
+          "traffic skew",
+          "partition metrics",
+          "key salting",
+          "time bucketing"
+        ],
+        "expected_points": [
+          "Uses metrics to identify partition-level skew rather than looking only at cluster averages.",
+          "Finds the application keys causing concentrated traffic.",
+          "Explains why adding nodes may not fix a hot-key problem.",
+          "Proposes a modeling or partitioning change appropriate to the workload."
+        ],
+        "common_mistakes": [
+          "Adding more nodes as the only solution.",
+          "Looking only at average cluster CPU or latency.",
+          "Changing the partition key without checking how required queries will work afterward."
+        ],
+        "example": "If one globally popular account receives millions of requests and all records use account_id as the partition key, that account can overload one partition. Splitting its workload across time buckets or controlled subkeys can distribute the load.",
+        "follow_up_questions": [
+          "What consistency or query-complexity trade-offs can key salting introduce?",
+          "How would you verify after deployment that your new partitioning strategy actually removed the hotspot?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests only scaling the cluster and cannot identify partition-level skew.",
+          "average": "Recognizes hot partitions but gives generic remediation without diagnostic steps.",
+          "good": "Uses partition metrics, identifies skewed keys, and proposes key or data-model changes.",
+          "excellent": "Provides a production diagnostic workflow, distinguishes storage skew from traffic skew, evaluates the impact on query routing and consistency, and validates the remediation with partition-level metrics."
+        },
+        "skills": [
+          "NoSQL",
+          "Production Troubleshooting",
+          "Distributed Systems",
+          "Observability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "hot-partition",
+          "hot-key",
+          "traffic-skew",
+          "troubleshooting"
+        ]
+      },
+      {
+        "id": "BE-222",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Database Models",
+        "subtopic": "Secondary Indexes",
+        "difficulty": "Expert",
+        "question_type": "architecture",
+        "question": "What trade-offs should you consider before adding secondary indexes to a high-write NoSQL workload?",
+        "answer": "A secondary index can make an important query efficient, but it introduces additional storage, write amplification, maintenance work, and potentially extra distributed coordination. Indexes can also create hotspots if indexed values are highly skewed or can become expensive to maintain at very high write rates. Before adding one, I would confirm the query's business importance, expected selectivity, write volume, cardinality, consistency requirements, and whether an access-pattern-oriented primary key or separate read model would be better. The index should be validated under realistic write and failure conditions rather than evaluated only by query latency.",
+        "key_concepts": [
+          "secondary indexes",
+          "write amplification",
+          "selectivity",
+          "index maintenance",
+          "high-write workloads",
+          "access patterns"
+        ],
+        "expected_points": [
+          "Explains that indexes improve reads at a cost to writes and storage.",
+          "Considers cardinality and selectivity.",
+          "Considers traffic skew and distributed maintenance.",
+          "Evaluates whether an alternate data model or read-optimized representation is preferable."
+        ],
+        "common_mistakes": [
+          "Assuming secondary indexes are free because they do not change application code.",
+          "Adding indexes for every query without measuring write impact.",
+          "Ignoring skew, replication, storage, and failure behavior."
+        ],
+        "example": "A high-volume event-ingestion system may reject a broad secondary index on a low-cardinality field such as event_type if it causes heavy index maintenance and poor selectivity. A dedicated access path designed around the important query may be more appropriate.",
+        "follow_up_questions": [
+          "When would you deliberately maintain a duplicated read model instead of adding a secondary index?",
+          "How would you evaluate whether an index is hurting a production write path?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says indexes only improve query performance and ignores their costs.",
+          "average": "Mentions write overhead but cannot reason about selectivity or distributed behavior.",
+          "good": "Explains write amplification, storage, selectivity, skew, and alternative data-model choices.",
+          "excellent": "Evaluates the index as an architectural decision, considering workload economics, consistency, distribution, operational failure modes, and the option of purpose-built read models."
+        },
+        "skills": [
+          "NoSQL",
+          "Indexing",
+          "Distributed Systems",
+          "Performance Engineering"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "secondary-index",
+          "write-amplification",
+          "selectivity",
+          "read-model"
+        ]
+      },
+      {
+        "id": "BE-223",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Database Models",
+        "subtopic": "Wide-Column Databases",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is a wide-column database, and how does its data model differ from a relational table?",
+        "answer": "A wide-column database organizes data around partitions and rows whose columns can be sparse or vary according to the database's model. Unlike a relational table designed primarily around normalized entities and arbitrary SQL queries, wide-column systems commonly require the schema to be designed around known query patterns and partitioning. The partition key determines where data lives, while clustering or ordering information can determine how related rows are organized within a partition. This makes wide-column databases useful for large distributed workloads with predictable access patterns.",
+        "key_concepts": [
+          "wide-column database",
+          "partition key",
+          "clustering key",
+          "sparse columns",
+          "query-driven schema"
+        ],
+        "expected_points": [
+          "Explains the wide-column concept without equating it to simply having many SQL columns.",
+          "Identifies partitioning as fundamental.",
+          "Explains that query patterns influence schema design.",
+          "Recognizes suitability for large distributed and predictable workloads."
+        ],
+        "common_mistakes": [
+          "Saying a wide-column database is just a relational table with hundreds of columns.",
+          "Ignoring partition keys.",
+          "Assuming it supports arbitrary joins and queries like a relational database."
+        ],
+        "example": "A time-series workload could partition measurements by device and time bucket, with readings ordered within each partition so recent readings for one device can be retrieved efficiently.",
+        "follow_up_questions": [
+          "Why can the same business entity require multiple tables in a query-driven wide-column design?",
+          "What problems arise if a single partition grows without bounds?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Confuses wide-column databases with wide relational tables.",
+          "average": "Knows that Cassandra-like systems distribute data but cannot explain partition-driven modeling.",
+          "good": "Explains partitions, query-driven schemas, and the role of clustering/order.",
+          "excellent": "Demonstrates understanding of physical data placement, predictable query design, bounded partitions, and why denormalized tables are often intentional."
+        },
+        "skills": [
+          "NoSQL",
+          "Wide-Column Databases",
+          "Data Modeling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "wide-column",
+          "partition-key",
+          "clustering",
+          "query-driven-schema"
+        ]
+      },
+      {
+        "id": "BE-224",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Database Models",
+        "subtopic": "Graph Databases",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "When is a graph database a better fit than a relational or document database?",
+        "answer": "A graph database is particularly useful when relationships are central to the application's queries and the workload requires frequent traversal across connected entities. Examples include social networks, recommendation systems, fraud analysis, dependency graphs, and network topology. Relational databases can represent graphs, but repeated multi-hop traversals may become complex or expensive depending on the workload. A graph database is not automatically better simply because the data contains relationships; the depth, frequency, and nature of graph traversals should justify the specialized model.",
+        "key_concepts": [
+          "graph database",
+          "nodes",
+          "edges",
+          "graph traversal",
+          "relationship-centric workloads"
+        ],
+        "expected_points": [
+          "Identifies relationship traversal as the main reason to choose a graph model.",
+          "Provides appropriate multi-hop use cases.",
+          "Acknowledges that relational databases can represent relationships.",
+          "Uses query characteristics rather than the mere existence of relationships to justify graph storage."
+        ],
+        "common_mistakes": [
+          "Saying any foreign key relationship requires a graph database.",
+          "Assuming graph databases are universally faster than relational databases.",
+          "Focusing only on storing relationships rather than traversing them."
+        ],
+        "example": "Fraud analysis may ask whether an account is connected to suspicious devices through several intermediate accounts. Multi-hop relationship traversal is a natural graph workload.",
+        "follow_up_questions": [
+          "Why might a relational database still be a reasonable choice for a simple one-hop relationship query?",
+          "What makes a graph workload difficult to model efficiently in a document database?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says graph databases are for any data with relationships.",
+          "average": "Provides a graph use case but cannot explain why traversal matters.",
+          "good": "Explains relationship-centric workloads and multi-hop traversal trade-offs.",
+          "excellent": "Compares graph, relational, and document models using traversal depth, query frequency, relationship cardinality, and workload shape."
+        },
+        "skills": [
+          "NoSQL",
+          "Graph Databases",
+          "Database Selection"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "graph-database",
+          "graph-traversal",
+          "relationships",
+          "database-selection"
+        ]
+      }
+    ]
+  }
+}

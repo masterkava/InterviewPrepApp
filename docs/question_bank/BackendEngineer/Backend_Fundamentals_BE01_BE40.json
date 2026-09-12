@@ -1,0 +1,2147 @@
+{
+  "question_bank": {
+    "id": "backend-engineering-500",
+    "title": "Backend Engineering Interview Question Bank — 500 Questions",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "domain": "backend_fundamentals",
+    "question_count": 40,
+    "questions": [
+      {
+        "id": "BE-001",
+        "domain": "backend_fundamentals",
+        "topic": "Client-Server Architecture",
+        "subtopic": "Backend Responsibilities",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is the role of a backend application in a client-server architecture?",
+        "answer": "The backend is responsible for processing client requests, applying business logic, interacting with databases or other services, enforcing server-side security and validation, and returning appropriate responses to clients. It provides services and data that the client consumes without requiring the client to directly access protected resources such as databases.",
+        "key_concepts": [
+          "Client-server architecture",
+          "Request processing",
+          "Business logic",
+          "Data access",
+          "Server-side validation",
+          "Security"
+        ],
+        "expected_points": [
+          "The client sends requests to backend services",
+          "The backend processes requests and applies business rules",
+          "The backend interacts with databases and external services",
+          "The backend validates and secures requests",
+          "The backend returns a response to the client"
+        ],
+        "common_mistakes": [
+          "Describing the backend only as a database",
+          "Assuming the frontend should directly access the database",
+          "Ignoring backend business logic and security responsibilities"
+        ],
+        "example": "A mobile banking application sends a request to retrieve an account balance. The backend authenticates the user, retrieves the balance from the appropriate data store, applies authorization rules, and returns the result.",
+        "follow_up_questions": [
+          "Why should clients generally not connect directly to a production database?",
+          "Where should business rules be implemented in a backend architecture?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that the backend stores data or receives requests.",
+          "average": "Explains that the backend receives requests, accesses data, and returns responses.",
+          "good": "Explains request processing, business logic, data access, validation, and security.",
+          "excellent": "Clearly explains the backend's role as a trusted server-side boundary and discusses business logic, authorization, data access, external dependencies, and secure response handling."
+        },
+        "skills": [
+          "backend_fundamentals",
+          "client_server_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "backend",
+          "client_server",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-002",
+        "domain": "backend_fundamentals",
+        "topic": "Request/Response Lifecycle",
+        "subtopic": "Request Processing",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What typically happens from the moment a client sends a request until the backend sends a response?",
+        "answer": "The request travels through networking infrastructure to the backend server, where it is accepted and routed to the appropriate endpoint. Middleware or filters may perform authentication, logging, validation, or other processing. The application executes business logic, accesses databases or external services when required, constructs a response, and sends it back through the server and network to the client.",
+        "key_concepts": [
+          "Request routing",
+          "Middleware",
+          "Authentication",
+          "Validation",
+          "Business logic",
+          "Data access",
+          "Response generation"
+        ],
+        "expected_points": [
+          "The request reaches the backend server",
+          "Routing identifies the appropriate endpoint",
+          "Middleware may process the request",
+          "Business logic executes",
+          "Data stores or external services may be called",
+          "The response is generated and returned"
+        ],
+        "common_mistakes": [
+          "Assuming the request directly reaches business logic",
+          "Ignoring middleware",
+          "Assuming every request necessarily accesses a database"
+        ],
+        "example": "For GET /users/42, the request can pass through authentication middleware, reach the user handler, retrieve user data from a database, serialize the result, and return a JSON response.",
+        "follow_up_questions": [
+          "Where would you perform authentication in this lifecycle?",
+          "What could cause latency between the backend and a downstream database?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that the server receives the request and sends a response.",
+          "average": "Mentions routing and business logic.",
+          "good": "Explains routing, middleware, business logic, data access, and response generation.",
+          "excellent": "Explains the lifecycle end-to-end and identifies potential latency and failure points at networking, middleware, application, database, and external-service layers."
+        },
+        "skills": [
+          "backend_fundamentals",
+          "request_lifecycle"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "request_lifecycle",
+          "middleware",
+          "backend"
+        ]
+      },
+      {
+        "id": "BE-003",
+        "domain": "backend_fundamentals",
+        "topic": "Client-Server Architecture",
+        "subtopic": "Frontend vs Backend",
+        "difficulty": "Easy",
+        "question_type": "comparison",
+        "question": "What is the difference between frontend logic and backend logic?",
+        "answer": "Frontend logic runs primarily on the user's device and focuses on presentation, interaction, client-side state, and user experience. Backend logic runs on servers and handles business rules, protected data, authorization, persistence, integrations, and operations that should not be trusted to the client.",
+        "key_concepts": [
+          "Client-side execution",
+          "Server-side execution",
+          "Business logic",
+          "Authorization",
+          "Data protection"
+        ],
+        "expected_points": [
+          "Frontend executes primarily on the client",
+          "Backend executes on servers",
+          "Frontend handles presentation and user interaction",
+          "Backend handles trusted business logic and protected operations",
+          "Client-side validation cannot replace server-side validation"
+        ],
+        "common_mistakes": [
+          "Assuming frontend validation is sufficient for security",
+          "Putting sensitive business rules exclusively in frontend code",
+          "Defining the frontend only as HTML and CSS"
+        ],
+        "example": "A frontend may disable a purchase button when the cart is empty, but the backend must independently verify that the cart is valid and that the user is authorized to make the purchase.",
+        "follow_up_questions": [
+          "Why can't the backend trust a value calculated by the frontend?",
+          "Which business rules should always be enforced server-side?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says frontend is UI and backend is database.",
+          "average": "Distinguishes client-side UI from server-side processing.",
+          "good": "Explains business logic, security, authorization, and protected data responsibilities.",
+          "excellent": "Clearly explains the trust boundary between client and server and why security-sensitive and business-critical rules must be enforced on the backend."
+        },
+        "skills": [
+          "backend_fundamentals",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "frontend",
+          "backend",
+          "trust_boundary"
+        ]
+      },
+      {
+        "id": "BE-004",
+        "domain": "backend_fundamentals",
+        "topic": "Client-Server Architecture",
+        "subtopic": "Server",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is a server, and how is a backend application different from a server?",
+        "answer": "A server is a machine or computing environment that provides resources or services to other systems over a network. A backend application is software running on a server or server-like environment that implements specific application functionality. The server provides the execution environment and networking capabilities, while the backend application provides the business functionality.",
+        "key_concepts": [
+          "Server",
+          "Backend application",
+          "Execution environment",
+          "Network service"
+        ],
+        "expected_points": [
+          "A server is a computing environment that provides services",
+          "A backend application is software running in that environment",
+          "One server can run multiple applications or services",
+          "The terms server and backend application are not interchangeable"
+        ],
+        "common_mistakes": [
+          "Using server and backend application as exact synonyms",
+          "Assuming a server must be a physical machine"
+        ],
+        "example": "A virtual machine can act as a server and run an API application, a background worker, and monitoring agents simultaneously.",
+        "follow_up_questions": [
+          "Can multiple backend services run on the same server?",
+          "What is the difference between a physical server and a virtual server?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines a server simply as a backend program.",
+          "average": "Recognizes that a server provides resources or services over a network.",
+          "good": "Distinguishes the server environment from the application running on it.",
+          "excellent": "Explains physical, virtual, and containerized execution environments and clearly distinguishes infrastructure from application software."
+        },
+        "skills": [
+          "backend_fundamentals",
+          "infrastructure_basics"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "server",
+          "backend",
+          "infrastructure"
+        ]
+      },
+      {
+        "id": "BE-005",
+        "domain": "backend_fundamentals",
+        "topic": "Backend Application Architecture",
+        "subtopic": "Web Server vs Application Server",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between a web server and an application server?",
+        "answer": "A web server primarily handles HTTP requests, static content, TLS termination, and forwarding requests to application components. An application server or application runtime executes application code and business logic. In modern systems the distinction can be blurred because frameworks and application servers may perform both roles.",
+        "key_concepts": [
+          "Web server",
+          "Application server",
+          "HTTP",
+          "Static content",
+          "Application runtime",
+          "Reverse proxy"
+        ],
+        "expected_points": [
+          "Web servers handle HTTP and often static content",
+          "Application servers execute application code",
+          "Web servers can reverse-proxy requests to applications",
+          "Modern frameworks can combine responsibilities"
+        ],
+        "common_mistakes": [
+          "Claiming web servers can never execute dynamic requests",
+          "Treating the distinction as absolute in modern architectures"
+        ],
+        "example": "Nginx can serve static files and reverse-proxy API requests to an application process running behind it.",
+        "follow_up_questions": [
+          "Why would you place a reverse proxy in front of an application server?",
+          "What responsibilities could be handled by Nginx or another edge server?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the two roles.",
+          "average": "Associates web servers with HTTP and application servers with application code.",
+          "good": "Explains static content, reverse proxying, and application execution.",
+          "excellent": "Explains the historical distinction while recognizing that modern deployments frequently combine or distribute these responsibilities."
+        },
+        "skills": [
+          "backend_architecture",
+          "http",
+          "reverse_proxy"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "web_server",
+          "application_server",
+          "nginx"
+        ]
+      },
+      {
+        "id": "BE-006",
+        "domain": "backend_fundamentals",
+        "topic": "Stateless vs Stateful Systems",
+        "subtopic": "Stateless Services",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What does it mean for a backend service to be stateless?",
+        "answer": "A stateless service does not rely on locally stored session state from previous requests to correctly process the next request. Each request contains or references the information required for processing, while persistent state is typically stored in external systems such as databases, caches, or shared session stores.",
+        "key_concepts": [
+          "Statelessness",
+          "Request independence",
+          "External state",
+          "Horizontal scaling"
+        ],
+        "expected_points": [
+          "Requests can be processed independently",
+          "The application instance does not depend on local session state",
+          "Persistent state is stored externally when required",
+          "Statelessness supports easier horizontal scaling"
+        ],
+        "common_mistakes": [
+          "Claiming stateless systems cannot have any state",
+          "Confusing statelessness with not using a database"
+        ],
+        "example": "An API using signed access tokens can authenticate a request without requiring the same application instance to remember the user's previous request.",
+        "follow_up_questions": [
+          "Why does statelessness make horizontal scaling easier?",
+          "Where could session state be stored if a stateful feature is required?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says that a stateless service does not store any data.",
+          "average": "Explains that requests do not depend on local previous request state.",
+          "good": "Explains external state storage and request independence.",
+          "excellent": "Clearly distinguishes application-local state from persistent business state and explains how statelessness affects load balancing and scaling."
+        },
+        "skills": [
+          "backend_fundamentals",
+          "scalability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "stateless",
+          "stateful",
+          "scaling"
+        ]
+      },
+      {
+        "id": "BE-007",
+        "domain": "backend_fundamentals",
+        "topic": "Stateless vs Stateful Systems",
+        "subtopic": "Stateless Scaling",
+        "difficulty": "Medium",
+        "question_type": "scenario",
+        "question": "Why are stateless backend services generally easier to scale horizontally?",
+        "answer": "A stateless service allows any healthy instance to process any request because no required session state is tied to a particular instance. Requests can therefore be distributed across multiple instances by a load balancer without requiring session affinity or state synchronization between application instances.",
+        "key_concepts": [
+          "Horizontal scaling",
+          "Load balancing",
+          "Session affinity",
+          "Shared state"
+        ],
+        "expected_points": [
+          "Any instance can handle a request",
+          "Load balancers can distribute requests freely",
+          "Instances do not need synchronized local session state",
+          "Adding or removing instances becomes simpler"
+        ],
+        "common_mistakes": [
+          "Claiming stateless services never use databases",
+          "Saying horizontal scaling is impossible for stateful services"
+        ],
+        "example": "If five API instances are behind a load balancer and authentication state is externally managed, a request can be routed to any healthy instance.",
+        "follow_up_questions": [
+          "What problems can session affinity introduce?",
+          "How would you handle session state in a horizontally scaled application?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that more servers can be added.",
+          "average": "Explains that requests can go to any instance.",
+          "good": "Connects statelessness with load balancing and absence of local session dependency.",
+          "excellent": "Explains scaling, instance replacement, load balancing, session affinity, and externalized state in practical terms."
+        },
+        "skills": [
+          "scalability",
+          "load_balancing",
+          "stateless_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "horizontal_scaling",
+          "load_balancer",
+          "stateless"
+        ]
+      },
+      {
+        "id": "BE-008",
+        "domain": "backend_fundamentals",
+        "topic": "Stateless vs Stateful Systems",
+        "subtopic": "Stateful Architecture",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What are the advantages and disadvantages of stateful backend services compared with stateless services?",
+        "answer": "Stateful services can simplify workflows that require maintaining conversational or session state locally, and they can sometimes reduce the need for repeated state retrieval. However, they complicate horizontal scaling, failover, load balancing, instance replacement, and recovery because state must be preserved or synchronized. Stateless services simplify scaling but may require external storage or repeated retrieval of state.",
+        "key_concepts": [
+          "Stateful services",
+          "Stateless services",
+          "Session state",
+          "Failover",
+          "Horizontal scaling"
+        ],
+        "expected_points": [
+          "Stateful services can simplify stateful workflows",
+          "State creates scaling and failover complexity",
+          "State may need replication or external persistence",
+          "Stateless services generally simplify scaling and replacement"
+        ],
+        "common_mistakes": [
+          "Claiming stateful architecture is always bad",
+          "Claiming stateless services eliminate all state"
+        ],
+        "example": "A multiplayer game server may intentionally maintain active session state, while a typical REST API may externalize state into databases or caches.",
+        "follow_up_questions": [
+          "When might stateful architecture be a reasonable choice?",
+          "How could you make a stateful service highly available?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the trade-off between stateful and stateless services.",
+          "average": "Recognizes that stateful services retain client-related state.",
+          "good": "Explains scaling, failover, and state-management trade-offs.",
+          "excellent": "Provides balanced reasoning and identifies cases where stateful architecture is intentional and appropriate."
+        },
+        "skills": [
+          "backend_architecture",
+          "scalability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "stateful",
+          "stateless",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-009",
+        "domain": "backend_fundamentals",
+        "topic": "Backend Application Architecture",
+        "subtopic": "Controllers",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is the purpose of a controller or request handler in a backend application?",
+        "answer": "A controller or request handler is responsible for receiving an incoming request, interpreting its inputs, invoking the appropriate application or business logic, and constructing the HTTP response. It should generally coordinate these operations rather than contain large amounts of domain logic or direct infrastructure concerns.",
+        "key_concepts": [
+          "Controller",
+          "Request handling",
+          "Response handling",
+          "Business logic separation"
+        ],
+        "expected_points": [
+          "Receives and interprets requests",
+          "Extracts relevant inputs",
+          "Invokes application or business logic",
+          "Constructs or returns an appropriate response",
+          "Should remain focused on request orchestration"
+        ],
+        "common_mistakes": [
+          "Putting all business logic inside controllers",
+          "Treating controllers as database repositories"
+        ],
+        "example": "A POST /orders handler validates request structure, calls an order service, and converts the service result into an HTTP response.",
+        "follow_up_questions": [
+          "Where should complex business rules be implemented?",
+          "What problems arise when controllers become very large?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that a controller receives requests.",
+          "average": "Explains request handling and response generation.",
+          "good": "Explains orchestration and separation from business logic.",
+          "excellent": "Clearly describes controllers as an application boundary and explains how thin controllers improve maintainability and testability."
+        },
+        "skills": [
+          "backend_architecture",
+          "separation_of_concerns"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "controller",
+          "request_handler",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-010",
+        "domain": "backend_fundamentals",
+        "topic": "Application Layers & Separation of Concerns",
+        "subtopic": "Controller Service Repository",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between a controller, service layer, and repository or data-access layer?",
+        "answer": "The controller handles the transport or API boundary, the service layer contains application and business logic, and the repository or data-access layer encapsulates interaction with persistent storage. Separating these responsibilities reduces coupling and allows business logic to be tested independently of HTTP and database implementation details.",
+        "key_concepts": [
+          "Controller layer",
+          "Service layer",
+          "Repository layer",
+          "Separation of concerns",
+          "Dependency inversion"
+        ],
+        "expected_points": [
+          "Controller handles API or transport concerns",
+          "Service handles application/business logic",
+          "Repository handles persistence concerns",
+          "Separation reduces coupling",
+          "Layers can be tested independently"
+        ],
+        "common_mistakes": [
+          "Putting business logic in repositories",
+          "Putting SQL queries directly in controllers",
+          "Assuming every project must have exactly these three layers"
+        ],
+        "example": "An order controller receives an HTTP request, the order service validates business rules, and the repository persists the order.",
+        "follow_up_questions": [
+          "Does every backend application need a repository layer?",
+          "How does this separation improve unit testing?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the responsibilities of the layers.",
+          "average": "Recognizes that controllers handle requests and repositories access data.",
+          "good": "Correctly explains all three responsibilities and separation of concerns.",
+          "excellent": "Explains the architectural boundaries, dependency direction, testing benefits, and recognizes that the exact layering can vary by application."
+        },
+        "skills": [
+          "backend_architecture",
+          "separation_of_concerns",
+          "clean_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "controller",
+          "service",
+          "repository"
+        ]
+      },
+      {
+        "id": "BE-011",
+        "domain": "backend_fundamentals",
+        "topic": "Application Layers & Separation of Concerns",
+        "subtopic": "Business Logic",
+        "difficulty": "Medium",
+        "question_type": "scenario",
+        "question": "Why should business logic generally not be placed directly inside API controllers?",
+        "answer": "Large amounts of business logic in controllers create tightly coupled, difficult-to-test code and make the same rules difficult to reuse from other entry points such as background jobs or command-line processes. Separating business logic into application or domain services improves maintainability, testing, reuse, and consistency.",
+        "key_concepts": [
+          "Business logic",
+          "Controller coupling",
+          "Testability",
+          "Reusability",
+          "Separation of concerns"
+        ],
+        "expected_points": [
+          "Controllers become difficult to maintain when overloaded",
+          "Business logic may need to be reused outside HTTP",
+          "Separated logic is easier to test",
+          "Business rules become more centralized and consistent"
+        ],
+        "common_mistakes": [
+          "Claiming controllers should contain no logic at all",
+          "Assuming service layers automatically make code clean"
+        ],
+        "example": "An order validation rule should be reusable when an order is created through an API or imported through a background job.",
+        "follow_up_questions": [
+          "What logic is appropriate to keep inside a controller?",
+          "How would you refactor a controller containing hundreds of lines of business logic?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that controllers should be small.",
+          "average": "Explains maintainability and testing concerns.",
+          "good": "Explains reuse, separation, and centralized business rules.",
+          "excellent": "Provides a practical architectural rationale and distinguishes request orchestration from domain/application behavior."
+        },
+        "skills": [
+          "backend_architecture",
+          "business_logic",
+          "testability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "business_logic",
+          "controller",
+          "service_layer"
+        ]
+      },
+      {
+        "id": "BE-012",
+        "domain": "backend_fundamentals",
+        "topic": "Application Layers & Separation of Concerns",
+        "subtopic": "Separation of Concerns",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is separation of concerns, and why is it important in backend development?",
+        "answer": "Separation of concerns means organizing software so that different responsibilities are handled by distinct components or modules. In backend systems, this can separate transport handling, business logic, persistence, authentication, and infrastructure concerns. It reduces coupling and makes systems easier to understand, test, change, and maintain.",
+        "key_concepts": [
+          "Separation of concerns",
+          "Modularity",
+          "Coupling",
+          "Maintainability",
+          "Testability"
+        ],
+        "expected_points": [
+          "Different responsibilities should have clear boundaries",
+          "Separation reduces unnecessary coupling",
+          "Components become easier to test and change",
+          "Backend layers can represent different responsibilities"
+        ],
+        "common_mistakes": [
+          "Equating separation of concerns with simply creating more files",
+          "Assuming every responsibility must be a separate microservice"
+        ],
+        "example": "Authentication logic, payment processing, and database access can have distinct responsibilities even when they remain within one application.",
+        "follow_up_questions": [
+          "What problems arise when concerns are heavily coupled?",
+          "Does separation of concerns require microservices?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the concept beyond saying code should be organized.",
+          "average": "Explains separating different responsibilities.",
+          "good": "Connects separation to coupling, testing, and maintainability.",
+          "excellent": "Explains boundaries at both code and architectural levels and correctly distinguishes separation of concerns from service decomposition."
+        },
+        "skills": [
+          "software_design",
+          "backend_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "separation_of_concerns",
+          "modularity",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-013",
+        "domain": "backend_fundamentals",
+        "topic": "Application Layers & Separation of Concerns",
+        "subtopic": "Single Responsibility Principle",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is the Single Responsibility Principle, and how does it apply to backend services?",
+        "answer": "The Single Responsibility Principle states that a software component should have one primary reason to change. In backend development, a module or class should have a focused responsibility rather than simultaneously handling HTTP requests, database persistence, payment processing, and notification delivery.",
+        "key_concepts": [
+          "Single Responsibility Principle",
+          "Cohesion",
+          "Coupling",
+          "Maintainability"
+        ],
+        "expected_points": [
+          "A component should have a focused responsibility",
+          "The principle is about reasons to change rather than simply line count",
+          "Focused components are easier to test and maintain",
+          "Responsibilities should not be unnecessarily mixed"
+        ],
+        "common_mistakes": [
+          "Interpreting SRP as exactly one function per class",
+          "Assuming every class must be extremely small"
+        ],
+        "example": "An OrderService can coordinate order creation while a NotificationService handles sending notifications rather than combining both responsibilities into one component.",
+        "follow_up_questions": [
+          "How does SRP affect testability?",
+          "Can following SRP too aggressively create problems?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that a class should do one thing.",
+          "average": "Explains focused responsibilities.",
+          "good": "Explains the reason-to-change interpretation and backend examples.",
+          "excellent": "Explains cohesion, coupling, maintainability, and the trade-off between focused responsibilities and excessive fragmentation."
+        },
+        "skills": [
+          "solid_principles",
+          "software_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "srp",
+          "solid",
+          "software_design"
+        ]
+      },
+      {
+        "id": "BE-014",
+        "domain": "backend_fundamentals",
+        "topic": "CRUD & Business Logic",
+        "subtopic": "CRUD Operations",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is CRUD, and what are its four fundamental operations?",
+        "answer": "CRUD stands for Create, Read, Update, and Delete. These represent the fundamental operations commonly performed on persistent resources: creating new records, retrieving existing records, modifying records, and removing records.",
+        "key_concepts": [
+          "Create",
+          "Read",
+          "Update",
+          "Delete",
+          "Persistence"
+        ],
+        "expected_points": [
+          "CRUD stands for Create, Read, Update, Delete",
+          "The operations map to common data-management actions",
+          "CRUD is a conceptual model rather than a requirement for every API"
+        ],
+        "common_mistakes": [
+          "Claiming CRUD directly maps one-to-one to HTTP methods in every case",
+          "Assuming every backend operation is CRUD"
+        ],
+        "example": "A user management API may create a user, retrieve user details, update profile information, and delete or deactivate a user.",
+        "follow_up_questions": [
+          "How do CRUD operations commonly map to REST APIs?",
+          "Why might deleting a record be replaced by soft deletion?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot expand CRUD correctly.",
+          "average": "Correctly identifies all four operations.",
+          "good": "Explains CRUD as a common data-management abstraction.",
+          "excellent": "Explains CRUD accurately while recognizing that real business operations may go beyond simple CRUD and may require domain-specific commands."
+        },
+        "skills": [
+          "backend_fundamentals",
+          "crud"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "crud",
+          "data_operations"
+        ]
+      },
+      {
+        "id": "BE-015",
+        "domain": "backend_fundamentals",
+        "topic": "CRUD & Business Logic",
+        "subtopic": "Create Resource API",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "How would you design a backend endpoint for creating a new user?",
+        "answer": "The endpoint should accept a validated request payload, authenticate the caller when required, validate business rules such as uniqueness and allowed values, securely process sensitive fields such as passwords, persist the user, and return an appropriate response without exposing sensitive information. The operation should also handle conflicts, validation failures, and unexpected errors consistently.",
+        "key_concepts": [
+          "Input validation",
+          "Authentication",
+          "Authorization",
+          "Business validation",
+          "Password hashing",
+          "Persistence",
+          "Error handling"
+        ],
+        "expected_points": [
+          "Define a clear endpoint and request schema",
+          "Validate input on the server",
+          "Check business constraints such as unique email",
+          "Hash passwords rather than storing plaintext",
+          "Persist the user transactionally where appropriate",
+          "Avoid returning sensitive fields",
+          "Return appropriate success and error responses"
+        ],
+        "common_mistakes": [
+          "Storing plaintext passwords",
+          "Trusting frontend validation",
+          "Returning the password hash in the response",
+          "Ignoring duplicate-user handling"
+        ],
+        "example": "POST /users accepts name, email, and password, validates the payload, checks whether the email already exists, hashes the password, creates the user, and returns a safe user representation.",
+        "follow_up_questions": [
+          "How would you prevent duplicate users when two requests arrive simultaneously?",
+          "What HTTP response would you return if the email already exists?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only to insert the received fields into the database.",
+          "average": "Mentions validation and database insertion.",
+          "good": "Covers validation, uniqueness, password hashing, safe responses, and error handling.",
+          "excellent": "Addresses validation, authorization, secure credential handling, race conditions, transactional behavior, response design, and failure handling."
+        },
+        "skills": [
+          "api_design",
+          "validation",
+          "backend_security",
+          "database"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "user_creation",
+          "api",
+          "validation",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-016",
+        "domain": "backend_fundamentals",
+        "topic": "CRUD & Business Logic",
+        "subtopic": "Server-Side Validation",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What validation should a backend perform when receiving user input?",
+        "answer": "Backend validation should verify that input has the correct structure, data types, required fields, allowed ranges or formats, and business-valid values. It should also enforce security-related constraints such as payload limits and prevent unsafe input from reaching sensitive operations. Validation should be performed independently of client-side validation.",
+        "key_concepts": [
+          "Schema validation",
+          "Type validation",
+          "Business validation",
+          "Security validation",
+          "Payload limits"
+        ],
+        "expected_points": [
+          "Validate data types and structure",
+          "Validate required fields and allowed values",
+          "Apply business rules",
+          "Enforce security-related constraints",
+          "Never rely exclusively on client-side validation"
+        ],
+        "common_mistakes": [
+          "Validating only whether fields are present",
+          "Assuming frontend validation is sufficient",
+          "Treating validation as only a security mechanism"
+        ],
+        "example": "An API accepting an age field might validate that it is an integer, within an allowed range, and appropriate for the requested operation.",
+        "follow_up_questions": [
+          "What is the difference between schema validation and business validation?",
+          "How can excessive request payload sizes affect a backend service?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Mentions only checking whether fields are present.",
+          "average": "Mentions data types, required fields, and formats.",
+          "good": "Includes schema, business, and security-related validation.",
+          "excellent": "Explains validation as a layered responsibility and discusses malformed input, business invariants, payload limits, and trust boundaries."
+        },
+        "skills": [
+          "input_validation",
+          "api_security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "validation",
+          "input",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-017",
+        "domain": "backend_fundamentals",
+        "topic": "CRUD & Business Logic",
+        "subtopic": "Frontend vs Backend Validation",
+        "difficulty": "Easy",
+        "question_type": "comparison",
+        "question": "Why should a backend validate data even when the frontend already performs validation?",
+        "answer": "The client is outside the backend's trust boundary and can be modified, bypassed, or replaced. Server-side validation ensures that every caller, including malicious or buggy clients, is subject to the same constraints. Frontend validation remains useful for user experience, but it cannot replace backend validation.",
+        "key_concepts": [
+          "Trust boundary",
+          "Server-side validation",
+          "Client manipulation",
+          "Security",
+          "Defense in depth"
+        ],
+        "expected_points": [
+          "Clients cannot be trusted",
+          "Frontend validation can be bypassed",
+          "Backend must enforce business and security rules",
+          "Frontend validation improves user experience"
+        ],
+        "common_mistakes": [
+          "Claiming frontend validation provides security",
+          "Removing frontend validation because backend validation exists"
+        ],
+        "example": "A user can modify a browser request and submit a negative product price even if the UI prevents entering one. The backend must reject the invalid value.",
+        "follow_up_questions": [
+          "What types of validation belong specifically to business logic?",
+          "Can backend validation alone provide good user experience?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says backend validation is required without explaining why.",
+          "average": "Recognizes that users can bypass frontend validation.",
+          "good": "Explains trust boundaries and the complementary role of frontend validation.",
+          "excellent": "Clearly explains client distrust, security enforcement, defense in depth, and why frontend validation still has UX value."
+        },
+        "skills": [
+          "validation",
+          "security",
+          "trust_boundaries"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "validation",
+          "frontend",
+          "backend_security"
+        ]
+      },
+      {
+        "id": "BE-018",
+        "domain": "backend_fundamentals",
+        "topic": "CRUD & Business Logic",
+        "subtopic": "Validation vs Business Rules",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between input validation and business-rule enforcement?",
+        "answer": "Input validation checks whether incoming data is structurally and syntactically acceptable, such as verifying that an email has a valid format or a field has the correct type. Business-rule enforcement determines whether an otherwise valid request is allowed according to application rules, such as preventing a customer from purchasing more inventory than is available.",
+        "key_concepts": [
+          "Input validation",
+          "Business rules",
+          "Domain constraints",
+          "Structural validity",
+          "Business validity"
+        ],
+        "expected_points": [
+          "Validation checks structure and acceptable input",
+          "Business rules determine whether an operation is allowed",
+          "A request can be structurally valid but business-invalid",
+          "Both should be enforced server-side"
+        ],
+        "common_mistakes": [
+          "Treating all validation as simple type checking",
+          "Assuming syntactically valid input is automatically business-valid"
+        ],
+        "example": "A quantity of 10 may be a valid integer, but the purchase can still be rejected if only 4 units are available.",
+        "follow_up_questions": [
+          "Where would you place complex business rules in a layered architecture?",
+          "Can business rules change without changing the API contract?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the two concepts.",
+          "average": "Recognizes that validation checks input while business rules control behavior.",
+          "good": "Provides clear examples of structural versus business validity.",
+          "excellent": "Explains the distinction in terms of trust boundaries, domain invariants, and maintainable application architecture."
+        },
+        "skills": [
+          "validation",
+          "business_logic",
+          "domain_modeling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "validation",
+          "business_rules",
+          "domain_logic"
+        ]
+      },
+      {
+        "id": "BE-019",
+        "domain": "backend_fundamentals",
+        "topic": "Middleware",
+        "subtopic": "Middleware Responsibilities",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is middleware, and where does it fit into a backend request lifecycle?",
+        "answer": "Middleware is processing that runs between receiving a request and executing the final request handler, and often also between the handler and sending the response. Middleware can implement cross-cutting concerns such as authentication, logging, request IDs, CORS, rate limiting, and error handling.",
+        "key_concepts": [
+          "Middleware",
+          "Request pipeline",
+          "Cross-cutting concerns",
+          "Request processing"
+        ],
+        "expected_points": [
+          "Middleware participates in the request/response pipeline",
+          "It can run before and after request handlers",
+          "It is useful for cross-cutting concerns",
+          "Middleware can short-circuit a request"
+        ],
+        "common_mistakes": [
+          "Defining middleware as business logic",
+          "Assuming middleware can only run before handlers"
+        ],
+        "example": "Authentication middleware can inspect an access token before allowing the request to reach the protected endpoint.",
+        "follow_up_questions": [
+          "What happens if middleware rejects a request?",
+          "What types of logic should not be implemented as middleware?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Provides a vague definition unrelated to the request pipeline.",
+          "average": "Explains that middleware processes requests before handlers.",
+          "good": "Explains the pipeline and cross-cutting responsibilities.",
+          "excellent": "Explains request/response interception, ordering, short-circuiting, and appropriate versus inappropriate middleware responsibilities."
+        },
+        "skills": [
+          "middleware",
+          "backend_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "middleware",
+          "request_pipeline"
+        ]
+      },
+      {
+        "id": "BE-020",
+        "domain": "backend_fundamentals",
+        "topic": "Middleware",
+        "subtopic": "Cross-Cutting Concerns",
+        "difficulty": "Medium",
+        "question_type": "scenario",
+        "question": "What are some common responsibilities that are appropriate to implement using backend middleware?",
+        "answer": "Common middleware responsibilities include request logging, correlation or request IDs, authentication checks, CORS handling, request timing, rate limiting, tracing, security headers, and centralized exception interception. Middleware is appropriate when the behavior applies broadly across many endpoints and does not depend heavily on endpoint-specific business rules.",
+        "key_concepts": [
+          "Logging",
+          "Authentication",
+          "Request IDs",
+          "Tracing",
+          "CORS",
+          "Rate limiting",
+          "Security headers"
+        ],
+        "expected_points": [
+          "Middleware is useful for cross-cutting behavior",
+          "Logging and tracing are common examples",
+          "Authentication and security controls can be middleware concerns",
+          "Rate limiting can be applied at middleware or gateway layers",
+          "Business-specific rules generally belong elsewhere"
+        ],
+        "common_mistakes": [
+          "Putting complex business workflows into middleware",
+          "Assuming every security control must be implemented as middleware"
+        ],
+        "example": "A request-ID middleware assigns a correlation ID to every incoming request so logs from downstream operations can be correlated.",
+        "follow_up_questions": [
+          "Why does middleware ordering matter?",
+          "How would you propagate a request ID to downstream services?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Provides only one generic middleware example.",
+          "average": "Names logging, authentication, or CORS.",
+          "good": "Explains several cross-cutting responsibilities and their rationale.",
+          "excellent": "Distinguishes cross-cutting middleware concerns from endpoint-specific business logic and discusses ordering and observability."
+        },
+        "skills": [
+          "middleware",
+          "observability",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "middleware",
+          "logging",
+          "tracing",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-021",
+        "domain": "backend_fundamentals",
+        "topic": "Logging & Error Handling Fundamentals",
+        "subtopic": "Centralized Exception Handling",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "How would you implement centralized exception handling in a backend application?",
+        "answer": "A centralized exception-handling mechanism intercepts unhandled exceptions at a common boundary, maps known application exceptions to appropriate client-safe responses, logs unexpected failures with useful context, and prevents internal implementation details from leaking to clients. It should also maintain consistent error response formats across endpoints.",
+        "key_concepts": [
+          "Exception handling",
+          "Centralized error handling",
+          "Error mapping",
+          "Structured logging",
+          "Information disclosure"
+        ],
+        "expected_points": [
+          "Create a common exception-handling boundary",
+          "Map known errors to appropriate HTTP responses",
+          "Log unexpected exceptions with context",
+          "Avoid exposing stack traces or secrets",
+          "Use a consistent error response format"
+        ],
+        "common_mistakes": [
+          "Returning raw exception messages to clients",
+          "Logging without enough context",
+          "Catching every exception and silently ignoring failures"
+        ],
+        "example": "A domain exception such as InsufficientInventory can be mapped to a conflict response, while an unexpected database failure is logged and returned as a generic server error.",
+        "follow_up_questions": [
+          "What information should be included in a production error log?",
+          "Why should stack traces generally not be returned to API clients?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests wrapping every endpoint in identical try/catch blocks.",
+          "average": "Recognizes the need for a global exception handler.",
+          "good": "Explains error mapping, logging, and safe client responses.",
+          "excellent": "Discusses error taxonomy, structured logging, correlation IDs, information disclosure, observability, and consistent API error contracts."
+        },
+        "skills": [
+          "error_handling",
+          "logging",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "exceptions",
+          "error_handling",
+          "logging"
+        ]
+      },
+      {
+        "id": "BE-022",
+        "domain": "backend_fundamentals",
+        "topic": "Logging & Error Handling Fundamentals",
+        "subtopic": "Centralized vs Local Error Handling",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "Why is centralized error handling generally preferable to handling every exception independently in every endpoint?",
+        "answer": "Centralized error handling provides consistent response formats, reduces duplicated code, standardizes logging and monitoring, and makes security controls such as hiding internal details easier to enforce. Endpoint-specific handling is still appropriate when an operation requires specialized recovery or compensation logic.",
+        "key_concepts": [
+          "Centralized error handling",
+          "Consistency",
+          "Duplication",
+          "Observability",
+          "Error recovery"
+        ],
+        "expected_points": [
+          "Reduces repetitive error-handling code",
+          "Provides consistent API responses",
+          "Centralizes logging and monitoring",
+          "Reduces the chance of accidentally exposing internal details",
+          "Specific recovery logic may still belong near the operation"
+        ],
+        "common_mistakes": [
+          "Claiming every exception should be handled globally",
+          "Ignoring endpoint-specific recovery requirements"
+        ],
+        "example": "A global handler can standardize unexpected 500 responses while an order service can locally handle a payment timeout with a retry or compensation workflow.",
+        "follow_up_questions": [
+          "When should an exception be handled locally instead?",
+          "How would you distinguish operational errors from programming bugs?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says centralized handling is cleaner without explaining why.",
+          "average": "Mentions consistency and less duplication.",
+          "good": "Explains consistency, logging, security, and appropriate local handling.",
+          "excellent": "Balances centralized error translation with local recovery and clearly distinguishes error reporting from error recovery."
+        },
+        "skills": [
+          "error_handling",
+          "software_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "exception_handling",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-023",
+        "domain": "backend_fundamentals",
+        "topic": "Logging & Error Handling Fundamentals",
+        "subtopic": "Business vs System Errors",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between an expected business error and an unexpected system error?",
+        "answer": "An expected business error occurs when a request is valid but cannot be completed because of a defined business rule, such as insufficient inventory or an invalid state transition. An unexpected system error indicates an infrastructure, dependency, programming, or unforeseen failure, such as a database outage or unhandled exception.",
+        "key_concepts": [
+          "Business error",
+          "System error",
+          "Domain rule",
+          "Infrastructure failure",
+          "Error classification"
+        ],
+        "expected_points": [
+          "Business errors are expected outcomes defined by domain rules",
+          "System errors result from failures outside normal business behavior",
+          "They should be logged and handled differently",
+          "Clients should receive appropriate representations of each"
+        ],
+        "common_mistakes": [
+          "Treating every failed request as a server error",
+          "Returning internal infrastructure details for system errors"
+        ],
+        "example": "Insufficient inventory may be a business conflict, while a database connection timeout is an infrastructure failure.",
+        "follow_up_questions": [
+          "How should business errors differ from unexpected errors in API responses?",
+          "Which type of error should trigger an alert for the operations team?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish business and system failures.",
+          "average": "Provides a basic example of each.",
+          "good": "Explains their different causes and handling requirements.",
+          "excellent": "Explains error taxonomy, client communication, logging, alerting, retryability, and operational implications."
+        },
+        "skills": [
+          "error_handling",
+          "backend_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "business_error",
+          "system_error",
+          "exceptions"
+        ]
+      },
+      {
+        "id": "BE-024",
+        "domain": "backend_fundamentals",
+        "topic": "Logging & Error Handling Fundamentals",
+        "subtopic": "Internal Errors",
+        "difficulty": "Medium",
+        "question_type": "security",
+        "question": "How should a backend API respond when an unexpected internal exception occurs?",
+        "answer": "The API should return a safe and appropriately generic error response, commonly an HTTP 500 response for an unexpected server-side failure, while logging the detailed exception internally with sufficient context for diagnosis. The response should not expose stack traces, database details, secrets, internal hostnames, or other sensitive implementation information.",
+        "key_concepts": [
+          "HTTP 500",
+          "Information disclosure",
+          "Structured logging",
+          "Security",
+          "Internal diagnostics"
+        ],
+        "expected_points": [
+          "Return an appropriate generic server error",
+          "Log detailed information internally",
+          "Do not expose stack traces or sensitive implementation details",
+          "Include correlation information where possible",
+          "Avoid leaking credentials or infrastructure details"
+        ],
+        "common_mistakes": [
+          "Returning the raw exception message",
+          "Returning stack traces to clients",
+          "Failing to log the underlying failure"
+        ],
+        "example": "The client might receive a generic 'Internal server error' response with a request ID, while the complete exception and stack trace are available in secured application logs.",
+        "follow_up_questions": [
+          "What information would you put in the error log?",
+          "How can a request ID help investigate the incident?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Returns the raw exception to the client.",
+          "average": "Returns a generic 500 response.",
+          "good": "Explains safe responses and internal logging.",
+          "excellent": "Explains secure error handling, structured diagnostics, correlation IDs, information disclosure risks, and operational debugging."
+        },
+        "skills": [
+          "error_handling",
+          "api_security",
+          "observability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "http_500",
+          "error_handling",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-025",
+        "domain": "backend_fundamentals",
+        "topic": "Configuration & Environment Management",
+        "subtopic": "Application Configuration",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is configuration management in a backend application?",
+        "answer": "Configuration management is the practice of managing environment-specific and operational settings separately from application code. These settings can include database connection information, service endpoints, feature flags, timeouts, logging levels, and credentials. Good configuration management makes deployments repeatable and avoids hardcoding environment-specific values.",
+        "key_concepts": [
+          "Configuration",
+          "Environment variables",
+          "Secrets",
+          "Feature flags",
+          "Deployment consistency"
+        ],
+        "expected_points": [
+          "Configuration contains environment or operational settings",
+          "Configuration should generally be separated from application logic",
+          "Different environments may require different values",
+          "Secrets require secure management"
+        ],
+        "common_mistakes": [
+          "Hardcoding production configuration into source code",
+          "Treating secrets and ordinary configuration identically"
+        ],
+        "example": "A service may use different database hosts for development and production while keeping the application code unchanged.",
+        "follow_up_questions": [
+          "Which configuration values should be treated as secrets?",
+          "How would you manage configuration across multiple deployment environments?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Describes configuration only as a config file.",
+          "average": "Explains environment-specific settings.",
+          "good": "Discusses separation from code and secret management.",
+          "excellent": "Explains configuration sources, deployment consistency, secret handling, validation, and environment-specific behavior."
+        },
+        "skills": [
+          "configuration_management",
+          "deployment"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "configuration",
+          "environment",
+          "secrets"
+        ]
+      },
+      {
+        "id": "BE-026",
+        "domain": "backend_fundamentals",
+        "topic": "Configuration & Environment Management",
+        "subtopic": "Secrets",
+        "difficulty": "Easy",
+        "question_type": "security",
+        "question": "Why should secrets such as database passwords and API keys not be hardcoded in application source code?",
+        "answer": "Hardcoded secrets can be exposed through source repositories, logs, compiled artifacts, code reviews, backups, or developer machines. Separating secrets from source code allows them to be rotated without changing application code and supports safer environment-specific deployments.",
+        "key_concepts": [
+          "Secrets management",
+          "Credential exposure",
+          "Secret rotation",
+          "Environment configuration"
+        ],
+        "expected_points": [
+          "Source code can be widely distributed or exposed",
+          "Secrets should be stored in secure secret-management mechanisms",
+          "Secrets need to be rotatable",
+          "Different environments often require different credentials"
+        ],
+        "common_mistakes": [
+          "Assuming private repositories make hardcoded secrets safe",
+          "Putting secrets into frontend code",
+          "Only hiding secrets with source-code obfuscation"
+        ],
+        "example": "A production database password should be injected into the backend deployment through a secret-management mechanism rather than committed to Git.",
+        "follow_up_questions": [
+          "What should you do if a production API key is accidentally committed to Git?",
+          "Why can't an API key placed in frontend JavaScript be considered secret?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says simply that hardcoding is bad practice.",
+          "average": "Mentions repository exposure.",
+          "good": "Explains secure storage, rotation, and environment separation.",
+          "excellent": "Explains credential lifecycle, exposure vectors, rotation, revocation, and the distinction between server-side secrets and public client credentials."
+        },
+        "skills": [
+          "security",
+          "secrets_management"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "secrets",
+          "api_keys",
+          "credentials"
+        ]
+      },
+      {
+        "id": "BE-027",
+        "domain": "backend_fundamentals",
+        "topic": "Configuration & Environment Management",
+        "subtopic": "Deployment Environments",
+        "difficulty": "Easy",
+        "question_type": "comparison",
+        "question": "What is the difference between development, staging, and production environments?",
+        "answer": "Development is primarily used for building and testing features locally. Staging is a controlled environment intended to resemble production and is used for integration and release validation. Production is the live environment serving real users and therefore requires stronger controls around reliability, security, monitoring, data protection, and change management.",
+        "key_concepts": [
+          "Development",
+          "Staging",
+          "Production",
+          "Release validation",
+          "Operational controls"
+        ],
+        "expected_points": [
+          "Development supports active engineering work",
+          "Staging is used for pre-production validation",
+          "Production serves real users",
+          "Production requires stronger reliability and security controls"
+        ],
+        "common_mistakes": [
+          "Treating staging as simply another developer machine",
+          "Using production data carelessly in lower environments"
+        ],
+        "example": "A new API version may first be tested locally, then deployed to staging for integration testing, and finally released to production after validation.",
+        "follow_up_questions": [
+          "Why should staging resemble production?",
+          "What risks arise when development and production configurations differ significantly?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the environments.",
+          "average": "Recognizes development as local and production as live.",
+          "good": "Explains the role of staging and operational differences.",
+          "excellent": "Discusses environment parity, deployment validation, data safety, observability, and production change controls."
+        },
+        "skills": [
+          "deployment",
+          "environment_management"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "development",
+          "staging",
+          "production"
+        ]
+      },
+      {
+        "id": "BE-028",
+        "domain": "backend_fundamentals",
+        "topic": "Configuration & Environment Management",
+        "subtopic": "Environment Drift",
+        "difficulty": "Medium",
+        "question_type": "troubleshooting",
+        "question": "What problems can occur when configuration is handled differently across development, staging, and production environments?",
+        "answer": "Configuration differences can cause environment-specific failures, unexpected behavior, security issues, and difficult-to-reproduce bugs. Examples include different database settings, timeouts, feature flags, dependency endpoints, authentication configuration, or logging levels. Configuration should therefore be explicit, validated, versioned where appropriate, and managed consistently.",
+        "key_concepts": [
+          "Configuration drift",
+          "Environment parity",
+          "Deployment reliability",
+          "Feature flags",
+          "Configuration validation"
+        ],
+        "expected_points": [
+          "Environment drift creates inconsistent behavior",
+          "Differences can make bugs difficult to reproduce",
+          "Security and connectivity failures can occur",
+          "Configuration should be managed systematically"
+        ],
+        "common_mistakes": [
+          "Assuming application code is always the cause of environment-specific failures",
+          "Copying production secrets into development environments"
+        ],
+        "example": "An API works in staging because its timeout is 60 seconds but fails in production where the load balancer timeout is only 10 seconds.",
+        "follow_up_questions": [
+          "How would you detect configuration drift?",
+          "Which configuration values should be validated when an application starts?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that different configurations can cause bugs.",
+          "average": "Identifies environment-specific behavior.",
+          "good": "Explains drift, reproducibility, and security implications.",
+          "excellent": "Provides concrete examples and explains configuration validation, environment parity, automated deployment, and safe secret handling."
+        },
+        "skills": [
+          "configuration_management",
+          "troubleshooting",
+          "deployment"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "configuration_drift",
+          "deployment",
+          "troubleshooting"
+        ]
+      },
+      {
+        "id": "BE-029",
+        "domain": "backend_fundamentals",
+        "topic": "Dependency Injection",
+        "subtopic": "Dependency Injection Fundamentals",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is dependency injection, and why is it useful in backend applications?",
+        "answer": "Dependency injection is a design technique where a component receives the dependencies it needs from an external mechanism rather than constructing those dependencies internally. It reduces coupling, makes implementations replaceable, and improves testability because real dependencies can be replaced with controlled test doubles.",
+        "key_concepts": [
+          "Dependency injection",
+          "Loose coupling",
+          "Inversion of control",
+          "Testability",
+          "Dependency management"
+        ],
+        "expected_points": [
+          "Dependencies are supplied rather than constructed internally",
+          "It reduces coupling",
+          "Implementations can be substituted",
+          "Testing becomes easier"
+        ],
+        "common_mistakes": [
+          "Equating dependency injection only with a framework feature",
+          "Assuming dependency injection automatically makes architecture good"
+        ],
+        "example": "An OrderService can receive a PaymentGateway interface rather than directly constructing a concrete payment client.",
+        "follow_up_questions": [
+          "How would dependency injection help unit-test an order service?",
+          "What is the difference between dependency injection and dependency inversion?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines dependency injection as simply using a framework.",
+          "average": "Explains that dependencies are passed into a component.",
+          "good": "Explains coupling, substitution, and testability.",
+          "excellent": "Clearly distinguishes the technique from framework mechanics and connects it to dependency inversion, composition, and testing."
+        },
+        "skills": [
+          "dependency_injection",
+          "software_design",
+          "testability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "dependency_injection",
+          "ioc",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-030",
+        "domain": "backend_fundamentals",
+        "topic": "Dependency Injection",
+        "subtopic": "Testing",
+        "difficulty": "Medium",
+        "question_type": "scenario",
+        "question": "How does dependency injection improve the testability of a backend service?",
+        "answer": "Dependency injection allows a service to receive replaceable implementations of its dependencies. During testing, expensive or external dependencies such as databases, payment gateways, or message brokers can be replaced with mocks, stubs, fakes, or in-memory implementations, allowing the service's own behavior to be tested in isolation.",
+        "key_concepts": [
+          "Unit testing",
+          "Mocks",
+          "Stubs",
+          "Fakes",
+          "Dependency substitution"
+        ],
+        "expected_points": [
+          "Dependencies can be replaced during tests",
+          "External systems can be isolated",
+          "Tests become faster and more deterministic",
+          "The service's behavior can be tested independently"
+        ],
+        "common_mistakes": [
+          "Claiming dependency injection eliminates integration tests",
+          "Mocking every dependency regardless of test purpose"
+        ],
+        "example": "A service that charges customers through a PaymentGateway can receive a fake gateway during unit tests so the service can be tested without making real payments.",
+        "follow_up_questions": [
+          "When would you prefer an integration test over a mock?",
+          "What are the risks of excessive mocking?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says dependency injection helps testing without explaining how.",
+          "average": "Mentions replacing dependencies with mocks.",
+          "good": "Explains isolation, deterministic tests, and external dependency replacement.",
+          "excellent": "Explains the trade-offs among mocks, fakes, integration tests, and realistic dependencies while showing how dependency injection enables controlled composition."
+        },
+        "skills": [
+          "dependency_injection",
+          "testing",
+          "software_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "testing",
+          "mocking",
+          "dependency_injection"
+        ]
+      },
+      {
+        "id": "BE-031",
+        "domain": "backend_fundamentals",
+        "topic": "Database Connection Pooling",
+        "subtopic": "Connection Pools",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is database connection pooling, and why do backend applications use it?",
+        "answer": "A database connection pool maintains a reusable set of database connections so application requests can borrow and return connections rather than creating a new database connection for every operation. This reduces connection establishment overhead, limits the number of concurrent database connections, and improves resource utilization.",
+        "key_concepts": [
+          "Connection pooling",
+          "Connection reuse",
+          "Resource management",
+          "Concurrency",
+          "Database connections"
+        ],
+        "expected_points": [
+          "A pool maintains reusable database connections",
+          "Requests borrow and return connections",
+          "Connection creation has overhead",
+          "The pool limits concurrent database connections",
+          "Pool sizing affects application behavior"
+        ],
+        "common_mistakes": [
+          "Claiming a pool creates one connection for the entire application",
+          "Assuming increasing pool size always improves performance"
+        ],
+        "example": "An API server with many concurrent requests may use a pool of 20 database connections rather than opening a new database connection for every request.",
+        "follow_up_questions": [
+          "What happens when all connections in the pool are busy?",
+          "How would you choose an appropriate pool size?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that connection pooling makes databases faster.",
+          "average": "Explains connection reuse.",
+          "good": "Explains reuse, limits, and connection-creation overhead.",
+          "excellent": "Discusses pool sizing, wait behavior, database capacity, application concurrency, timeouts, and connection lifecycle."
+        },
+        "skills": [
+          "database",
+          "connection_pooling",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "database",
+          "connection_pool",
+          "performance"
+        ]
+      },
+      {
+        "id": "BE-032",
+        "domain": "backend_fundamentals",
+        "topic": "Database Connection Pooling",
+        "subtopic": "Connection Exhaustion",
+        "difficulty": "Hard",
+        "question_type": "troubleshooting",
+        "question": "What can happen if a backend application creates a new database connection for every request instead of using connection pooling?",
+        "answer": "The application can spend significant time establishing and closing connections, increasing latency and resource consumption. Under load it can exhaust the database's connection limit, causing requests to fail or queue. It can also create connection storms when traffic spikes, potentially destabilizing both the application and database.",
+        "key_concepts": [
+          "Connection overhead",
+          "Connection exhaustion",
+          "Connection storms",
+          "Database limits",
+          "Latency"
+        ],
+        "expected_points": [
+          "Connection establishment has overhead",
+          "Database connection limits can be exhausted",
+          "Latency and resource usage increase",
+          "Traffic spikes can cause connection storms",
+          "Both application and database can become unstable"
+        ],
+        "common_mistakes": [
+          "Assuming databases support unlimited connections",
+          "Saying connection pooling is only an optimization and never a reliability concern"
+        ],
+        "example": "If an application receives 2,000 concurrent requests and each creates a new database connection, the database may reject connections long before the application reaches its CPU limit.",
+        "follow_up_questions": [
+          "What metrics would you monitor to detect connection exhaustion?",
+          "What can happen if the connection pool is configured too large?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Mentions only that opening connections is slower.",
+          "average": "Identifies connection overhead and database limits.",
+          "good": "Explains exhaustion, connection storms, latency, and failures.",
+          "excellent": "Connects application concurrency, pool sizing, database capacity, queueing, timeouts, and cascading failure behavior."
+        },
+        "skills": [
+          "database",
+          "connection_pooling",
+          "troubleshooting",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "connection_exhaustion",
+          "database",
+          "production"
+        ]
+      },
+      {
+        "id": "BE-033",
+        "domain": "backend_fundamentals",
+        "topic": "Logging & Error Handling Fundamentals",
+        "subtopic": "Backend Logging",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is logging, and what information should a backend service typically log?",
+        "answer": "Logging records events and diagnostic information produced by an application so engineers can understand behavior, troubleshoot failures, and investigate incidents. Useful backend logs can include timestamps, severity, request or correlation IDs, operation names, relevant identifiers, latency, error information, and structured context, while avoiding secrets and unnecessary sensitive data.",
+        "key_concepts": [
+          "Application logging",
+          "Structured logs",
+          "Log levels",
+          "Correlation IDs",
+          "Observability",
+          "Sensitive data"
+        ],
+        "expected_points": [
+          "Logs record application and operational events",
+          "Logs should contain useful diagnostic context",
+          "Request or correlation IDs improve traceability",
+          "Sensitive information should not be logged carelessly",
+          "Structured logs improve machine processing"
+        ],
+        "common_mistakes": [
+          "Logging passwords or access tokens",
+          "Logging everything at error level",
+          "Creating logs without request correlation information"
+        ],
+        "example": "A structured error log might contain request_id, endpoint, duration, user_id where appropriate, downstream dependency, and exception type without including authentication tokens.",
+        "follow_up_questions": [
+          "What is the difference between DEBUG, INFO, WARN, and ERROR logs?",
+          "Why are structured logs preferable for large systems?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines logging only as printing messages.",
+          "average": "Explains that logs help troubleshoot applications.",
+          "good": "Identifies useful context and sensitive-data concerns.",
+          "excellent": "Explains structured logging, severity, correlation, observability, retention, and security considerations."
+        },
+        "skills": [
+          "logging",
+          "observability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "logging",
+          "observability",
+          "structured_logs"
+        ]
+      },
+      {
+        "id": "BE-034",
+        "domain": "backend_fundamentals",
+        "topic": "Logging & Error Handling Fundamentals",
+        "subtopic": "Error vs Client Response",
+        "difficulty": "Medium",
+        "question_type": "security",
+        "question": "What is the difference between logging an error and exposing an error to an API client?",
+        "answer": "Logging an error is an internal diagnostic activity that can contain detailed technical information needed by engineers. An API response is part of a public contract and should contain only information the client needs and is authorized to receive. Internal stack traces, database errors, infrastructure details, and secrets should generally remain in protected logs rather than being returned to clients.",
+        "key_concepts": [
+          "Error logging",
+          "API error contract",
+          "Information disclosure",
+          "Security",
+          "Diagnostics"
+        ],
+        "expected_points": [
+          "Logs can contain detailed diagnostic information",
+          "Client responses should be safe and intentionally designed",
+          "Sensitive internal information should not be exposed",
+          "Error responses should follow a consistent contract"
+        ],
+        "common_mistakes": [
+          "Returning raw database errors to clients",
+          "Assuming a useful developer error message is automatically safe for users"
+        ],
+        "example": "A database timeout may be logged with the database operation and stack trace internally while the client receives a generic temporary-service-error response.",
+        "follow_up_questions": [
+          "What information should a client receive for a validation error?",
+          "How would you correlate a client error response with the corresponding server logs?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Treats server logs and API responses as equivalent.",
+          "average": "Recognizes that detailed errors should remain internal.",
+          "good": "Explains diagnostic versus client-facing information.",
+          "excellent": "Explains security boundaries, structured error contracts, correlation IDs, and appropriate differences between operational diagnostics and client communication."
+        },
+        "skills": [
+          "logging",
+          "api_security",
+          "error_handling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "logging",
+          "api_errors",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-035",
+        "domain": "backend_fundamentals",
+        "topic": "Logging & Error Handling Fundamentals",
+        "subtopic": "Logging Quality",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "How would you design logging for a backend API so that a production request can be traced across multiple operations?",
+        "answer": "The API should generate or propagate a unique request or correlation ID and include it in structured logs for the request and significant downstream operations. If the request crosses services, the correlation context should be propagated so logs can be associated across service boundaries. Logs should include timestamps, operation names, status, duration, and relevant identifiers while avoiding sensitive information.",
+        "key_concepts": [
+          "Correlation ID",
+          "Distributed tracing",
+          "Structured logging",
+          "Request context",
+          "Latency"
+        ],
+        "expected_points": [
+          "Generate or propagate a correlation ID",
+          "Include the ID consistently in relevant logs",
+          "Propagate context to downstream services",
+          "Log useful request metadata",
+          "Avoid sensitive data"
+        ],
+        "common_mistakes": [
+          "Using only timestamps to correlate requests",
+          "Creating a new unrelated ID at every service boundary",
+          "Logging credentials or tokens"
+        ],
+        "example": "A request entering Service A with request_id=abc123 propagates that identifier to Service B and a message-processing component so engineers can search for the entire request path.",
+        "follow_up_questions": [
+          "What is the difference between correlation IDs and distributed tracing?",
+          "How would you propagate tracing context through asynchronous messages?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests simply adding more log statements.",
+          "average": "Mentions request IDs.",
+          "good": "Explains structured logging and propagation across services.",
+          "excellent": "Distinguishes correlation from tracing and explains context propagation across synchronous and asynchronous boundaries."
+        },
+        "skills": [
+          "logging",
+          "observability",
+          "distributed_tracing"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "correlation_id",
+          "logging",
+          "tracing"
+        ]
+      },
+      {
+        "id": "BE-036",
+        "domain": "backend_fundamentals",
+        "topic": "CRUD & Business Logic",
+        "subtopic": "Business Logic Placement",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "You are designing a backend where the same business operation can be triggered through an API, a background job, and an administrative command. Where should the core business logic live, and why?",
+        "answer": "The reusable business behavior should live in an application or domain-level component that is independent of the individual transport mechanisms. The API handler, background worker, and administrative command should act as entry points that invoke the shared business logic. This prevents duplicated rules and keeps behavior consistent across different execution paths.",
+        "key_concepts": [
+          "Application services",
+          "Domain logic",
+          "Reusable business rules",
+          "Multiple entry points",
+          "Separation of concerns"
+        ],
+        "expected_points": [
+          "Business behavior should not be duplicated across entry points",
+          "A shared application/domain component can contain the operation",
+          "Transport-specific handlers should orchestrate rather than duplicate rules",
+          "Shared logic improves consistency and testing"
+        ],
+        "common_mistakes": [
+          "Putting business logic inside the API controller",
+          "Duplicating the same logic in the worker and command",
+          "Creating a shared utility class without modeling the actual business responsibility"
+        ],
+        "example": "An order cancellation operation can be exposed through an API endpoint and an administrative command while both invoke the same cancellation service that enforces order-state rules.",
+        "follow_up_questions": [
+          "How would you prevent the API and background worker from performing conflicting database operations?",
+          "What belongs in the domain layer versus the infrastructure layer?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Places the business logic directly in one entry point.",
+          "average": "Suggests creating a shared service.",
+          "good": "Explains shared application/domain logic and thin entry points.",
+          "excellent": "Clearly separates transport, application/domain behavior, persistence, and infrastructure while discussing transaction boundaries and consistency."
+        },
+        "skills": [
+          "software_architecture",
+          "business_logic",
+          "domain_driven_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "business_logic",
+          "architecture",
+          "service_layer"
+        ]
+      },
+      {
+        "id": "BE-037",
+        "domain": "backend_fundamentals",
+        "topic": "Logging & Error Handling Fundamentals",
+        "subtopic": "HTTP 500 Investigation",
+        "difficulty": "Hard",
+        "question_type": "troubleshooting",
+        "question": "A backend API suddenly starts returning HTTP 500 errors for only some requests. How would you investigate the problem?",
+        "answer": "I would first establish the scope and timing of the failures using metrics and logs, identify affected endpoints and request patterns, and correlate failed requests using request IDs. I would inspect recent deployments or configuration changes, application exceptions, database and downstream-service health, resource utilization, and error rates. I would then reproduce the failure if possible, isolate the failing dependency or code path, and apply a controlled fix or rollback.",
+        "key_concepts": [
+          "Incident investigation",
+          "Structured logging",
+          "Correlation IDs",
+          "Recent changes",
+          "Dependency health",
+          "Metrics"
+        ],
+        "expected_points": [
+          "Determine when the issue started and its scope",
+          "Identify affected endpoints or request patterns",
+          "Inspect application logs and exceptions",
+          "Check recent deployments and configuration changes",
+          "Check databases and downstream dependencies",
+          "Inspect CPU, memory, connection pools, and other resources",
+          "Mitigate through rollback or controlled remediation when appropriate"
+        ],
+        "common_mistakes": [
+          "Immediately restarting all servers without investigation",
+          "Looking only at application logs",
+          "Assuming every 500 error is caused by application code"
+        ],
+        "example": "If only requests involving a particular database query return 500 after a deployment, logs and query-specific metrics can narrow the problem to that code path or dependency.",
+        "follow_up_questions": [
+          "What metrics would you check first?",
+          "How would you distinguish an application bug from a database outage?",
+          "When would you roll back the deployment?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests restarting the server without systematic investigation.",
+          "average": "Checks logs and recent code changes.",
+          "good": "Uses logs, metrics, deployment history, dependencies, and resource metrics to isolate the problem.",
+          "excellent": "Describes a structured incident-response workflow covering scope, correlation, hypothesis-driven investigation, mitigation, rollback, verification, and post-incident prevention."
+        },
+        "skills": [
+          "troubleshooting",
+          "incident_response",
+          "observability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "http_500",
+          "production",
+          "incident_response"
+        ]
+      },
+      {
+        "id": "BE-038",
+        "domain": "backend_fundamentals",
+        "topic": "Performance & Scalability Fundamentals",
+        "subtopic": "Traffic Growth",
+        "difficulty": "Hard",
+        "question_type": "scenario",
+        "question": "Your backend service works correctly with a few users but becomes increasingly slow as traffic grows. What areas would you investigate first?",
+        "answer": "I would identify where latency is being introduced by examining request latency distributions, throughput, CPU and memory utilization, database performance, connection pools, external-service latency, queue depth, cache behavior, and application-level bottlenecks. I would use profiling and tracing where necessary rather than assuming that adding more application instances will solve the problem.",
+        "key_concepts": [
+          "Latency",
+          "Throughput",
+          "Profiling",
+          "Database performance",
+          "Connection pools",
+          "External dependencies",
+          "Scalability"
+        ],
+        "expected_points": [
+          "Measure latency and throughput before changing architecture",
+          "Check CPU and memory",
+          "Investigate database queries and connections",
+          "Check downstream dependencies",
+          "Inspect caches and queues",
+          "Use tracing or profiling to locate bottlenecks",
+          "Consider horizontal scaling only after identifying the bottleneck"
+        ],
+        "common_mistakes": [
+          "Immediately adding more servers",
+          "Looking only at CPU utilization",
+          "Ignoring database or downstream bottlenecks"
+        ],
+        "example": "If application CPU remains at 30% while database latency increases sharply, adding API instances may increase database pressure rather than solve the problem.",
+        "follow_up_questions": [
+          "How would you determine whether the database is the bottleneck?",
+          "What is the difference between latency and throughput?",
+          "When would horizontal scaling actually help?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests increasing server capacity without measuring the bottleneck.",
+          "average": "Checks CPU, memory, and database performance.",
+          "good": "Uses metrics, tracing, profiling, database analysis, and dependency analysis.",
+          "excellent": "Approaches the problem systematically using latency distributions, saturation signals, dependency analysis, profiling, capacity limits, and targeted scaling."
+        },
+        "skills": [
+          "performance",
+          "scalability",
+          "observability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "performance",
+          "scalability",
+          "latency"
+        ]
+      },
+      {
+        "id": "BE-039",
+        "domain": "backend_fundamentals",
+        "topic": "Performance & Scalability Fundamentals",
+        "subtopic": "Memory Growth",
+        "difficulty": "Hard",
+        "question_type": "troubleshooting",
+        "question": "A backend application consumes increasingly more memory over several hours and eventually crashes. How would you troubleshoot the issue?",
+        "answer": "I would first confirm the pattern using memory metrics and determine whether memory grows continuously or correlates with traffic or a specific workload. I would inspect heap usage, object retention, caches, connection or resource lifecycles, background tasks, queues, and recent code changes. Depending on the runtime, I would use profiling, heap snapshots, allocation tracking, or equivalent diagnostics to identify retained objects and then reproduce and fix the underlying leak or unbounded growth.",
+        "key_concepts": [
+          "Memory leak",
+          "Heap profiling",
+          "Object retention",
+          "Unbounded caches",
+          "Resource lifecycle"
+        ],
+        "expected_points": [
+          "Confirm memory-growth pattern using metrics",
+          "Correlate growth with traffic or workloads",
+          "Inspect heap and object retention",
+          "Investigate caches and queues",
+          "Check background tasks and resource cleanup",
+          "Use runtime-specific profiling tools",
+          "Fix the underlying cause rather than relying only on restarts"
+        ],
+        "common_mistakes": [
+          "Assuming high memory usage automatically means a memory leak",
+          "Only increasing server memory",
+          "Restarting the application without investigating the cause"
+        ],
+        "example": "An unbounded in-memory cache may cause memory usage to increase continuously even though application objects themselves are correctly managed.",
+        "follow_up_questions": [
+          "How would you distinguish a memory leak from legitimate cache growth?",
+          "What operational mitigation could you apply while investigating the root cause?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests only restarting the application or increasing memory.",
+          "average": "Recognizes that memory growth may indicate a leak.",
+          "good": "Explains metrics, profiling, object retention, caches, and resource cleanup.",
+          "excellent": "Provides a systematic investigation strategy, distinguishes leak from expected memory behavior, identifies mitigation options, and explains how to validate the fix."
+        },
+        "skills": [
+          "performance",
+          "memory_management",
+          "troubleshooting"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "memory_leak",
+          "heap",
+          "production"
+        ]
+      },
+      {
+        "id": "BE-040",
+        "domain": "backend_fundamentals",
+        "topic": "Application Layers & Separation of Concerns",
+        "subtopic": "Legacy Backend Refactoring",
+        "difficulty": "Expert",
+        "question_type": "architecture",
+        "question": "You inherit a backend application where controllers contain database queries, business rules, validation, and external API calls. How would you refactor the architecture without breaking existing functionality?",
+        "answer": "I would first establish characterization tests and production behavior baselines so existing behavior is understood before changing structure. I would identify cohesive responsibilities, extract business logic into application or domain services, isolate persistence behind data-access abstractions where useful, and encapsulate external integrations behind dedicated clients or adapters. I would refactor incrementally behind stable API contracts, validate each change with automated tests and observability, and avoid attempting a large rewrite without evidence.",
+        "key_concepts": [
+          "Legacy refactoring",
+          "Characterization tests",
+          "Incremental refactoring",
+          "Separation of concerns",
+          "Service layer",
+          "Data access",
+          "External adapters"
+        ],
+        "expected_points": [
+          "Understand existing behavior before restructuring",
+          "Add characterization or regression tests",
+          "Separate business logic from transport concerns",
+          "Extract database access appropriately",
+          "Isolate external integrations",
+          "Refactor incrementally rather than performing a risky rewrite",
+          "Maintain API compatibility",
+          "Use tests and observability to validate behavior"
+        ],
+        "common_mistakes": [
+          "Proposing a complete rewrite immediately",
+          "Creating arbitrary layers without understanding responsibilities",
+          "Changing behavior while claiming to perform a structural refactor",
+          "Ignoring regression testing"
+        ],
+        "example": "A large order controller can first be covered by integration tests, then its payment logic can be extracted into a PaymentService, followed by persistence extraction and gradual simplification of the controller.",
+        "follow_up_questions": [
+          "How would you identify the first piece of logic to extract?",
+          "What tests would you add before starting the refactor?",
+          "How would you handle a business rule that is duplicated across several controllers?",
+          "When would you decide that a rewrite is justified instead of incremental refactoring?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests rewriting the application from scratch without discussing compatibility or risk.",
+          "average": "Suggests separating controllers, services, and repositories.",
+          "good": "Proposes incremental extraction supported by tests and stable interfaces.",
+          "excellent": "Demonstrates mature legacy-system reasoning: establishes behavioral baselines, identifies seams, minimizes blast radius, preserves contracts, isolates dependencies, uses observability, and makes architectural changes incrementally based on evidence."
+        },
+        "skills": [
+          "software_architecture",
+          "legacy_refactoring",
+          "testing",
+          "system_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer"
+        ],
+        "tags": [
+          "legacy",
+          "refactoring",
+          "architecture",
+          "technical_debt"
+        ]
+      }
+    ]
+  }
+}

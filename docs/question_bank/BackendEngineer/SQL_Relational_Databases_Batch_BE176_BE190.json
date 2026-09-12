@@ -1,0 +1,843 @@
+{
+  "question_bank": {
+    "id": "backend-engineering-500",
+    "title": "Backend Engineering Interview Question Bank — SQL & Relational Databases — Batch 2",
+    "description": "Advanced SQL and relational database interview questions covering subqueries, CTEs, window functions, keys, constraints, and normalization.",
+    "language": "Technology-neutral SQL",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "domain": "sql_relational_databases",
+    "question_count": 15,
+    "batch": {
+      "batch_number": 2,
+      "batch_size": 15,
+      "domain_target": 45,
+      "question_id_range": [
+        "BE-176",
+        "BE-190"
+      ]
+    },
+    "intended_use": [
+      "preparation",
+      "mock_interview",
+      "ai_evaluation",
+      "adaptive_follow_up"
+    ],
+    "roles": [
+      "backend_developer",
+      "software_developer",
+      "full_stack_developer"
+    ],
+    "questions": [
+      {
+        "id": "BE-176",
+        "domain": "sql_relational_databases",
+        "topic": "Subqueries & CTEs",
+        "subtopic": "Scalar Subquery",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is a scalar subquery in SQL, and what happens if it returns more than one row?",
+        "answer": "A scalar subquery is a subquery used where a single value is expected, such as in a SELECT expression or comparison. It must return at most one row; if it returns multiple rows, most relational databases raise an error because the outer expression cannot use multiple values as a scalar. If it returns no rows, its result is generally NULL in a scalar expression context.",
+        "key_concepts": [
+          "Scalar subquery",
+          "Single value",
+          "Subquery cardinality",
+          "NULL"
+        ],
+        "expected_points": [
+          "Defines a scalar subquery as a subquery expected to produce one value",
+          "Explains that multiple returned rows cause an error in scalar context",
+          "Explains the typical no-row result as NULL"
+        ],
+        "common_mistakes": [
+          "Assuming a scalar subquery automatically takes the first row",
+          "Confusing a scalar subquery with an IN subquery",
+          "Ignoring the possibility of multiple rows"
+        ],
+        "example": "SELECT name, (SELECT MAX(amount) FROM orders) AS max_order_value FROM customers;",
+        "follow_up_questions": [
+          "How would you rewrite a scalar subquery that can legitimately return multiple rows?",
+          "What is the difference between a scalar subquery and a correlated subquery?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what a scalar subquery is.",
+          "average": "Knows it returns a value but misses the cardinality requirement.",
+          "good": "Correctly explains single-value semantics and the multiple-row error.",
+          "excellent": "Explains scalar context precisely and discusses both zero-row and multiple-row behavior."
+        },
+        "skills": [
+          "sql",
+          "subqueries",
+          "relational_querying"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "scalar_subquery",
+          "subqueries"
+        ]
+      },
+      {
+        "id": "BE-177",
+        "domain": "sql_relational_databases",
+        "topic": "Subqueries & CTEs",
+        "subtopic": "IN vs EXISTS",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between IN and EXISTS when filtering rows based on related data?",
+        "answer": "IN compares an expression against a set of values returned by a subquery, while EXISTS tests whether the subquery produces at least one row. EXISTS is often a natural fit when only existence matters and can avoid concerns about duplicate matching rows. NULL semantics also differ in important cases, especially with NOT IN, so EXISTS is often safer for anti-existence checks when nullable data is involved.",
+        "key_concepts": [
+          "IN",
+          "EXISTS",
+          "NULL semantics",
+          "Existence test",
+          "Subquery"
+        ],
+        "expected_points": [
+          "Distinguishes value membership from existence testing",
+          "Explains why duplicate rows do not change EXISTS semantics",
+          "Recognizes NULL-related behavior as important, especially for NOT IN",
+          "Avoids claiming one form is universally faster"
+        ],
+        "common_mistakes": [
+          "Saying EXISTS always performs faster",
+          "Treating NOT IN and NOT EXISTS as always equivalent",
+          "Ignoring NULL behavior"
+        ],
+        "example": "SELECT c.id FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);",
+        "follow_up_questions": [
+          "Why can NOT IN behave unexpectedly when the subquery returns NULL?",
+          "How would you express the same requirement using a JOIN?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish IN from EXISTS.",
+          "average": "Understands membership versus existence but misses NULL behavior.",
+          "good": "Explains both semantics and the important NOT IN/NULL caveat.",
+          "excellent": "Precisely reasons about set membership, existence, duplicate semantics, and three-valued logic."
+        },
+        "skills": [
+          "sql",
+          "subqueries",
+          "null_handling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "in",
+          "exists",
+          "subqueries"
+        ]
+      },
+      {
+        "id": "BE-178",
+        "domain": "sql_relational_databases",
+        "topic": "Subqueries & CTEs",
+        "subtopic": "Correlated Subquery",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is a correlated subquery, and how does it differ from a non-correlated subquery?",
+        "answer": "A correlated subquery references a column from a row in the outer query, so its result logically depends on the current outer row. A non-correlated subquery is independent of the outer query and can conceptually be evaluated without knowing which outer row is being processed. Correlated subqueries can be expressive, but depending on the optimizer and data size, an equivalent JOIN, aggregation, or window-function solution may be more efficient.",
+        "key_concepts": [
+          "Correlated subquery",
+          "Outer query reference",
+          "Non-correlated subquery",
+          "Query optimization"
+        ],
+        "expected_points": [
+          "Defines correlation through an outer-query reference",
+          "Contrasts it with an independent subquery",
+          "Explains that correlated syntax does not automatically mean one physical execution per row",
+          "Mentions alternative formulations when performance matters"
+        ],
+        "common_mistakes": [
+          "Saying the database must execute the subquery separately for every outer row",
+          "Confusing correlation with nesting alone",
+          "Assuming correlated subqueries are always slow"
+        ],
+        "example": "SELECT e.name FROM employees e WHERE e.salary > (SELECT AVG(e2.salary) FROM employees e2 WHERE e2.department_id = e.department_id);",
+        "follow_up_questions": [
+          "How could this query be rewritten using a window function?",
+          "How would you use EXPLAIN to investigate whether the correlated form is expensive?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain correlation.",
+          "average": "Knows the subquery references the outer query but lacks performance understanding.",
+          "good": "Clearly distinguishes correlated and non-correlated subqueries.",
+          "excellent": "Explains logical correlation without making incorrect assumptions about physical execution and identifies alternative query strategies."
+        },
+        "skills": [
+          "sql",
+          "subqueries",
+          "query_optimization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "correlated_subquery",
+          "subqueries"
+        ]
+      },
+      {
+        "id": "BE-179",
+        "domain": "sql_relational_databases",
+        "topic": "Subqueries & CTEs",
+        "subtopic": "Common Table Expressions",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "What is a Common Table Expression (CTE), and why would you use one instead of deeply nested subqueries?",
+        "answer": "A CTE, introduced with WITH, gives a name to a query expression that can then be referenced by the statement that follows. CTEs can make complex queries easier to read, divide logic into meaningful stages, and support recursive queries. A CTE is not automatically a performance optimization or temporary table; whether it is materialized or inlined depends on the database and query, so performance should be evaluated from the actual execution plan.",
+        "key_concepts": [
+          "CTE",
+          "WITH clause",
+          "Readability",
+          "Recursive query",
+          "Materialization"
+        ],
+        "expected_points": [
+          "Explains the purpose and syntax of a CTE",
+          "Explains readability and decomposition benefits",
+          "Recognizes recursive CTEs as an important capability",
+          "Avoids claiming every CTE is materialized or faster"
+        ],
+        "common_mistakes": [
+          "Calling every CTE a temporary table",
+          "Claiming CTEs always improve performance",
+          "Ignoring recursive CTEs"
+        ],
+        "example": "WITH recent_orders AS (SELECT * FROM orders WHERE created_at >= CURRENT_DATE - INTERVAL '30 days') SELECT customer_id, COUNT(*) FROM recent_orders GROUP BY customer_id;",
+        "follow_up_questions": [
+          "What is a recursive CTE useful for?",
+          "How can CTE materialization affect performance in databases that support it?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain a CTE.",
+          "average": "Knows WITH defines a named query but misses its practical value.",
+          "good": "Explains readability, staged logic, and recursive CTEs.",
+          "excellent": "Explains CTE semantics while correctly separating maintainability benefits from optimizer/materialization behavior."
+        },
+        "skills": [
+          "sql",
+          "cte",
+          "query_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cte",
+          "with",
+          "query_readability"
+        ]
+      },
+      {
+        "id": "BE-180",
+        "domain": "sql_relational_databases",
+        "topic": "Subqueries & CTEs",
+        "subtopic": "Recursive CTE",
+        "difficulty": "Hard",
+        "question_type": "implementation",
+        "question": "How can a recursive CTE be used to traverse a hierarchy such as an employee-manager tree?",
+        "answer": "A recursive CTE has an anchor member that selects the starting rows and a recursive member that joins the current result back to the hierarchy table to find the next level. For an employee-manager hierarchy, the anchor can select top-level employees and the recursive member can find employees whose manager_id matches the previous level's employee id. A production implementation should also consider termination, cycles, maximum depth, and the amount of data traversed.",
+        "key_concepts": [
+          "Recursive CTE",
+          "Anchor member",
+          "Recursive member",
+          "Hierarchy",
+          "Termination"
+        ],
+        "expected_points": [
+          "Identifies anchor and recursive members",
+          "Explains how the recursive join advances through the hierarchy",
+          "Mentions termination and cycle concerns",
+          "Recognizes depth and data-volume considerations"
+        ],
+        "common_mistakes": [
+          "Providing only a normal CTE",
+          "Forgetting the recursive member needs a relationship to the prior level",
+          "Ignoring cycles or unbounded recursion"
+        ],
+        "example": "WITH RECURSIVE org AS (SELECT id, manager_id, name, 0 AS depth FROM employees WHERE manager_id IS NULL UNION ALL SELECT e.id, e.manager_id, e.name, o.depth + 1 FROM employees e JOIN org o ON e.manager_id = o.id) SELECT * FROM org;",
+        "follow_up_questions": [
+          "How would you prevent or detect cycles in the hierarchy?",
+          "How would you return the path from the root manager to each employee?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe recursive query structure.",
+          "average": "Knows recursion is possible but cannot identify anchor and recursive members.",
+          "good": "Correctly explains the recursive CTE pattern for hierarchy traversal.",
+          "excellent": "Explains traversal mechanics plus termination, cycle detection, depth, and production-scale considerations."
+        },
+        "skills": [
+          "sql",
+          "cte",
+          "hierarchical_data",
+          "data_modeling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "recursive_cte",
+          "hierarchy",
+          "cte"
+        ]
+      },
+      {
+        "id": "BE-181",
+        "domain": "sql_relational_databases",
+        "topic": "Window Functions",
+        "subtopic": "Window Function vs GROUP BY",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the key difference between a window function and GROUP BY when calculating aggregates?",
+        "answer": "GROUP BY collapses multiple input rows into one output row per group, whereas a window function calculates across a set of related rows while retaining the individual rows in the result. This makes window functions useful for calculations such as running totals, rankings, and each employee's salary relative to the department average without losing employee-level detail.",
+        "key_concepts": [
+          "Window function",
+          "GROUP BY",
+          "Row preservation",
+          "Partition",
+          "Analytical calculation"
+        ],
+        "expected_points": [
+          "Explains that GROUP BY reduces rows to group-level output",
+          "Explains that window functions preserve individual rows",
+          "Provides an analytical use case such as ranking or running totals",
+          "Understands PARTITION BY as defining the calculation group"
+        ],
+        "common_mistakes": [
+          "Saying window functions always aggregate the result to one row per group",
+          "Confusing PARTITION BY with GROUP BY",
+          "Assuming window functions can replace every GROUP BY"
+        ],
+        "example": "SELECT employee_id, department_id, salary, AVG(salary) OVER (PARTITION BY department_id) AS dept_avg FROM employees;",
+        "follow_up_questions": [
+          "What is the difference between PARTITION BY and ORDER BY inside a window definition?",
+          "How would you calculate the top three employees per department?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish window functions from GROUP BY.",
+          "average": "Knows window functions preserve rows but cannot explain why that matters.",
+          "good": "Clearly explains row preservation and provides an appropriate example.",
+          "excellent": "Explains grouping versus analytical windows and applies PARTITION BY to a realistic reporting requirement."
+        },
+        "skills": [
+          "sql",
+          "window_functions",
+          "aggregation"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "window_functions",
+          "group_by",
+          "partition_by"
+        ]
+      },
+      {
+        "id": "BE-182",
+        "domain": "sql_relational_databases",
+        "topic": "Window Functions",
+        "subtopic": "ROW_NUMBER vs RANK vs DENSE_RANK",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "What are the differences among ROW_NUMBER(), RANK(), and DENSE_RANK(), particularly when two rows have the same ordering value?",
+        "answer": "ROW_NUMBER assigns a unique sequential number to every row, even when ordering values tie. RANK assigns the same rank to tied rows and leaves gaps after the tie; DENSE_RANK also assigns the same rank to ties but does not leave gaps. The choice depends on whether ties should share a position and whether subsequent rank numbers should contain gaps.",
+        "key_concepts": [
+          "ROW_NUMBER",
+          "RANK",
+          "DENSE_RANK",
+          "Ties",
+          "Window ordering"
+        ],
+        "expected_points": [
+          "Explains that ROW_NUMBER is unique per row",
+          "Explains that RANK creates gaps after ties",
+          "Explains that DENSE_RANK does not create gaps",
+          "Connects the choice to business requirements"
+        ],
+        "common_mistakes": [
+          "Claiming all three functions produce identical rankings",
+          "Saying RANK never contains gaps",
+          "Using ROW_NUMBER when tied records should share a rank"
+        ],
+        "example": "For scores 100, 100, 90, the ranks are ROW_NUMBER 1,2,3; RANK 1,1,3; DENSE_RANK 1,1,2.",
+        "follow_up_questions": [
+          "Which function would you use to return exactly one latest order per customer?",
+          "Which function would you use for top-three salary bands where ties should share a rank?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the differences.",
+          "average": "Knows ties matter but mixes up the gap behavior.",
+          "good": "Correctly explains all three functions with the tie example.",
+          "excellent": "Explains the ranking semantics and selects the appropriate function for different business requirements."
+        },
+        "skills": [
+          "sql",
+          "window_functions",
+          "ranking"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "row_number",
+          "rank",
+          "dense_rank"
+        ]
+      },
+      {
+        "id": "BE-183",
+        "domain": "sql_relational_databases",
+        "topic": "Window Functions",
+        "subtopic": "Top N per Group",
+        "difficulty": "Hard",
+        "question_type": "coding",
+        "question": "Write a SQL query to return the two highest-paid employees from each department, including ties only when they share the same salary rank.",
+        "answer": "Use DENSE_RANK when ties should share a rank: SELECT employee_id, department_id, salary FROM (SELECT e.*, DENSE_RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS salary_rank FROM employees e) ranked WHERE salary_rank <= 2;. This returns all employees whose salary belongs to the top two distinct salary ranks in each department.",
+        "key_concepts": [
+          "DENSE_RANK",
+          "PARTITION BY",
+          "Top N per group",
+          "Window function",
+          "Ties"
+        ],
+        "expected_points": [
+          "Partitions ranking by department",
+          "Orders salaries descending",
+          "Uses DENSE_RANK so equal salaries share a rank",
+          "Filters the ranked result to rank <= 2"
+        ],
+        "common_mistakes": [
+          "Using global ORDER BY instead of PARTITION BY",
+          "Using ROW_NUMBER when ties must be retained",
+          "Filtering the window function directly in WHERE in dialects that do not allow it"
+        ],
+        "example": "SELECT employee_id, department_id, salary FROM (SELECT e.*, DENSE_RANK() OVER (PARTITION BY department_id ORDER BY salary DESC) AS rnk FROM employees e) x WHERE rnk <= 2;",
+        "follow_up_questions": [
+          "How would the result change if exactly two employees per department were required?",
+          "How would you return the top two salary ranks while using RANK instead?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot construct a per-group ranking query.",
+          "average": "Uses a window function but misses partitioning or tie behavior.",
+          "good": "Correctly uses DENSE_RANK with PARTITION BY and filters the rank.",
+          "excellent": "Produces a correct query and clearly explains the difference between top N rows and top N ranks."
+        },
+        "skills": [
+          "sql",
+          "window_functions",
+          "query_writing"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "top_n",
+          "dense_rank",
+          "partition_by"
+        ]
+      },
+      {
+        "id": "BE-184",
+        "domain": "sql_relational_databases",
+        "topic": "Window Functions",
+        "subtopic": "Running Total",
+        "difficulty": "Hard",
+        "question_type": "coding",
+        "question": "How would you calculate a running total of order value for each customer in chronological order?",
+        "answer": "Use a windowed SUM with PARTITION BY customer and an ORDER BY representing the desired chronology: SELECT customer_id, order_id, created_at, amount, SUM(amount) OVER (PARTITION BY customer_id ORDER BY created_at, order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_total FROM orders;. Including a deterministic tie-breaker such as order_id makes the ordering stable when timestamps are equal.",
+        "key_concepts": [
+          "SUM OVER",
+          "PARTITION BY",
+          "ORDER BY",
+          "Running total",
+          "Window frame"
+        ],
+        "expected_points": [
+          "Partitions by customer",
+          "Orders rows chronologically",
+          "Uses SUM as a window function",
+          "Uses an explicit window frame and deterministic tie-breaker"
+        ],
+        "common_mistakes": [
+          "Using GROUP BY and losing individual orders",
+          "Forgetting PARTITION BY customer",
+          "Ignoring ties in the ordering column"
+        ],
+        "example": "SUM(amount) OVER (PARTITION BY customer_id ORDER BY created_at, order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW).",
+        "follow_up_questions": [
+          "Why can the default window frame produce surprising results when ORDER BY values tie?",
+          "What index might help this workload?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot calculate a running total without collapsing rows.",
+          "average": "Knows SUM OVER but misses partitioning, ordering, or frame details.",
+          "good": "Correctly builds a per-customer running total.",
+          "excellent": "Correctly reasons about partitioning, deterministic order, and window-frame semantics."
+        },
+        "skills": [
+          "sql",
+          "window_functions",
+          "analytical_queries"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "running_total",
+          "sum_over",
+          "window_frame"
+        ]
+      },
+      {
+        "id": "BE-185",
+        "domain": "sql_relational_databases",
+        "topic": "Keys & Constraints",
+        "subtopic": "Primary Key vs Unique Constraint",
+        "difficulty": "Easy",
+        "question_type": "comparison",
+        "question": "What is the difference between a primary key and a UNIQUE constraint?",
+        "answer": "A primary key identifies the row's primary identity and cannot contain NULL values. A table has one primary-key constraint, although the key can consist of multiple columns. A table can have multiple UNIQUE constraints to enforce additional candidate keys or business uniqueness rules; exact NULL behavior for UNIQUE constraints can vary by database system.",
+        "key_concepts": [
+          "Primary key",
+          "UNIQUE constraint",
+          "Entity identity",
+          "Composite key",
+          "NULL behavior"
+        ],
+        "expected_points": [
+          "Explains the identity role of a primary key",
+          "Explains that a table has one primary-key constraint",
+          "Explains that multiple UNIQUE constraints are possible",
+          "Notes that NULL handling for UNIQUE can be database-specific"
+        ],
+        "common_mistakes": [
+          "Saying a table can have multiple primary keys",
+          "Saying PRIMARY KEY and UNIQUE are identical",
+          "Assuming UNIQUE NULL behavior is identical across all databases"
+        ],
+        "example": "A users table might use id as PRIMARY KEY and email as UNIQUE to enforce one account per email address.",
+        "follow_up_questions": [
+          "When would you choose a composite primary key?",
+          "What is a candidate key?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the two constraints.",
+          "average": "Knows both enforce uniqueness but misses identity and NULL distinctions.",
+          "good": "Correctly explains primary-key and UNIQUE semantics.",
+          "excellent": "Explains identity, cardinality, composite keys, multiple candidate keys, and database-specific NULL behavior."
+        },
+        "skills": [
+          "sql",
+          "constraints",
+          "database_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "primary_key",
+          "unique",
+          "constraints"
+        ]
+      },
+      {
+        "id": "BE-186",
+        "domain": "sql_relational_databases",
+        "topic": "Keys & Constraints",
+        "subtopic": "Foreign Keys",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What problem does a foreign key solve, and what are the main design considerations when defining one?",
+        "answer": "A foreign key enforces referential integrity by requiring a referencing value to correspond to an allowed key in the referenced table, subject to NULLability and constraint rules. It prevents orphaned relationships when enforced. Design considerations include whether the relationship is mandatory, what happens on parent deletion or update, indexing the referencing column for common workloads, and avoiding cascade behavior that could unintentionally affect large amounts of data.",
+        "key_concepts": [
+          "Foreign key",
+          "Referential integrity",
+          "Orphan rows",
+          "ON DELETE",
+          "Indexing"
+        ],
+        "expected_points": [
+          "Explains referential integrity",
+          "Explains how foreign keys prevent invalid references",
+          "Discusses NULLability and delete/update actions",
+          "Recognizes operational implications of cascading actions"
+        ],
+        "common_mistakes": [
+          "Calling a foreign key an index by definition",
+          "Assuming every database automatically indexes the child column",
+          "Using CASCADE without considering its data-impact implications"
+        ],
+        "example": "orders.customer_id REFERENCES customers(id) prevents an order from referencing a customer that does not exist, unless the relationship permits NULL.",
+        "follow_up_questions": [
+          "Why can an index on the foreign-key column be useful even if the database does not require it?",
+          "When would ON DELETE CASCADE be appropriate or dangerous?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain referential integrity.",
+          "average": "Knows a foreign key links tables but misses enforcement semantics.",
+          "good": "Explains referential integrity and key design considerations.",
+          "excellent": "Connects foreign keys to data correctness, lifecycle actions, indexing, and production impact."
+        },
+        "skills": [
+          "sql",
+          "constraints",
+          "referential_integrity"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "foreign_key",
+          "referential_integrity",
+          "constraints"
+        ]
+      },
+      {
+        "id": "BE-187",
+        "domain": "sql_relational_databases",
+        "topic": "Keys & Constraints",
+        "subtopic": "Check Constraints",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "When should a business rule be enforced with a CHECK constraint instead of application code?",
+        "answer": "A CHECK constraint is appropriate for a row-level condition that should always be true regardless of which application or client writes the data. Examples include quantity > 0 or a status belonging to an allowed set, subject to the database's constraint capabilities. Database enforcement protects data integrity across services, scripts, and administrative operations, while application validation is still useful for user-friendly error messages and complex rules that require external state.",
+        "key_concepts": [
+          "CHECK constraint",
+          "Data integrity",
+          "Database enforcement",
+          "Application validation",
+          "Business rule"
+        ],
+        "expected_points": [
+          "Identifies invariant row-level rules as good CHECK candidates",
+          "Explains why database enforcement protects against multiple writers",
+          "Distinguishes simple database constraints from complex external-state rules",
+          "Recognizes that application validation can still improve user experience"
+        ],
+        "common_mistakes": [
+          "Saying all business logic belongs in the database",
+          "Using CHECK for rules requiring queries to other tables",
+          "Assuming application validation alone guarantees integrity"
+        ],
+        "example": "CREATE TABLE order_items (quantity INTEGER CHECK (quantity > 0));",
+        "follow_up_questions": [
+          "What types of business rules are poor candidates for CHECK constraints?",
+          "How should an application handle a database constraint violation?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot identify when a CHECK constraint is useful.",
+          "average": "Knows CHECK validates values but cannot discuss architectural trade-offs.",
+          "good": "Explains invariant enforcement and the role of application validation.",
+          "excellent": "Balances database integrity with application-layer concerns and correctly identifies cross-row or external-state limitations."
+        },
+        "skills": [
+          "sql",
+          "constraints",
+          "data_integrity"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "check_constraint",
+          "data_integrity",
+          "validation"
+        ]
+      },
+      {
+        "id": "BE-188",
+        "domain": "sql_relational_databases",
+        "topic": "Normalization & Data Modeling",
+        "subtopic": "Normalization and Update Anomalies",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What problem does normalization solve, and what are insertion, update, and deletion anomalies?",
+        "answer": "Normalization organizes relational data to reduce inappropriate redundancy and dependency problems. Insertion anomalies occur when a fact cannot be recorded without unrelated data, update anomalies occur when the same fact must be changed in multiple rows and can become inconsistent, and deletion anomalies occur when removing one fact unintentionally removes another useful fact. Normalization improves integrity, although deliberate denormalization can be justified for specific performance or read-model requirements.",
+        "key_concepts": [
+          "Normalization",
+          "Redundancy",
+          "Insertion anomaly",
+          "Update anomaly",
+          "Deletion anomaly"
+        ],
+        "expected_points": [
+          "Explains the purpose of reducing problematic redundancy",
+          "Defines insertion, update, and deletion anomalies",
+          "Connects anomalies to inconsistent or lost facts",
+          "Recognizes that denormalization can be a deliberate trade-off"
+        ],
+        "common_mistakes": [
+          "Saying normalization means putting every attribute in its own table",
+          "Claiming denormalization is always bad",
+          "Defining anomalies only in terms of duplicate rows"
+        ],
+        "example": "Storing customer address repeatedly in every order can create an update anomaly if the address changes and some historical rows are updated while others are not.",
+        "follow_up_questions": [
+          "What is the intuition behind first, second, and third normal forms?",
+          "When might denormalization be justified?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain normalization or anomalies.",
+          "average": "Knows normalization reduces duplication but cannot describe the anomaly types.",
+          "good": "Correctly explains all three anomalies and the purpose of normalization.",
+          "excellent": "Explains dependency-driven redundancy and balances normalization against justified denormalization."
+        },
+        "skills": [
+          "sql",
+          "database_design",
+          "normalization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "normalization",
+          "anomalies",
+          "data_modeling"
+        ]
+      },
+      {
+        "id": "BE-189",
+        "domain": "sql_relational_databases",
+        "topic": "Normalization & Data Modeling",
+        "subtopic": "Normalization vs Denormalization",
+        "difficulty": "Hard",
+        "question_type": "tradeoff",
+        "question": "A read-heavy backend repeatedly joins five tables to build a frequently requested dashboard. When might denormalization be appropriate, and what risks must be managed?",
+        "answer": "Denormalization can be appropriate when measured read performance or query complexity is a real bottleneck and the duplicated or precomputed data has a clear ownership and refresh strategy. Options include summary tables, materialized views where supported, or carefully maintained derived columns. The trade-off is additional storage, more complex writes, possible stale data, and consistency problems, so the decision should be driven by workload measurements and explicit freshness requirements rather than by avoiding joins in general.",
+        "key_concepts": [
+          "Denormalization",
+          "Read-heavy workload",
+          "Derived data",
+          "Consistency",
+          "Freshness"
+        ],
+        "expected_points": [
+          "Identifies measured read performance as a reason to denormalize",
+          "Mentions summary tables or materialized views",
+          "Discusses write complexity and consistency risks",
+          "Defines freshness requirements before choosing the approach"
+        ],
+        "common_mistakes": [
+          "Assuming joins are inherently slow",
+          "Denormalizing without a refresh strategy",
+          "Ignoring stale or inconsistent derived data"
+        ],
+        "example": "A daily sales dashboard could use a pre-aggregated sales_summary table if real-time order-level joins are too expensive and daily freshness is acceptable.",
+        "follow_up_questions": [
+          "How would you validate that denormalization actually improves the dashboard workload?",
+          "How would you keep a derived summary consistent with source data?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests copying data without considering correctness.",
+          "average": "Understands denormalization can improve reads but misses freshness or write complexity.",
+          "good": "Explains the performance trade-off and appropriate derived-data strategies.",
+          "excellent": "Frames denormalization as a measured workload decision with explicit consistency, ownership, refresh, and freshness requirements."
+        },
+        "skills": [
+          "sql",
+          "database_design",
+          "performance",
+          "tradeoffs"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "denormalization",
+          "read_heavy",
+          "data_modeling"
+        ]
+      },
+      {
+        "id": "BE-190",
+        "domain": "sql_relational_databases",
+        "topic": "Subqueries & CTEs",
+        "subtopic": "CTE vs Temporary Table",
+        "difficulty": "Expert",
+        "question_type": "comparison",
+        "question": "A complex data-processing workflow uses the same intermediate result several times. Should you use a CTE or a temporary table? Explain the trade-offs rather than assuming one is always better.",
+        "answer": "A CTE is part of the statement and is primarily a query-structuring mechanism, while a temporary table creates database state that can be reused across statements and may support indexes or statistics depending on the database. A temporary table can be useful when an intermediate result is large, reused multiple times, or benefits from its own indexing and lifecycle. A CTE is often preferable for a single logical statement and keeps the workflow simpler. Actual optimizer behavior, materialization rules, data volume, and transaction/session semantics should be considered before choosing.",
+        "key_concepts": [
+          "CTE",
+          "Temporary table",
+          "Materialization",
+          "Intermediate result",
+          "Indexing"
+        ],
+        "expected_points": [
+          "Distinguishes statement-scoped CTEs from temporary database objects",
+          "Explains reuse across statements as a temporary-table advantage",
+          "Mentions possible indexing/statistics benefits of temporary tables",
+          "Explains that CTE performance depends on database and optimizer behavior"
+        ],
+        "common_mistakes": [
+          "Saying CTEs are always materialized",
+          "Saying temporary tables are always faster",
+          "Ignoring the need to reuse the intermediate result"
+        ],
+        "example": "If a large filtered customer cohort is reused by several subsequent statements and benefits from an index on customer_id, a temporary table may be more appropriate than repeating a CTE.",
+        "follow_up_questions": [
+          "How would you determine whether materializing an intermediate result is beneficial?",
+          "What transaction or session-lifecycle considerations apply to temporary tables?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Treats CTEs and temporary tables as interchangeable without explaining scope.",
+          "average": "Knows temporary tables can be reused but misses optimizer and indexing considerations.",
+          "good": "Clearly compares scope, reuse, materialization, and indexing trade-offs.",
+          "excellent": "Makes a workload-driven choice using data volume, reuse, optimizer behavior, statistics/indexing, and lifecycle semantics."
+        },
+        "skills": [
+          "sql",
+          "query_optimization",
+          "database_design",
+          "tradeoff"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cte",
+          "temporary_table",
+          "materialization",
+          "optimization"
+        ]
+      }
+    ]
+  }
+}

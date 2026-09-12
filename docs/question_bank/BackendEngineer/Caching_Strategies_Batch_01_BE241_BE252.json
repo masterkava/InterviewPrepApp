@@ -1,0 +1,695 @@
+{
+  "question_bank": {
+    "id": "backend-caching-strategies-batch-01",
+    "title": "Backend Engineering — Caching Strategies — Batch 01",
+    "description": "First batch of the 35-question Caching Strategies domain, covering caching fundamentals and core cache patterns.",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "question_count": 12,
+    "difficulty_distribution": {
+      "Easy": 3,
+      "Medium": 7,
+      "Hard": 2,
+      "Expert": 0
+    },
+    "questions": [
+      {
+        "id": "BE-241",
+        "domain": "caching_strategies",
+        "topic": "Caching Fundamentals",
+        "subtopic": "Purpose of Caching",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is caching, and why would a backend application use a cache?",
+        "answer": "Caching is the practice of storing frequently accessed data in a faster storage layer so that subsequent requests can be served without repeatedly accessing the original data source. A cache can reduce latency, lower database or downstream-service load, and improve throughput. However, cached data can become stale and the cache consumes memory and introduces invalidation and operational complexity, so it should be used where the performance benefit justifies those trade-offs.",
+        "key_concepts": [
+          "Cache",
+          "Latency reduction",
+          "Backend load reduction",
+          "Throughput",
+          "Stale data",
+          "Cache trade-offs"
+        ],
+        "expected_points": [
+          "A cache stores data closer to the application or in a faster-access layer than the original source.",
+          "Repeated reads can be served from the cache instead of the database or downstream service.",
+          "Caching can reduce response latency and backend resource consumption.",
+          "Caching introduces trade-offs such as stale data, memory cost, and invalidation complexity."
+        ],
+        "common_mistakes": [
+          "Saying that caching permanently replaces the database or source of truth.",
+          "Assuming caching always improves performance regardless of access patterns.",
+          "Ignoring stale-data and invalidation concerns."
+        ],
+        "example": "A product catalog endpoint may repeatedly request the same product details. Instead of querying the database for every request, the application can cache frequently requested product data for a limited period and serve subsequent reads from the cache.",
+        "follow_up_questions": [
+          "What types of data are generally good candidates for caching?",
+          "What problems can caching introduce if it is used without a clear invalidation strategy?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot clearly define caching or gives an unrelated performance optimization.",
+          "average": "Explains that caching stores frequently used data for faster access and mentions one benefit, but misses important trade-offs.",
+          "good": "Clearly explains caching, latency and load reduction, and recognizes that cached data can become stale.",
+          "excellent": "Explains the purpose and benefits of caching precisely, identifies appropriate trade-offs, and distinguishes the cache from the system of record."
+        },
+        "skills": [
+          "Caching",
+          "Backend Fundamentals",
+          "Performance Optimization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "caching",
+          "performance",
+          "latency",
+          "backend"
+        ]
+      },
+      {
+        "id": "BE-242",
+        "domain": "caching_strategies",
+        "topic": "Caching Fundamentals",
+        "subtopic": "Cache Hits and Misses",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is a cache hit and a cache miss? Why are these metrics important when evaluating a caching strategy?",
+        "answer": "A cache hit occurs when the requested data is present in the cache and can be returned without going to the underlying data source. A cache miss occurs when the data is not available in the cache, so the application must obtain it from the source and may populate the cache afterward. The hit rate, which is the proportion of requests served by the cache, is important because a low hit rate can mean that the cache adds memory and operational cost without providing enough reduction in downstream work or latency.",
+        "key_concepts": [
+          "Cache hit",
+          "Cache miss",
+          "Hit rate",
+          "Source of truth",
+          "Cache effectiveness"
+        ],
+        "expected_points": [
+          "A hit means the requested entry is found in the cache.",
+          "A miss means the application must retrieve the data from the underlying source.",
+          "A miss may trigger cache population depending on the caching pattern.",
+          "Hit rate is an important indicator of whether a cache is providing useful value."
+        ],
+        "common_mistakes": [
+          "Treating a cache miss as an application error.",
+          "Assuming a high hit rate alone guarantees good overall performance.",
+          "Confusing hit rate with cache size or TTL."
+        ],
+        "example": "If an endpoint receives 10,000 cacheable requests and 8,500 are served directly from the cache, the cache hit rate is 85%. The remaining 1,500 requests are misses and require another data source.",
+        "follow_up_questions": [
+          "How would you investigate a cache hit rate that suddenly drops in production?",
+          "Can a cache still be useful with a relatively low hit rate? Why?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish a cache hit from a cache miss.",
+          "average": "Defines hit and miss correctly but does not connect them to cache effectiveness.",
+          "good": "Explains both concepts, the relationship to the underlying source, and why hit rate matters.",
+          "excellent": "Explains hit/miss behavior, hit-rate implications, and recognizes that cache effectiveness depends on latency, cost, access patterns, and workload rather than hit rate alone."
+        },
+        "skills": [
+          "Caching",
+          "Performance Analysis",
+          "Backend Fundamentals"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-hit",
+          "cache-miss",
+          "hit-rate",
+          "caching"
+        ]
+      },
+      {
+        "id": "BE-243",
+        "domain": "caching_strategies",
+        "topic": "Caching Fundamentals",
+        "subtopic": "Cache Hit Ratio",
+        "difficulty": "Medium",
+        "question_type": "scenario_based",
+        "question": "A backend service has a cache hit ratio of only 30%. What would you investigate before deciding to increase the cache size?",
+        "answer": "I would first determine why requests are missing rather than assuming the cache is simply too small. I would inspect the access pattern, key design, TTLs, eviction activity, object size, workload distribution, and whether the requested data is inherently low-reuse. I would also check whether application changes or key-generation inconsistencies are causing logically identical requests to use different keys. Increasing capacity can help if entries are being evicted because of memory pressure, but it will not fix poor key design, very short TTLs, low temporal locality, or a workload dominated by unique requests.",
+        "key_concepts": [
+          "Hit ratio",
+          "Access patterns",
+          "TTL",
+          "Eviction",
+          "Cache key design",
+          "Temporal locality"
+        ],
+        "expected_points": [
+          "Determine whether misses are caused by eviction or by the workload itself.",
+          "Inspect TTL values and whether entries expire before they are reused.",
+          "Validate that logically identical requests generate consistent cache keys.",
+          "Check object size, eviction metrics, and memory pressure.",
+          "Consider whether the workload has enough repeated access to benefit from caching."
+        ],
+        "common_mistakes": [
+          "Immediately increasing cache capacity without diagnosing the miss pattern.",
+          "Ignoring inconsistent cache-key construction.",
+          "Assuming every backend workload should have a high cache hit ratio."
+        ],
+        "example": "Suppose a service caches user profile responses but creates keys using an unordered set of query parameters. The same logical request can generate multiple keys, producing unnecessary misses. Increasing memory would not address that problem.",
+        "follow_up_questions": [
+          "How would you distinguish misses caused by expiration from misses caused by eviction?",
+          "What metrics would you put on a cache dashboard to diagnose this problem?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Only suggests increasing cache size without investigating the cause of misses.",
+          "average": "Mentions TTL or eviction but provides limited diagnostic reasoning.",
+          "good": "Investigates TTL, eviction, key design, object size, and workload characteristics before resizing.",
+          "excellent": "Systematically separates capacity-related misses from workload and configuration problems and explains why each diagnostic signal matters."
+        },
+        "skills": [
+          "Caching",
+          "Performance Troubleshooting",
+          "Observability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "hit-ratio",
+          "cache-diagnostics",
+          "eviction",
+          "ttl",
+          "cache-keys"
+        ]
+      },
+      {
+        "id": "BE-244",
+        "domain": "caching_strategies",
+        "topic": "Caching Fundamentals",
+        "subtopic": "TTL and Expiration",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is a TTL in caching, and what factors should influence the TTL chosen for a cached item?",
+        "answer": "TTL, or time to live, defines how long a cached entry remains valid before it expires automatically. The appropriate TTL depends on how frequently the underlying data changes, how much staleness the application can tolerate, how expensive the source lookup is, and how much cache churn the workload can handle. A longer TTL can improve hit rates and reduce source load but increases the potential staleness window, while a shorter TTL improves freshness at the cost of more misses and source traffic.",
+        "key_concepts": [
+          "TTL",
+          "Expiration",
+          "Freshness",
+          "Staleness",
+          "Cache churn"
+        ],
+        "expected_points": [
+          "TTL controls the lifetime of a cache entry.",
+          "Frequently changing data generally needs a shorter freshness window.",
+          "Staleness tolerance and source-system load should influence TTL selection.",
+          "Longer TTLs can improve reuse but increase stale-data risk."
+        ],
+        "common_mistakes": [
+          "Assuming one TTL is appropriate for every type of data.",
+          "Treating expiration as a guarantee that data is perfectly fresh at all times.",
+          "Choosing a very long TTL solely to maximize hit rate."
+        ],
+        "example": "A weather display may tolerate a short freshness window and use a TTL of a few minutes, while a relatively stable reference-data object may use a much longer TTL.",
+        "follow_up_questions": [
+          "When would you prefer explicit invalidation over relying only on TTL?",
+          "What could happen if all entries in a cache use the same very short TTL?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain TTL or describes it as the time taken to read from a cache.",
+          "average": "Correctly defines TTL and mentions freshness but does not explain the trade-off.",
+          "good": "Explains TTL, staleness, source load, and the relationship between TTL length and cache effectiveness.",
+          "excellent": "Explains TTL as a workload-specific freshness policy and clearly balances hit rate, staleness tolerance, source load, and churn."
+        },
+        "skills": [
+          "Caching",
+          "Data Freshness",
+          "Performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "ttl",
+          "expiration",
+          "freshness",
+          "staleness"
+        ]
+      },
+      {
+        "id": "BE-245",
+        "domain": "caching_strategies",
+        "topic": "Caching Fundamentals",
+        "subtopic": "Local vs Distributed Cache",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What are the main differences between an in-process cache and a distributed cache? When would you choose one over the other?",
+        "answer": "An in-process cache lives inside an application instance, so access is typically very fast and does not require a network hop. However, each instance has its own cache, so data is not automatically shared and cache contents disappear when that instance restarts. A distributed cache is accessed by multiple application instances and provides shared cache state, but it introduces network latency and another infrastructure dependency. An in-process cache is useful for small, instance-local data where slight divergence is acceptable, while a distributed cache is more appropriate when multiple instances need a shared cache or when cache capacity should be separated from application memory.",
+        "key_concepts": [
+          "In-process cache",
+          "Distributed cache",
+          "Network latency",
+          "Shared state",
+          "Cache locality"
+        ],
+        "expected_points": [
+          "In-process caches are local to an application instance and usually have very low access latency.",
+          "Distributed caches can be shared across multiple application instances.",
+          "Local caches can become inconsistent across instances.",
+          "Distributed caches introduce network and operational dependencies.",
+          "The choice depends on consistency requirements, workload, scale, and operational constraints."
+        ],
+        "common_mistakes": [
+          "Claiming that distributed caches are always faster than local caches.",
+          "Ignoring the fact that each application instance has a separate local cache.",
+          "Treating distributed caching as free of availability and network failure concerns."
+        ],
+        "example": "A service running 10 instances might keep a small local cache for immutable configuration metadata, while using a distributed cache for shared session or frequently accessed business data.",
+        "follow_up_questions": [
+          "What problems can occur if the same data is cached independently in ten application instances?",
+          "What is a common reason to combine a local cache with a distributed cache?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the difference between local and distributed caching.",
+          "average": "Knows that local caching is inside the application and distributed caching is shared, but misses important trade-offs.",
+          "good": "Correctly compares latency, sharing, consistency, memory, and operational dependency.",
+          "excellent": "Makes a workload-driven choice and clearly explains why a two-level local-plus-distributed strategy can sometimes be beneficial."
+        },
+        "skills": [
+          "Caching",
+          "Distributed Systems Basics",
+          "Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "local-cache",
+          "distributed-cache",
+          "architecture",
+          "caching"
+        ]
+      },
+      {
+        "id": "BE-246",
+        "domain": "caching_strategies",
+        "topic": "Cache Patterns",
+        "subtopic": "Cache-Aside",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "How does the cache-aside pattern work, and what responsibilities does the application have when using it?",
+        "answer": "In the cache-aside pattern, the application checks the cache first. On a hit, it returns the cached value; on a miss, it reads the data from the source of truth, returns it, and typically writes that value into the cache for future requests. The application is responsible for deciding what to cache, constructing keys, handling misses, and usually invalidating or updating cache entries when the underlying data changes. This gives the application significant control but also means consistency and failure handling must be designed explicitly.",
+        "key_concepts": [
+          "Cache-aside",
+          "Cache lookup",
+          "Cache miss",
+          "Cache population",
+          "Invalidation"
+        ],
+        "expected_points": [
+          "The application checks the cache before querying the source.",
+          "On a miss, the application retrieves data from the source of truth.",
+          "The application normally populates the cache after a successful source read.",
+          "Application logic is responsible for cache keys and invalidation/update behavior."
+        ],
+        "common_mistakes": [
+          "Saying the cache automatically loads missing data without application involvement.",
+          "Forgetting to describe what happens after a cache miss.",
+          "Ignoring invalidation when the underlying data changes."
+        ],
+        "example": "For a product lookup, the application checks `product:123`. If the entry is absent, it queries the database, returns the product, and stores the result under that key with an appropriate TTL.",
+        "follow_up_questions": [
+          "What consistency problem can occur when a database update succeeds but cache invalidation fails?",
+          "How could you reduce the chance of many concurrent requests loading the same missing key?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe the request flow or incorrectly says the cache is always updated automatically.",
+          "average": "Explains cache lookup and source retrieval but misses application ownership of invalidation or population.",
+          "good": "Clearly explains hit, miss, source read, cache population, and application-managed invalidation.",
+          "excellent": "Explains the complete pattern and its operational trade-offs, including consistency and concurrent-miss considerations."
+        },
+        "skills": [
+          "Caching",
+          "Cache-Aside Pattern",
+          "Backend Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-aside",
+          "cache-miss",
+          "invalidation",
+          "caching-patterns"
+        ]
+      },
+      {
+        "id": "BE-247",
+        "domain": "caching_strategies",
+        "topic": "Cache Patterns",
+        "subtopic": "Read-Through Cache",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is a read-through cache, and how does its request flow differ from cache-aside?",
+        "answer": "With a read-through cache, the application asks the cache layer for the data, and the cache layer is responsible for loading missing data from the underlying source through a configured loader or integration. In cache-aside, the application itself detects the miss, reads from the source, and usually populates the cache. Read-through can simplify application code and centralize cache-loading behavior, but it requires a cache layer that supports or integrates with the required loading mechanism and can make application-specific loading logic less explicit.",
+        "key_concepts": [
+          "Read-through cache",
+          "Cache loader",
+          "Cache-aside",
+          "Abstraction",
+          "Cache miss handling"
+        ],
+        "expected_points": [
+          "A read-through cache handles the source lookup after a cache miss.",
+          "The application interacts primarily with the cache interface.",
+          "Cache-aside places miss handling and cache population in application code.",
+          "Read-through centralizes loading behavior but depends on suitable cache infrastructure."
+        ],
+        "common_mistakes": [
+          "Defining read-through as simply another name for cache-aside.",
+          "Saying the cache magically knows every database query without a configured loader.",
+          "Ignoring the infrastructure dependency introduced by the read-through mechanism."
+        ],
+        "example": "A service requests customer data from a cache. If the key is missing, the configured cache loader queries the customer repository and stores the result before returning it to the application.",
+        "follow_up_questions": [
+          "What are the advantages of centralizing cache loading instead of keeping it in application code?",
+          "When might cache-aside be preferable to read-through?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish read-through from cache-aside.",
+          "average": "Understands that the cache can load missing data but does not clearly describe the responsibility boundary.",
+          "good": "Correctly explains the cache loader and contrasts it with application-managed cache-aside logic.",
+          "excellent": "Explains both request flows and makes a reasoned trade-off around abstraction, infrastructure support, and application-specific logic."
+        },
+        "skills": [
+          "Caching",
+          "Cache Patterns",
+          "Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "read-through",
+          "cache-aside",
+          "cache-loader",
+          "caching-patterns"
+        ]
+      },
+      {
+        "id": "BE-248",
+        "domain": "caching_strategies",
+        "topic": "Cache Patterns",
+        "subtopic": "Write-Through Cache",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "How does the write-through caching pattern work, and what consistency benefit does it provide?",
+        "answer": "In a write-through pattern, a write is sent through the caching layer, which updates the cache and synchronously writes the corresponding data to the underlying persistent store before the operation is considered successful. This can keep the cache aligned with successful writes and reduce the chance that a newly written value is immediately replaced by an older cached value. The trade-off is that writes can have higher latency because the persistent store must be updated as part of the write path, and failure handling across the cache and store still needs to be designed carefully.",
+        "key_concepts": [
+          "Write-through",
+          "Synchronous persistence",
+          "Cache consistency",
+          "Write latency",
+          "Source of truth"
+        ],
+        "expected_points": [
+          "Writes pass through the cache layer rather than bypassing it.",
+          "The persistent store is updated as part of the write operation.",
+          "Successful writes can keep the cached representation aligned with the persistent value.",
+          "The pattern can increase write latency and does not eliminate all failure-handling concerns."
+        ],
+        "common_mistakes": [
+          "Claiming write-through means data exists only in the cache.",
+          "Assuming cache and database failures can never diverge.",
+          "Ignoring the additional latency of synchronous persistence."
+        ],
+        "example": "When a user changes a profile name, the application writes the new value through the caching layer, which updates the cache and persists the change to the database before confirming success.",
+        "follow_up_questions": [
+          "How does write-through differ from write-behind?",
+          "What happens if the persistent store is unavailable during a write-through operation?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what happens during a write.",
+          "average": "Understands that both cache and persistent storage are updated but misses the synchronous nature and trade-off.",
+          "good": "Correctly explains the write path, consistency benefit, and latency trade-off.",
+          "excellent": "Explains the pattern precisely and discusses failure semantics, persistence ordering, and why it may or may not fit a workload."
+        },
+        "skills": [
+          "Caching",
+          "Write-Through",
+          "Data Consistency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "write-through",
+          "consistency",
+          "write-path",
+          "caching-patterns"
+        ]
+      },
+      {
+        "id": "BE-249",
+        "domain": "caching_strategies",
+        "topic": "Cache Patterns",
+        "subtopic": "Write-Behind Cache",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "What is write-behind caching, and what risks must a backend engineer consider before using it?",
+        "answer": "In write-behind, or write-back, caching, a write is accepted by the cache first and persisted to the underlying store asynchronously later. This can reduce write latency and absorb bursts, but it means the cache temporarily contains state that may not yet be durable in the persistent store. The design must therefore address data loss if the cache fails, ordering of updates, retry behavior, backpressure, and how the application reports or handles persistence failures. It is most appropriate when the workload can tolerate asynchronous persistence and the system has a reliable mechanism for draining writes to the source of truth.",
+        "key_concepts": [
+          "Write-behind",
+          "Asynchronous persistence",
+          "Durability",
+          "Write buffering",
+          "Backpressure",
+          "Failure recovery"
+        ],
+        "expected_points": [
+          "Writes can be acknowledged before the persistent store is updated.",
+          "This can reduce perceived write latency and absorb bursts.",
+          "A cache failure before persistence can result in lost acknowledged data unless durability mechanisms exist.",
+          "The design needs ordering, retries, backpressure, and failure monitoring.",
+          "The pattern requires an explicit understanding of the durability and consistency guarantees."
+        ],
+        "common_mistakes": [
+          "Claiming write-behind provides the same durability guarantees as an immediate database write.",
+          "Ignoring what happens to acknowledged writes if the cache fails.",
+          "Focusing only on performance without discussing asynchronous failure handling."
+        ],
+        "example": "A high-volume analytics ingestion path may temporarily buffer updates in a durable caching layer and asynchronously flush them to a persistent store, provided the business can tolerate delayed persistence and the buffering mechanism is designed for recovery.",
+        "follow_up_questions": [
+          "How would you prevent the write backlog from growing indefinitely if the database becomes slow?",
+          "How would you detect and recover writes that failed during asynchronous persistence?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the difference between synchronous and asynchronous persistence.",
+          "average": "Explains that writes happen asynchronously but does not identify the durability risk.",
+          "good": "Explains latency benefits and addresses durability, retries, ordering, and backpressure.",
+          "excellent": "Evaluates write-behind as a durability-sensitive architecture decision and proposes concrete mechanisms for backlog control, recovery, observability, and failure handling."
+        },
+        "skills": [
+          "Caching",
+          "Asynchronous Processing",
+          "Reliability",
+          "Data Durability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "write-behind",
+          "write-back",
+          "durability",
+          "backpressure",
+          "async"
+        ]
+      },
+      {
+        "id": "BE-250",
+        "domain": "caching_strategies",
+        "topic": "Cache Patterns",
+        "subtopic": "Write-Around Cache",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is write-around caching, and when can it be preferable to write-through caching?",
+        "answer": "In write-around caching, writes go directly to the persistent store rather than populating or updating the cache. This can avoid filling the cache with data that may never be read and can be useful for write-heavy workloads where newly written data has low immediate read reuse. The trade-off is that a subsequent read may miss the cache and load the newly written value, and applications must consider how existing cached entries are invalidated or refreshed when the source changes.",
+        "key_concepts": [
+          "Write-around",
+          "Cache pollution",
+          "Write-heavy workload",
+          "Read reuse",
+          "Invalidation"
+        ],
+        "expected_points": [
+          "Writes bypass the cache and go directly to persistent storage.",
+          "It can prevent low-value writes from occupying cache memory.",
+          "It can be useful when newly written data is unlikely to be read soon.",
+          "A later read may cause a cache miss and populate the cache.",
+          "Existing cached entries may still require invalidation when data changes."
+        ],
+        "common_mistakes": [
+          "Confusing write-around with write-behind.",
+          "Assuming bypassing the cache automatically keeps cached data consistent.",
+          "Ignoring the first-read cache miss after a write."
+        ],
+        "example": "A workload writes large batches of records that are rarely read immediately. Writing those records directly to the database avoids filling the cache with data that has little short-term reuse.",
+        "follow_up_questions": [
+          "What type of workload would make write-through a better choice than write-around?",
+          "How would you handle a stale cached entry when a write bypasses the cache?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain where writes go in the write-around pattern.",
+          "average": "Knows that writes bypass the cache but gives little reasoning for why.",
+          "good": "Explains cache pollution, read reuse, and the resulting miss/invalidation considerations.",
+          "excellent": "Chooses between write-around and write-through based on access patterns, freshness requirements, cache capacity, and read-after-write behavior."
+        },
+        "skills": [
+          "Caching",
+          "Cache Patterns",
+          "Workload Analysis"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "write-around",
+          "cache-pollution",
+          "write-through",
+          "caching-patterns"
+        ]
+      },
+      {
+        "id": "BE-251",
+        "domain": "caching_strategies",
+        "topic": "Cache Patterns",
+        "subtopic": "Selecting a Cache Pattern",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "How would you choose among cache-aside, read-through, write-through, write-behind, and write-around for a backend workload?",
+        "answer": "I would start with the workload's read/write ratio, data freshness requirements, tolerance for stale or delayed persistence, and the consequences of losing cached data. Cache-aside is a common choice when application code should explicitly control reads and invalidation. Read-through can simplify read paths when the cache infrastructure supports a reliable loader. Write-through is useful when successful writes should synchronously update persistent storage and the cache path, while write-behind is appropriate only when asynchronous persistence is acceptable and durability is engineered carefully. Write-around can be useful for write-heavy data with low immediate read reuse. The decision should be based on correctness and failure semantics first, then latency, throughput, and operational complexity.",
+        "key_concepts": [
+          "Cache pattern selection",
+          "Read/write ratio",
+          "Consistency",
+          "Durability",
+          "Freshness",
+          "Workload characteristics"
+        ],
+        "expected_points": [
+          "Evaluate read/write frequency and access locality.",
+          "Determine acceptable staleness and read-after-write requirements.",
+          "Consider durability requirements and the consequences of cache failure.",
+          "Choose a pattern based on workload behavior rather than popularity.",
+          "Account for operational complexity, failure handling, latency, and cache capacity."
+        ],
+        "common_mistakes": [
+          "Choosing a pattern solely because it has the lowest apparent latency.",
+          "Treating write-behind as a safe default for all write-heavy systems.",
+          "Ignoring data correctness, durability, or invalidation requirements."
+        ],
+        "example": "For product catalog reads with moderate writes, cache-aside may be sufficient. For a workload requiring the cache and persistent store to be updated together, write-through may fit better. For high-volume writes with low immediate read reuse, write-around may avoid unnecessary cache pollution.",
+        "follow_up_questions": [
+          "How would your choice change if the application could tolerate five minutes of stale data?",
+          "Which pattern would you avoid if losing an acknowledged write would be unacceptable?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Lists cache patterns without connecting them to workload or correctness requirements.",
+          "average": "Can describe some patterns but chooses them mainly based on simple read/write characteristics.",
+          "good": "Uses read/write ratio, freshness, consistency, durability, and operational trade-offs to choose patterns.",
+          "excellent": "Demonstrates architecture-level reasoning, prioritizing correctness and failure semantics before optimizing latency and throughput."
+        },
+        "skills": [
+          "Caching",
+          "Architecture Decision-Making",
+          "Performance",
+          "Data Consistency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-patterns",
+          "cache-aside",
+          "read-through",
+          "write-through",
+          "write-behind",
+          "write-around"
+        ]
+      },
+      {
+        "id": "BE-252",
+        "domain": "caching_strategies",
+        "topic": "Cache Patterns",
+        "subtopic": "Cache Key Design",
+        "difficulty": "Medium",
+        "question_type": "data_modeling",
+        "question": "What makes a good cache key, and what problems can poor cache-key design cause?",
+        "answer": "A good cache key is deterministic, uniquely identifies the logical data being cached, is stable across equivalent requests, and is easy to reason about operationally. It should include all request dimensions that affect the cached result while avoiding unnecessary variation that fragments the cache. Poor key design can cause collisions, incorrect data being returned for different requests, low hit rates because equivalent requests use different keys, or difficult cache invalidation. Namespacing and versioning can also help separate domains and support controlled schema changes.",
+        "key_concepts": [
+          "Cache keys",
+          "Determinism",
+          "Uniqueness",
+          "Key collisions",
+          "Cache fragmentation",
+          "Namespacing"
+        ],
+        "expected_points": [
+          "Equivalent logical requests should produce consistent keys.",
+          "Different data representations must not accidentally share the same key.",
+          "All material inputs affecting the cached result should be represented.",
+          "Unnecessary key variation can fragment the cache and reduce hit rate.",
+          "Namespacing and versioning can improve isolation and operational control."
+        ],
+        "common_mistakes": [
+          "Using only a partial identifier when additional request parameters change the result.",
+          "Creating keys with inconsistent parameter ordering or formatting.",
+          "Ignoring collisions, namespaces, or versioning during schema changes."
+        ],
+        "example": "For a paginated product search, a key such as `products:v2:category=books:page=2:sort=price_asc` is more reliable than using only `products:books`, because page and sort order affect the response.",
+        "follow_up_questions": [
+          "How can inconsistent serialization of request parameters reduce cache hit rate?",
+          "Why might you include a version component in cache keys?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says a cache key is simply an identifier but cannot explain correctness or uniqueness requirements.",
+          "average": "Mentions unique keys but misses equivalent-request consistency or cache fragmentation.",
+          "good": "Explains determinism, uniqueness, complete result-defining inputs, and the risks of poor key design.",
+          "excellent": "Demonstrates production-quality key design including canonicalization, namespacing, versioning, collision avoidance, and operational maintainability."
+        },
+        "skills": [
+          "Caching",
+          "Data Modeling",
+          "API Design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-keys",
+          "key-design",
+          "namespacing",
+          "cache-hit-rate"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,741 @@
+{
+  "question_bank": {
+    "id": "distributed-systems-batch-02",
+    "title": "Distributed Systems Interview Question Bank — Batch 2",
+    "description": "Backend Engineering Distributed Systems questions BE-325 through BE-337.",
+    "language": "Technology-neutral backend/distributed systems",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "question_count": 13,
+    "difficulty_distribution": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 8,
+      "Expert": 1
+    },
+    "questions": [
+      {
+        "id": "BE-325",
+        "domain": "distributed_systems_replication",
+        "topic": "Replication & Failover",
+        "subtopic": "Multi-leader replication",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "What is multi-leader replication, and what additional correctness problems does it introduce compared with a single-leader model?",
+        "answer": "In multi-leader replication, more than one node or region can accept writes, and those writes are replicated between leaders. This can improve write locality, availability, and geographic latency, but concurrent writes can target different leaders and create conflicts. The system therefore needs a conflict-detection and conflict-resolution strategy, plus a defined ordering or convergence model. Business operations that cannot tolerate conflicting updates may need stronger coordination or a different architecture.",
+        "key_concepts": [
+          "multi-leader replication",
+          "write locality",
+          "conflict detection",
+          "conflict resolution",
+          "convergence"
+        ],
+        "expected_points": [
+          "Multiple leaders independently accept writes.",
+          "It can reduce cross-region write latency and improve availability.",
+          "Concurrent updates can conflict when they modify the same logical data.",
+          "Conflict resolution must be deterministic and aligned with business semantics.",
+          "Some invariants require coordination that weakens the main benefit of multi-leader writes."
+        ],
+        "common_mistakes": [
+          "Assuming multiple leaders automatically provide strong consistency.",
+          "Resolving every conflict with last-write-wins without considering business meaning.",
+          "Ignoring clock skew and concurrent-write detection."
+        ],
+        "example": "Two regional profile services simultaneously change the same user's phone number while disconnected. When replication resumes, the system needs a defined way to resolve the competing versions.",
+        "follow_up_questions": [
+          "When would multi-leader replication be preferable to leader-follower replication?",
+          "Why can last-write-wins be dangerous for some business data?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Describes multi-leader as simply having multiple read replicas.",
+          "average": "Recognizes multiple write nodes but gives little explanation of conflicts.",
+          "good": "Explains write locality, concurrent updates, conflict resolution, and convergence.",
+          "excellent": "Analyzes the consistency trade-offs and explains why business invariants may require coordination despite the benefits of multi-leader writes."
+        },
+        "skills": [
+          "distributed_systems",
+          "replication",
+          "consistency_models"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "multi-leader",
+          "conflict-resolution",
+          "replication"
+        ]
+      },
+      {
+        "id": "BE-326",
+        "domain": "distributed_systems_consensus",
+        "topic": "Consensus, Leader Election & Coordination",
+        "subtopic": "Consensus fundamentals",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What problem does distributed consensus solve, and why is consensus harder than simply replicating data to several nodes?",
+        "answer": "Consensus allows a set of nodes to agree on a value or decision despite failures and unreliable communication, subject to the algorithm's fault assumptions. Replication can copy data without establishing which conflicting operation or leadership decision is authoritative. Consensus protocols coordinate participants so that non-faulty nodes make compatible decisions and, under the protocol's assumptions, eventually make progress. This coordination is particularly important for leader election, configuration changes, and replicated state machines.",
+        "key_concepts": [
+          "consensus",
+          "agreement",
+          "fault tolerance",
+          "coordination",
+          "replicated state machine"
+        ],
+        "expected_points": [
+          "Consensus is about reaching compatible decisions among distributed participants.",
+          "Replication alone does not resolve conflicting decisions or establish authority.",
+          "The protocol must account for node and communication failures.",
+          "Consensus supports leader election and ordered state-machine decisions.",
+          "Progress depends on assumptions such as the communication and failure model."
+        ],
+        "common_mistakes": [
+          "Defining consensus as copying the same data to multiple machines.",
+          "Assuming consensus guarantees availability under every network condition.",
+          "Treating consensus as identical to ordinary database replication."
+        ],
+        "example": "A cluster of service coordinators needs to agree on which node is the current leader before that node performs a singleton scheduled task.",
+        "follow_up_questions": [
+          "How is consensus related to leader election?",
+          "What happens to consensus progress when nodes cannot communicate reliably?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Equates consensus with replication.",
+          "average": "Understands agreement but cannot explain why failures complicate it.",
+          "good": "Explains agreement, failures, coordination, and practical uses.",
+          "excellent": "Clearly distinguishes data replication from agreement and connects consensus to fault assumptions, leader election, and replicated state machines."
+        },
+        "skills": [
+          "distributed_systems",
+          "consensus",
+          "fault_tolerance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "consensus",
+          "coordination",
+          "fault-tolerance"
+        ]
+      },
+      {
+        "id": "BE-327",
+        "domain": "distributed_systems_consensus",
+        "topic": "Consensus, Leader Election & Coordination",
+        "subtopic": "Leader election",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Why does a distributed cluster need leader election, and what properties must a safe leader-election mechanism provide?",
+        "answer": "Leader election selects one node to act as coordinator when a role requires a single active authority. A safe mechanism should avoid two nodes simultaneously believing they are the valid leader, should provide a way to detect or replace an unavailable leader, and should handle delayed messages and membership changes correctly. Election alone is not sufficient: a former leader may still act after losing leadership, so systems often need fencing or an equivalent mechanism to prevent stale leaders from performing protected writes.",
+        "key_concepts": [
+          "leader election",
+          "single authority",
+          "split brain",
+          "failure detection",
+          "fencing"
+        ],
+        "expected_points": [
+          "Election establishes a coordinator for operations requiring one authority.",
+          "The mechanism must prevent or mitigate simultaneous leaders.",
+          "Leader failure needs to trigger replacement under defined conditions.",
+          "Delayed messages can make an old leader believe it is still active.",
+          "Fencing or ownership validation may be required to prevent stale-leader side effects."
+        ],
+        "common_mistakes": [
+          "Assuming a heartbeat timeout proves the old leader is dead.",
+          "Thinking election by itself prevents stale leaders from acting.",
+          "Ignoring membership changes and delayed messages."
+        ],
+        "example": "A scheduler elects one coordinator to run a daily job. If the coordinator becomes unreachable, another node can be elected, but the old node must not continue running the job after connectivity returns.",
+        "follow_up_questions": [
+          "What is split brain in leader election?",
+          "Why is fencing important even after a new leader has been elected?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says leader election only improves performance.",
+          "average": "Understands that one node is selected but misses stale-leader risks.",
+          "good": "Explains uniqueness, failure detection, and fencing.",
+          "excellent": "Explains the safety and liveness goals of election and the subtle distinction between electing a new leader and preventing the old leader from acting."
+        },
+        "skills": [
+          "distributed_systems",
+          "leader_election",
+          "fault_tolerance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "leader-election",
+          "split-brain",
+          "fencing"
+        ]
+      },
+      {
+        "id": "BE-328",
+        "domain": "distributed_systems_consensus",
+        "topic": "Consensus, Leader Election & Coordination",
+        "subtopic": "Raft concepts",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "At a high level, how does a Raft-style consensus system use a leader, a replicated log, and terms to keep a cluster's state machine consistent?",
+        "answer": "In Raft, a leader accepts client commands and replicates log entries to followers. Entries become committed when the protocol's quorum and ordering rules establish that they are safely replicated, after which nodes apply them to their state machines in log order. Terms identify leadership epochs and help nodes reject stale leaders or messages from older elections. The combination of a single active leader per term, ordered logs, and quorum-based commitment provides a foundation for consistent replicated state-machine execution.",
+        "key_concepts": [
+          "Raft",
+          "leader",
+          "replicated log",
+          "terms",
+          "quorum",
+          "state machine"
+        ],
+        "expected_points": [
+          "The leader receives and orders client commands.",
+          "Followers replicate the leader's log.",
+          "Terms distinguish leadership epochs and reject stale authority.",
+          "A committed entry is safe according to the protocol's quorum and log rules.",
+          "Nodes apply committed entries in the same order to their state machines."
+        ],
+        "common_mistakes": [
+          "Saying a log entry is committed as soon as one follower receives it.",
+          "Treating a term as a timestamp.",
+          "Assuming any elected leader can immediately commit arbitrary old log entries without protocol checks."
+        ],
+        "example": "A configuration service uses a Raft cluster to store ordered configuration changes. A leader appends each change to the replicated log and the cluster commits it according to quorum rules before applying it.",
+        "follow_up_questions": [
+          "Why does Raft use terms instead of relying only on wall-clock time?",
+          "What happens when a follower has log entries that differ from the current leader's log?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the role of the leader or log.",
+          "average": "Recognizes leader-based replication but gives an incomplete account of terms and commitment.",
+          "good": "Explains leader ordering, replicated logs, terms, quorum commitment, and state-machine application.",
+          "excellent": "Accurately connects terms to leadership epochs, log consistency to safety, quorum commitment to durability, and ordered application to replicated state-machine correctness."
+        },
+        "skills": [
+          "distributed_systems",
+          "consensus",
+          "raft",
+          "replicated_state_machine"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "raft",
+          "consensus",
+          "replicated-log"
+        ]
+      },
+      {
+        "id": "BE-329",
+        "domain": "distributed_systems_consensus",
+        "topic": "Consensus, Leader Election & Coordination",
+        "subtopic": "Quorum reasoning",
+        "difficulty": "Hard",
+        "question_type": "reasoning",
+        "question": "Why are quorums commonly chosen so that any two quorums overlap? Explain how quorum intersection helps preserve a single agreed decision.",
+        "answer": "If every valid quorum contains a majority or otherwise satisfies an intersection property, any two quorums must share at least one participant. That overlap provides a mechanism for information about a previously accepted or committed decision to constrain later decisions. Without sufficient intersection, two disjoint groups could independently make conflicting decisions and both consider them valid. The exact quorum rules depend on the consensus or replication protocol, but the underlying safety idea is that conflicting decisions cannot be independently certified without overlap.",
+        "key_concepts": [
+          "quorum",
+          "quorum intersection",
+          "safety",
+          "majority",
+          "conflicting decisions"
+        ],
+        "expected_points": [
+          "A quorum is the minimum set needed for a protocol decision.",
+          "Safety often depends on any two valid quorums overlapping.",
+          "The overlap carries information about prior decisions into later decisions.",
+          "Without intersection, disjoint groups could certify conflicting outcomes.",
+          "Quorum size must be defined together with the protocol's failure model."
+        ],
+        "common_mistakes": [
+          "Assuming every quorum must simply be 50% plus one.",
+          "Claiming quorum intersection alone guarantees liveness.",
+          "Ignoring the protocol-specific meaning of a quorum acknowledgement."
+        ],
+        "example": "In a five-node cluster using majority decisions, any two majorities of three nodes share at least one node. That overlap prevents two conflicting values from both being independently accepted under suitable protocol rules.",
+        "follow_up_questions": [
+          "Why does a majority quorum generally tolerate only a limited number of failures?",
+          "Can a quorum system provide safety but still lose availability? Explain."
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines quorum only as 'most servers' without explaining intersection.",
+          "average": "Understands majority overlap but cannot connect it to safety.",
+          "good": "Explains intersection and why it prevents independently certified conflicting decisions.",
+          "excellent": "Reasones from quorum intersection to safety while clearly separating safety from liveness and acknowledging protocol-specific quorum semantics."
+        },
+        "skills": [
+          "distributed_systems",
+          "consensus",
+          "quorum_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "quorum",
+          "quorum-intersection",
+          "safety"
+        ]
+      },
+      {
+        "id": "BE-330",
+        "domain": "distributed_systems_consensus",
+        "topic": "Consensus, Leader Election & Coordination",
+        "subtopic": "Consensus during partitions",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A five-node consensus cluster is split into groups of two and three because of a network partition. What should happen to writes in each group if the system prioritizes safety?",
+        "answer": "If the protocol requires a majority of three nodes to commit decisions, the group of three can generally continue making progress while the group of two cannot safely commit new decisions. The minority group should reject or defer operations that require consensus rather than independently committing conflicting state. This sacrifices availability for the minority partition but preserves the safety property that two sides do not independently establish conflicting committed histories. Once connectivity returns, the protocol reconciles the minority according to its log and leadership rules.",
+        "key_concepts": [
+          "network partition",
+          "majority quorum",
+          "safety",
+          "availability",
+          "consensus"
+        ],
+        "expected_points": [
+          "The five-node cluster requires a quorum consistent with its protocol, typically three nodes for a majority.",
+          "The three-node side can continue if it satisfies the protocol's leadership and quorum conditions.",
+          "The two-node side cannot safely commit new consensus decisions.",
+          "The minority sacrifices availability to preserve consistency.",
+          "Recovery requires protocol-driven reconciliation rather than manual merging of committed histories."
+        ],
+        "common_mistakes": [
+          "Allowing both partitions to accept committed writes.",
+          "Saying the minority can continue because two of five nodes are healthy.",
+          "Confusing node health with quorum availability."
+        ],
+        "example": "A configuration cluster with five members is split 3/2. The three-node partition can elect or retain a valid leader and commit configuration changes; the two-node partition should remain unable to commit them.",
+        "follow_up_questions": [
+          "What happens if the partition is 2/2/1 instead?",
+          "Why is this behavior a deliberate availability trade-off rather than an implementation bug?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Allows both sides to commit independently or claims all writes stop regardless of quorum.",
+          "average": "Knows a majority is needed but cannot explain the safety rationale.",
+          "good": "Correctly allows the majority side to progress and blocks the minority from committing.",
+          "excellent": "Explains the distinction between node health and quorum availability and explicitly connects minority unavailability to preservation of safety."
+        },
+        "skills": [
+          "distributed_systems",
+          "consensus",
+          "network_partitions",
+          "fault_tolerance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "consensus",
+          "partition",
+          "quorum",
+          "safety"
+        ]
+      },
+      {
+        "id": "BE-331",
+        "domain": "distributed_systems_coordination",
+        "topic": "Distributed Locks & Coordination Primitives",
+        "subtopic": "Distributed lock semantics",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What problem does a distributed lock solve, and why is a distributed lock fundamentally more complicated than an in-process mutex?",
+        "answer": "A distributed lock coordinates access to a shared resource across independent processes or machines. Unlike an in-process mutex, the lock holder and the lock service can fail independently, network messages can be delayed, and a client can lose connectivity while continuing to run. A safe lock therefore needs explicit ownership, lease or expiry semantics, and protection against a stale holder acting after its lease has ended. Lock acquisition alone does not guarantee correctness unless the protected resource also rejects stale ownership where necessary.",
+        "key_concepts": [
+          "distributed lock",
+          "lease",
+          "ownership",
+          "network delay",
+          "stale holder"
+        ],
+        "expected_points": [
+          "It coordinates access across multiple independent processes or nodes.",
+          "The lock service and client can fail independently.",
+          "A disconnected client may continue running after losing lock ownership.",
+          "Leases or expirations bound ownership duration.",
+          "Fencing or resource-side ownership validation can prevent stale holders from corrupting state."
+        ],
+        "common_mistakes": [
+          "Treating a distributed lock as a network version of a mutex with no failure semantics.",
+          "Assuming a client that loses its connection automatically stops executing.",
+          "Using lock expiry without considering delayed operations from the old holder."
+        ],
+        "example": "Two workers process the same scheduled job, but only one should modify the shared job record at a time. A distributed lease coordinates ownership, while the database can reject operations from an expired lease token.",
+        "follow_up_questions": [
+          "Why is a lease often preferable to an indefinitely held distributed lock?",
+          "What is a fencing token and how does it protect a resource?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines a distributed lock as simply a mutex shared over the network.",
+          "average": "Understands cross-process locking but misses stale-holder behavior.",
+          "good": "Explains leases, failure, ownership, and stale clients.",
+          "excellent": "Shows why lock correctness depends on failure and timing semantics and explains why resource-side fencing may be necessary beyond lock acquisition."
+        },
+        "skills": [
+          "distributed_systems",
+          "distributed_locks",
+          "concurrency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "distributed-lock",
+          "lease",
+          "fencing"
+        ]
+      },
+      {
+        "id": "BE-332",
+        "domain": "distributed_systems_coordination",
+        "topic": "Distributed Locks & Coordination Primitives",
+        "subtopic": "Lease expiration and stale owners",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "Worker A acquires a 10-second distributed lease, pauses for 20 seconds, and then resumes. Worker B has acquired the same resource after A's lease expired. How can the system prevent A from performing stale writes?",
+        "answer": "The system should use an ownership or fencing token that changes whenever a new lease is granted. Worker A may still hold an old token after its lease expires, but the protected resource must reject operations carrying a token older than the current owner token. This is stronger than relying only on the lock service because network delays or process pauses can allow stale work to arrive after a new owner has been granted the resource. Lease expiration controls ownership duration; fencing enforces ownership at the resource boundary.",
+        "key_concepts": [
+          "lease",
+          "fencing token",
+          "stale owner",
+          "resource validation",
+          "process pause"
+        ],
+        "expected_points": [
+          "A lease expiry does not necessarily stop the old worker's execution.",
+          "A new owner receives a newer monotonically ordered ownership token.",
+          "The protected resource validates the token on every protected operation.",
+          "Older tokens are rejected after ownership changes.",
+          "Fencing protects against delayed or resumed stale work."
+        ],
+        "common_mistakes": [
+          "Assuming the old worker automatically knows its lease expired.",
+          "Relying only on wall-clock checks at the worker.",
+          "Checking the lock service but not validating ownership at the protected resource."
+        ],
+        "example": "Worker A gets token 41, pauses, and its lease expires. Worker B gets token 42. When A resumes and submits a write with token 41, the database rejects it because token 42 is current.",
+        "follow_up_questions": [
+          "Why can a heartbeat mechanism alone fail to solve this problem?",
+          "What properties should a fencing token have?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests simply waiting for the old worker to stop.",
+          "average": "Mentions lease expiry but cannot prevent stale operations.",
+          "good": "Explains fencing tokens and resource-side validation.",
+          "excellent": "Clearly distinguishes lease ownership from execution control and designs a resource-enforced fencing mechanism that remains safe under pauses and delayed messages."
+        },
+        "skills": [
+          "distributed_systems",
+          "distributed_locks",
+          "concurrency",
+          "fault_tolerance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "fencing",
+          "lease-expiry",
+          "stale-owner"
+        ]
+      },
+      {
+        "id": "BE-333",
+        "domain": "distributed_systems_coordination",
+        "topic": "Distributed Locks & Coordination Primitives",
+        "subtopic": "Lock service failure",
+        "difficulty": "Hard",
+        "question_type": "production_scenario",
+        "question": "Your application relies on a distributed lock service to ensure only one worker performs a critical operation. The lock service becomes temporarily unavailable. What should the workers do, and what determines whether they can safely continue?",
+        "answer": "Workers should not assume they still own or can safely acquire the lock when the coordination service is unavailable. For operations where duplicate execution can cause corruption, the safe default is to stop or fail closed until ownership can be established again. If the business operation is designed to tolerate duplicate execution, workers may continue using an idempotent or transactional mechanism instead. The correct behavior depends on whether the lock is a correctness requirement or merely a performance optimization.",
+        "key_concepts": [
+          "lock-service failure",
+          "fail-closed",
+          "ownership",
+          "idempotency",
+          "correctness boundary"
+        ],
+        "expected_points": [
+          "Workers cannot reliably establish new ownership while the coordinator is unavailable.",
+          "Existing ownership may also become uncertain after lease expiry.",
+          "Critical non-idempotent operations should fail closed unless another safety mechanism exists.",
+          "Idempotent operations may have alternatives to locking.",
+          "The design must distinguish correctness locks from optimization locks."
+        ],
+        "common_mistakes": [
+          "Letting every worker continue because the lock service is down.",
+          "Assuming an old lease remains valid indefinitely.",
+          "Using a lock to compensate for an operation that lacks transactional or idempotent guarantees."
+        ],
+        "example": "If a lock prevents two workers from issuing the same irreversible external command, workers should pause when ownership cannot be validated. If the command is safely idempotent, the architecture may tolerate concurrent attempts.",
+        "follow_up_questions": [
+          "How would you decide whether a lock is a correctness mechanism or just a performance optimization?",
+          "What fallback mechanism could replace a distributed lock for some database-backed operations?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Allows workers to proceed without ownership validation.",
+          "average": "Says workers should stop but does not explain why or when continuation is safe.",
+          "good": "Uses fail-closed behavior for correctness-critical operations and recognizes idempotent alternatives.",
+          "excellent": "Frames the decision around the actual invariant, ownership uncertainty, and available transactional/idempotent safeguards rather than treating distributed locking as universally mandatory."
+        },
+        "skills": [
+          "distributed_systems",
+          "distributed_locks",
+          "fault_tolerance",
+          "reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "lock-failure",
+          "fail-closed",
+          "correctness"
+        ]
+      },
+      {
+        "id": "BE-334",
+        "domain": "distributed_systems_coordination",
+        "topic": "Distributed Locks & Coordination Primitives",
+        "subtopic": "Coordination versus database transactions",
+        "difficulty": "Hard",
+        "question_type": "tradeoff",
+        "question": "When can a database transaction be a better solution than a distributed lock for coordinating concurrent updates?",
+        "answer": "A database transaction is often preferable when the shared resource and the required invariant can be enforced atomically by the database itself. Constraints, conditional updates, row-level locking, optimistic concurrency control, or serializable transactions can make the database the authoritative coordination point without introducing a separate lock service. This reduces distributed coordination components and can provide stronger coupling between ownership and the state being modified. A distributed lock is more appropriate when coordination spans resources that cannot participate in the same transaction or when the protected resource is outside the database.",
+        "key_concepts": [
+          "database transaction",
+          "atomicity",
+          "optimistic concurrency",
+          "conditional update",
+          "coordination boundary"
+        ],
+        "expected_points": [
+          "Use the database as the authority when the invariant is stored there.",
+          "Conditional writes or transactions can atomically check and update state.",
+          "This avoids a separate lock-service failure mode for database-local coordination.",
+          "Distributed locks become more relevant when multiple non-transactional resources must be coordinated.",
+          "The choice should follow the actual invariant and transaction boundary."
+        ],
+        "common_mistakes": [
+          "Using a distributed lock for every concurrent update.",
+          "Assuming transactions can atomically coordinate arbitrary external systems.",
+          "Ignoring database contention and transaction duration."
+        ],
+        "example": "Instead of locking an order externally, an update can use a conditional statement such as changing the order only if its version equals the expected version, rejecting concurrent stale updates.",
+        "follow_up_questions": [
+          "How does optimistic concurrency control differ from pessimistic locking?",
+          "What problems appear when a transaction must also call an external service?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Claims distributed locks are always necessary for concurrency.",
+          "average": "Mentions transactions but cannot explain when they are sufficient.",
+          "good": "Explains database-local atomic coordination and the boundary where a distributed lock may still be needed.",
+          "excellent": "Chooses the mechanism from the invariant and transaction boundary, comparing conditional updates, locking, serialization, contention, and external side effects."
+        },
+        "skills": [
+          "distributed_systems",
+          "transactions",
+          "concurrency_control"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "distributed-lock",
+          "transactions",
+          "optimistic-concurrency"
+        ]
+      },
+      {
+        "id": "BE-335",
+        "domain": "distributed_systems_time",
+        "topic": "Time, Clocks & Ordering",
+        "subtopic": "Clock skew",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is clock skew, and why is it dangerous to use independently generated wall-clock timestamps as the sole basis for ordering distributed events?",
+        "answer": "Clock skew is the difference between the clocks on different machines. Physical clocks can drift and can also be adjusted by synchronization mechanisms, so two nodes can assign timestamps that do not accurately represent causal or real-time ordering. Consequently, a later event can receive an earlier timestamp than another event, especially when events occur close together or clocks are adjusted. Wall-clock timestamps are useful metadata, but distributed protocols often need logical or protocol-defined ordering when correctness depends on event order.",
+        "key_concepts": [
+          "clock skew",
+          "wall-clock time",
+          "event ordering",
+          "clock drift",
+          "logical ordering"
+        ],
+        "expected_points": [
+          "Different machines do not share a perfectly synchronized clock.",
+          "Clock skew can make timestamps disagree with actual event order.",
+          "Clock adjustment can make timestamp-based assumptions even less reliable.",
+          "Wall-clock time should not be treated as proof of causality.",
+          "Logical clocks or protocol sequence numbers can provide ordering semantics."
+        ],
+        "common_mistakes": [
+          "Assuming NTP makes clocks identical.",
+          "Treating a larger timestamp as proof that an event happened later.",
+          "Using timestamps alone for correctness-critical distributed coordination."
+        ],
+        "example": "Server A records an event at 12:00:01.500 while server B's clock is 2 seconds ahead and records a later event at 12:00:03.000. Timestamp comparison alone does not establish the events' causal relationship.",
+        "follow_up_questions": [
+          "What is a logical clock?",
+          "When is wall-clock time still appropriate in a distributed system?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines clock skew as network latency.",
+          "average": "Knows clocks differ but does not explain ordering consequences.",
+          "good": "Explains drift, synchronization limits, and why timestamps do not establish causality.",
+          "excellent": "Clearly separates physical time from logical ordering and explains why correctness-critical protocols need explicit ordering mechanisms."
+        },
+        "skills": [
+          "distributed_systems",
+          "time_ordering",
+          "concurrency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "clock-skew",
+          "timestamps",
+          "event-ordering"
+        ]
+      },
+      {
+        "id": "BE-336",
+        "domain": "distributed_systems_time",
+        "topic": "Time, Clocks & Ordering",
+        "subtopic": "Lamport logical clocks",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "What problem does a Lamport logical clock solve, and what ordering guarantee does it provide?",
+        "answer": "A Lamport logical clock assigns monotonically increasing logical timestamps to events so that if event A causally precedes event B, A's timestamp is less than B's. Processes advance their logical clocks on local events and incorporate received timestamps when processing messages. This provides a consistent ordering relation that respects causality, but the reverse is not guaranteed: a smaller Lamport timestamp does not prove that one event caused another. Therefore Lamport clocks establish a useful partial-order-compatible numbering, not a complete measurement of physical time or causality.",
+        "key_concepts": [
+          "Lamport clock",
+          "logical timestamp",
+          "causality",
+          "happened-before",
+          "partial ordering"
+        ],
+        "expected_points": [
+          "Logical clocks avoid depending on synchronized wall clocks.",
+          "Causal predecessor events receive smaller timestamps than their successors.",
+          "Receiving a message advances the receiver's logical clock based on the message timestamp.",
+          "Timestamp order does not prove causality in the reverse direction.",
+          "Logical clocks are useful for deterministic event ordering when exact causality is otherwise unavailable."
+        ],
+        "common_mistakes": [
+          "Claiming Lamport timestamps represent real time.",
+          "Claiming timestamp order in both directions proves causality.",
+          "Ignoring message receipt when updating the logical clock."
+        ],
+        "example": "If service A sends a message after processing event X, service B processes the message as event Y. Lamport clock rules ensure the timestamp for X is less than Y.",
+        "follow_up_questions": [
+          "What limitation of Lamport clocks motivates vector clocks?",
+          "How could a Lamport timestamp be combined with a node identifier for deterministic tie-breaking?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Describes Lamport clocks as synchronized physical clocks.",
+          "average": "Knows they are logical but cannot explain the happened-before guarantee.",
+          "good": "Explains logical timestamps and the one-way relationship with causality.",
+          "excellent": "Precisely explains the happened-before relation, message-based clock updates, and why Lamport order is not equivalent to causal equivalence."
+        },
+        "skills": [
+          "distributed_systems",
+          "logical_clocks",
+          "event_ordering"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "lamport-clock",
+          "causality",
+          "happened-before"
+        ]
+      },
+      {
+        "id": "BE-337",
+        "domain": "distributed_systems_time",
+        "topic": "Time, Clocks & Ordering",
+        "subtopic": "Vector clocks and concurrent events",
+        "difficulty": "Expert",
+        "question_type": "comparison",
+        "question": "How do vector clocks improve on Lamport clocks when a system needs to determine whether two versions are causally related or concurrent?",
+        "answer": "Vector clocks maintain a logical counter for each participating node, allowing the system to compare version vectors component by component. If every component of vector A is less than or equal to the corresponding component of B and at least one is strictly less, A causally precedes B. If neither vector dominates the other, the versions are concurrent. This lets a system detect genuine concurrent updates, which is useful for conflict detection, although vector size and management become more difficult as the number of participants grows.",
+        "key_concepts": [
+          "vector clocks",
+          "causal ordering",
+          "concurrent versions",
+          "version vectors",
+          "conflict detection"
+        ],
+        "expected_points": [
+          "Each participant maintains a component representing its logical progress.",
+          "Vector comparison can establish causal precedence.",
+          "Neither vector dominating the other indicates concurrent updates.",
+          "This can distinguish causally related updates from true conflicts.",
+          "The metadata grows with the participant set and requires operational management."
+        ],
+        "common_mistakes": [
+          "Saying vector clocks synchronize physical clocks.",
+          "Assuming any unequal vectors imply a conflict.",
+          "Ignoring the metadata and participant-management cost."
+        ],
+        "example": "Version A has vector [3,2] and version B has [3,4]. A is causally before B because B is at least as advanced in every component and newer in the second. Versions [4,2] and [3,4] are concurrent because neither dominates the other.",
+        "follow_up_questions": [
+          "How would a database use concurrent version detection during conflict resolution?",
+          "What scalability problems can vector clocks create in a large distributed system?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish vector clocks from physical timestamps.",
+          "average": "Knows vectors track causality but cannot explain the comparison rule.",
+          "good": "Correctly explains dominance and concurrency detection.",
+          "excellent": "Precisely reasons about vector comparison, concurrent versions, conflict detection, and metadata scalability limitations."
+        },
+        "skills": [
+          "distributed_systems",
+          "vector_clocks",
+          "causality",
+          "conflict_resolution"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "vector-clocks",
+          "causality",
+          "concurrent-updates"
+        ]
+      }
+    ]
+  }
+}

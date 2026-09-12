@@ -1,6 +1,7 @@
 """Seed data for roles, skills, role-skill mappings, and question bank.
 
 Reads questions from question_banks/*.json (the single source of truth).
+Backend questions are loaded separately via sync_questions.py from docs/question_bank/.
 """
 
 import asyncio
@@ -33,13 +34,15 @@ SKILLS: list[dict[str, str]] = [
     {"slug": "web-frameworks", "name": "Web Frameworks", "category": "framework"},
     {"slug": "databases", "name": "Databases", "category": "concept"},
     {"slug": "testing", "name": "Testing", "category": "concept"},
-    # New skills for backend domains
     {"slug": "api-design", "name": "API Design", "category": "concept"},
     {"slug": "system-design", "name": "System Design", "category": "concept"},
     {"slug": "security", "name": "Security", "category": "concept"},
     {"slug": "caching", "name": "Caching", "category": "concept"},
     {"slug": "distributed-systems", "name": "Distributed Systems", "category": "concept"},
     {"slug": "messaging", "name": "Messaging & Async", "category": "concept"},
+    {"slug": "http", "name": "HTTP & Web Protocols", "category": "concept"},
+    {"slug": "nosql", "name": "NoSQL Databases", "category": "concept"},
+    {"slug": "authentication", "name": "Authentication & Authorization", "category": "concept"},
 ]
 
 ROLES: list[dict] = [
@@ -104,6 +107,30 @@ ROLES: list[dict] = [
             ("testing", 6),
         ],
     },
+    {
+        "slug": "backend-engineer",
+        "name": "Backend Engineer",
+        "description": (
+            "Technical interview for backend engineering roles. "
+            "Covers HTTP & Web Protocols, REST API Design, Databases (SQL & NoSQL), "
+            "Authentication, Caching, Messaging, and Distributed Systems."
+        ),
+        "display_order": 4,
+        "skills": [
+            ("web-frameworks", 7),
+            ("http", 8),
+            ("api-design", 9),
+            ("authentication", 7),
+            ("sql", 8),
+            ("nosql", 7),
+            ("databases", 8),
+            ("caching", 7),
+            ("messaging", 7),
+            ("distributed-systems", 8),
+            ("system-design", 7),
+            ("security", 7),
+        ],
+    },
 ]
 
 
@@ -134,24 +161,9 @@ AI_ML_TOPIC_TO_SKILL: dict[str, str] = {
     "AI System Design & Production Scenarios": "mlops",
 }
 
-BACKEND_DOMAIN_TO_SKILL: dict[str, str] = {
-    "backend_fundamentals": "web-frameworks",
-    "http_api": "api-design",
-    "databases_sql": "databases",
-    "authentication_security": "security",
-    "caching": "caching",
-    "messaging_async": "messaging",
-    "distributed_systems": "distributed-systems",
-    "microservices": "system-design",
-    "performance_observability": "system-design",
-    "system_design_production": "system-design",
-}
-
-# Which files seed which roles
 FILE_TO_ROLES: dict[str, list[str]] = {
     "python.json": ["ai-ml-engineer", "data-scientist", "python-developer"],
     "ai_ml.json": ["ai-ml-engineer", "data-scientist"],
-    "backend.json": ["python-developer"],
 }
 
 DIFFICULTY_NORMALIZE: dict[str, str] = {
@@ -249,7 +261,6 @@ async def _seed_questions(
             for role_slug in role_slugs:
                 if role_slug not in role_map:
                     continue
-                # Check the role actually has this skill
                 role_id = role_map[role_slug]
                 skill_id = skill_map.get(skill_slug)
                 if skill_id is None:
@@ -285,11 +296,6 @@ BANK_CONFIG: dict[str, dict] = {
         "topic_field": "topic",
         "topic_map": AI_ML_TOPIC_TO_SKILL,
         "fallback_skill": "machine-learning",
-    },
-    "backend.json": {
-        "topic_field": "domain",
-        "topic_map": BACKEND_DOMAIN_TO_SKILL,
-        "fallback_skill": "web-frameworks",
     },
 }
 

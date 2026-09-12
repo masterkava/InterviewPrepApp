@@ -1,0 +1,849 @@
+{
+  "question_bank": {
+    "id": "backend-engineering-500",
+    "title": "Backend Engineering Interview Question Bank — SQL & Relational Databases — Batch 3",
+    "description": "SQL and relational database interview questions covering indexes, query optimization, transactions, isolation, locking, deadlocks, and production incidents.",
+    "language": "Technology-neutral SQL",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "domain": "sql_relational_databases",
+    "question_count": 15,
+    "batch": {
+      "batch_number": 3,
+      "batch_size": 15,
+      "domain_target": 45,
+      "question_id_range": [
+        "BE-191",
+        "BE-205"
+      ]
+    },
+    "intended_use": [
+      "preparation",
+      "mock_interview",
+      "ai_evaluation",
+      "adaptive_follow_up"
+    ],
+    "roles": [
+      "backend_developer",
+      "software_developer",
+      "full_stack_developer"
+    ],
+    "questions": [
+      {
+        "id": "BE-191",
+        "domain": "sql_relational_databases",
+        "topic": "Indexes & Query Performance",
+        "subtopic": "Purpose of Database Indexes",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is a database index, and why can an index make a query faster?",
+        "answer": "An index is an auxiliary data structure that helps the database locate rows without examining every row in the table. An index stores searchable key values together with references to the corresponding rows, using a structure chosen by the database such as a B-tree for many common workloads. The benefit is faster access for suitable predicates and ordering, but indexes consume storage and add work to writes because they must be maintained.",
+        "key_concepts": [
+          "Index",
+          "B-tree",
+          "Data lookup",
+          "Full table scan",
+          "Write overhead"
+        ],
+        "expected_points": [
+          "Explains that an index provides an alternate access path to table data",
+          "Explains why it can avoid scanning every row",
+          "Recognizes that indexes consume storage and affect writes",
+          "Understands that an index only helps when it matches the query workload"
+        ],
+        "common_mistakes": [
+          "Saying an index stores a complete copy of the table",
+          "Claiming every query automatically becomes faster with an index",
+          "Ignoring index maintenance during INSERT, UPDATE, and DELETE"
+        ],
+        "example": "An index on users(email) can let a lookup for a specific email find matching rows without scanning every user.",
+        "follow_up_questions": [
+          "Why might the optimizer choose a table scan even when an index exists?",
+          "What kinds of queries benefit most from a B-tree index?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "indexes",
+          "query_optimization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "indexes",
+          "b_tree",
+          "query_performance"
+        ]
+      },
+      {
+        "id": "BE-192",
+        "domain": "sql_relational_databases",
+        "topic": "Indexes & Query Performance",
+        "subtopic": "Composite Indexes",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "How would you choose the column order for a composite index on (customer_id, status, created_at)?",
+        "answer": "Column order should be driven by the predicates, join conditions, ordering, selectivity, and workload rather than by a universal rule. A common pattern is to put columns used for equality predicates before columns used for range predicates or ordering, but the optimal order depends on the actual queries. For example, an index beginning with customer_id can efficiently support queries that constrain customer_id and then filter or order within that customer's rows.",
+        "key_concepts": [
+          "Composite index",
+          "Column order",
+          "Equality predicate",
+          "Range predicate",
+          "Query workload"
+        ],
+        "expected_points": [
+          "Explains that composite-index order matters",
+          "Considers the actual query predicates rather than column names alone",
+          "Recognizes the importance of equality, range, and ordering patterns",
+          "Avoids treating selectivity as the only factor"
+        ],
+        "common_mistakes": [
+          "Claiming the most selective column must always be first",
+          "Assuming an index on (A,B) is equally useful for a query filtering only B",
+          "Choosing column order without examining representative queries"
+        ],
+        "example": "For SELECT ... FROM orders WHERE customer_id = ? AND status = ? ORDER BY created_at DESC, an index such as (customer_id, status, created_at) may be a strong candidate.",
+        "follow_up_questions": [
+          "What is the leftmost-prefix principle for composite indexes?",
+          "When might you choose (status, customer_id) instead?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "indexes",
+          "query_optimization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "composite_index",
+          "index_order",
+          "query_planning"
+        ]
+      },
+      {
+        "id": "BE-193",
+        "domain": "sql_relational_databases",
+        "topic": "Indexes & Query Performance",
+        "subtopic": "Covering Indexes",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is a covering index, and why can it reduce query cost?",
+        "answer": "A covering index contains all columns needed to evaluate a query and return its required result, allowing the database to satisfy the query directly from the index without fetching the base table rows in cases supported by the engine. This can reduce random table access and I/O. The trade-off is a larger index and additional write-maintenance cost, so adding columns merely to cover a query should be justified by the workload.",
+        "key_concepts": [
+          "Covering index",
+          "Index-only access",
+          "I/O",
+          "Included columns",
+          "Write overhead"
+        ],
+        "expected_points": [
+          "Explains that the index contains all data needed by the query",
+          "Explains how avoiding base-table lookups can reduce I/O",
+          "Recognizes the storage and write-maintenance trade-off",
+          "Understands that exact behavior depends on the database engine and visibility/storage model"
+        ],
+        "common_mistakes": [
+          "Saying every index is automatically covering",
+          "Assuming a covering index always avoids every table access",
+          "Adding many columns without considering index size"
+        ],
+        "example": "A query selecting user_id and status filtered by email may be satisfied from an index containing email, user_id, and status.",
+        "follow_up_questions": [
+          "What is an index-only scan?",
+          "When can adding extra columns to an index hurt write performance?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "indexes",
+          "query_optimization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "covering_index",
+          "index_only_scan",
+          "io"
+        ]
+      },
+      {
+        "id": "BE-194",
+        "domain": "sql_relational_databases",
+        "topic": "Indexes & Query Performance",
+        "subtopic": "EXPLAIN and Query Plans",
+        "difficulty": "Medium",
+        "question_type": "troubleshooting",
+        "question": "A query that used to run in 50 ms now takes 5 seconds. How would you use EXPLAIN or an equivalent query-plan tool to investigate it?",
+        "answer": "Start by examining the current execution plan and comparing it with a known-good plan if available. Look for changes in access paths, estimated versus actual row counts, join strategies, sorts, scans, spills, and expensive operators. Then check statistics, indexes, data growth, parameter sensitivity where relevant, and recent schema or query changes. The fix should be validated with the actual workload rather than inferred from one plan property.",
+        "key_concepts": [
+          "EXPLAIN",
+          "Execution plan",
+          "Estimated vs actual rows",
+          "Query statistics",
+          "Access path"
+        ],
+        "expected_points": [
+          "Uses the execution plan rather than guessing",
+          "Checks row-estimation errors and expensive operators",
+          "Investigates indexes, statistics, data growth, and query changes",
+          "Validates the proposed fix with representative measurements"
+        ],
+        "common_mistakes": [
+          "Adding an index immediately without reading the plan",
+          "Assuming the highest-cost-looking operator alone is the root cause",
+          "Ignoring stale statistics or changed data distribution"
+        ],
+        "example": "For a slow filtered query, compare whether the database is performing an index seek/scan or a full table scan and whether estimated row counts differ greatly from actual rows.",
+        "follow_up_questions": [
+          "What does a large estimated-versus-actual row mismatch suggest?",
+          "How can stale statistics lead to a poor execution plan?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "query_planning",
+          "performance_troubleshooting"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "explain",
+          "execution_plan",
+          "query_performance"
+        ]
+      },
+      {
+        "id": "BE-195",
+        "domain": "sql_relational_databases",
+        "topic": "Indexes & Query Performance",
+        "subtopic": "Functions and Sargability",
+        "difficulty": "Hard",
+        "question_type": "optimization",
+        "question": "Why can applying a function to an indexed column prevent the database from efficiently using a normal index, and what alternatives can you consider?",
+        "answer": "A predicate such as WHERE LOWER(email) = 'a@example.com' transforms the indexed column before comparison, which may prevent a conventional index on email from being used as an efficient search path, depending on the database. Alternatives include storing a normalized value, using a functional or expression index where supported, or changing the predicate to match an indexed representation. The correct choice depends on semantics, database capabilities, and workload.",
+        "key_concepts": [
+          "Sargability",
+          "Functional expression",
+          "Expression index",
+          "Normalized value",
+          "Index usage"
+        ],
+        "expected_points": [
+          "Explains why transforming an indexed column can complicate index access",
+          "Understands the concept of a sargable predicate",
+          "Identifies expression indexes or normalized columns as possible solutions",
+          "Avoids claiming functions always make indexes unusable"
+        ],
+        "common_mistakes": [
+          "Saying any function on any column always disables an index",
+          "Changing the query in a way that changes case or comparison semantics",
+          "Ignoring database-specific expression-index support"
+        ],
+        "example": "Instead of repeatedly evaluating LOWER(email), an application may store a normalized email representation and index that value, or use an expression index where supported.",
+        "follow_up_questions": [
+          "What makes a predicate sargable?",
+          "How would you handle case-insensitive email lookup while preserving a uniqueness constraint?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "indexes",
+          "query_optimization",
+          "database_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "sargability",
+          "expression_index",
+          "query_performance"
+        ]
+      },
+      {
+        "id": "BE-196",
+        "domain": "sql_relational_databases",
+        "topic": "Indexes & Query Performance",
+        "subtopic": "Unused and Overlapping Indexes",
+        "difficulty": "Hard",
+        "question_type": "tradeoff",
+        "question": "A production table has twelve indexes, several of which appear to have overlapping columns. How would you decide whether an index should be removed?",
+        "answer": "Index removal should be based on workload evidence rather than column overlap alone. Examine query plans, index usage statistics where available, write volume, storage cost, maintenance overhead, and whether an index supports an important constraint or critical query. Before removing an index, validate that no important workload depends on it, preferably in a controlled environment or staged rollout, because an apparently redundant index can sometimes serve a different ordering, covering, or selectivity pattern.",
+        "key_concepts": [
+          "Index usage",
+          "Redundant indexes",
+          "Write overhead",
+          "Query workload",
+          "Index maintenance"
+        ],
+        "expected_points": [
+          "Checks actual usage and workload importance",
+          "Considers read benefits and write/storage costs",
+          "Distinguishes similar-looking indexes that serve different queries",
+          "Validates removal safely before production deletion"
+        ],
+        "common_mistakes": [
+          "Deleting indexes solely because their first columns overlap",
+          "Looking only at SELECT performance",
+          "Ignoring indexes required for uniqueness or constraints"
+        ],
+        "example": "Indexes (customer_id, created_at) and (customer_id, status, created_at) may overlap but can support different predicates and access patterns.",
+        "follow_up_questions": [
+          "How would you identify an index that is expensive but rarely used?",
+          "What risks exist when removing an index from a high-traffic production table?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "index_management",
+          "performance_analysis"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "redundant_indexes",
+          "index_usage",
+          "maintenance"
+        ]
+      },
+      {
+        "id": "BE-197",
+        "domain": "sql_relational_databases",
+        "topic": "Indexes & Query Performance",
+        "subtopic": "Statistics and Cardinality Estimation",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "Why are database statistics important to the query optimizer, and how can inaccurate statistics cause poor performance?",
+        "answer": "Optimizers use statistics about data distribution and cardinality to estimate how many rows predicates and joins will produce. Those estimates influence choices such as index access versus scanning and nested-loop versus hash or merge joins. If statistics are stale or do not represent current data distribution, the optimizer can choose a plan that is efficient for the estimate but expensive for the actual data.",
+        "key_concepts": [
+          "Database statistics",
+          "Cardinality estimation",
+          "Query optimizer",
+          "Data distribution",
+          "Execution plan"
+        ],
+        "expected_points": [
+          "Explains that statistics describe data distribution and cardinality",
+          "Connects estimates to optimizer decisions",
+          "Explains how stale or inaccurate statistics can produce a poor plan",
+          "Recognizes that data growth or skew can change plan quality"
+        ],
+        "common_mistakes": [
+          "Saying statistics are the same as application logs",
+          "Assuming an index alone guarantees good cardinality estimates",
+          "Ignoring skewed data distributions"
+        ],
+        "example": "If a status column was historically 95% 'active' but becomes 1% 'active', an outdated estimate can cause the optimizer to choose an inappropriate access path.",
+        "follow_up_questions": [
+          "What is cardinality estimation?",
+          "How can highly skewed data affect query plans?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "query_optimization",
+          "database_statistics"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "statistics",
+          "cardinality",
+          "optimizer"
+        ]
+      },
+      {
+        "id": "BE-198",
+        "domain": "sql_relational_databases",
+        "topic": "Transactions & ACID",
+        "subtopic": "ACID Properties",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Explain the ACID properties of database transactions and why they matter in backend applications.",
+        "answer": "Atomicity means a transaction's changes are treated as one unit, so it does not partially commit. Consistency means committed data satisfies the database's defined integrity rules and constraints. Isolation controls how concurrent transactions interact and what intermediate states they can observe, while durability means committed changes survive failures according to the database's durability guarantees. Together these properties provide predictable behavior for multi-step state changes.",
+        "key_concepts": [
+          "Atomicity",
+          "Consistency",
+          "Isolation",
+          "Durability",
+          "Transactions"
+        ],
+        "expected_points": [
+          "Defines all four ACID properties accurately",
+          "Explains why atomicity matters for multi-step operations",
+          "Distinguishes isolation from consistency",
+          "Connects durability to failure recovery and committed state"
+        ],
+        "common_mistakes": [
+          "Saying consistency means every replica is immediately identical",
+          "Treating isolation as simply serial execution",
+          "Claiming durability means data can never be lost under any failure"
+        ],
+        "example": "Transferring money between accounts should debit one account and credit another atomically rather than allowing only one side to commit.",
+        "follow_up_questions": [
+          "Which ACID property is most directly affected by transaction isolation level?",
+          "What database mechanisms contribute to durability?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "transactions",
+          "database_fundamentals"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "acid",
+          "transactions",
+          "data_integrity"
+        ]
+      },
+      {
+        "id": "BE-199",
+        "domain": "sql_relational_databases",
+        "topic": "Indexes & Query Performance",
+        "subtopic": "Transactions and Index Maintenance",
+        "difficulty": "Expert",
+        "question_type": "production_incident",
+        "question": "A high-write production table receives many INSERT and UPDATE operations, and after adding several indexes its write latency increases significantly. How would you analyze the problem and decide what to change?",
+        "answer": "Each additional index can increase write cost because affected index entries must also be inserted, updated, or deleted. Start by measuring write latency, transaction duration, CPU, I/O, index maintenance activity, and workload-specific query benefits. Identify indexes with low read value, overlapping coverage, or high maintenance cost, then test alternatives such as consolidating indexes or changing index definitions. Any removal or redesign should be validated against critical read queries and constraints because optimizing writes can regress important reads.",
+        "key_concepts": [
+          "Write amplification",
+          "Index maintenance",
+          "INSERT/UPDATE cost",
+          "Index usage",
+          "Workload trade-off"
+        ],
+        "expected_points": [
+          "Explains why indexes increase write work",
+          "Uses measurements to separate CPU, I/O, locking, and query effects",
+          "Evaluates index benefit against maintenance cost",
+          "Validates index changes against critical read workloads"
+        ],
+        "common_mistakes": [
+          "Removing every index to improve writes",
+          "Looking only at query latency and ignoring transaction duration",
+          "Assuming a rarely queried index has no value without checking constraints and critical paths"
+        ],
+        "example": "A table with one frequently used lookup index may perform well, while adding eight overlapping indexes can materially increase write amplification on a high-throughput ingestion workload.",
+        "follow_up_questions": [
+          "How would you identify which index contributes most to write overhead?",
+          "How can batching or bulk loading change the index-maintenance trade-off?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "indexes",
+          "production_troubleshooting",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "write_amplification",
+          "index_maintenance",
+          "production_incident"
+        ]
+      },
+      {
+        "id": "BE-200",
+        "domain": "sql_relational_databases",
+        "topic": "Transactions & ACID",
+        "subtopic": "Transaction Boundaries",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "How should a backend service decide what operations belong inside one database transaction?",
+        "answer": "A transaction should normally contain the smallest set of database operations that must succeed or fail together to preserve a business invariant. Keeping transactions focused reduces lock duration, contention, rollback work, and failure exposure. External network calls generally should not be held open inside a database transaction because their latency and failure behavior can extend locks; when database state must coordinate with external systems, patterns such as an outbox or saga may be more appropriate.",
+        "key_concepts": [
+          "Transaction boundary",
+          "Business invariant",
+          "Lock duration",
+          "External side effects",
+          "Outbox pattern"
+        ],
+        "expected_points": [
+          "Defines transaction scope around an atomic business invariant",
+          "Recognizes that long transactions increase contention and failure impact",
+          "Avoids holding database transactions across slow external calls",
+          "Mentions an appropriate coordination pattern for external side effects"
+        ],
+        "common_mistakes": [
+          "Putting an entire HTTP request inside one transaction by default",
+          "Calling external APIs while holding database locks",
+          "Splitting operations that must remain atomic across separate transactions without a consistency strategy"
+        ],
+        "example": "Creating an order and its order items may belong in one transaction, while sending an email can happen after commit or through an outbox-based asynchronous workflow.",
+        "follow_up_questions": [
+          "When would an outbox pattern be preferable to publishing an event inside a transaction?",
+          "How can an overly broad transaction cause production contention?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "transactions",
+          "backend_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "transaction_boundary",
+          "outbox",
+          "atomicity"
+        ]
+      },
+      {
+        "id": "BE-201",
+        "domain": "sql_relational_databases",
+        "topic": "Isolation, Locking & Deadlocks",
+        "subtopic": "Read Committed vs Repeatable Read",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "What is the difference between READ COMMITTED and REPEATABLE READ isolation levels?",
+        "answer": "READ COMMITTED generally prevents a transaction from reading data that another transaction has not committed, but a repeated query can observe newly committed changes made by another transaction. REPEATABLE READ provides stronger guarantees for rows already read, so repeated reads of the same logical rows are more stable, although exact phantom behavior and implementation details vary by database system. Stronger isolation can reduce concurrency or increase contention, so the correct level depends on application invariants.",
+        "key_concepts": [
+          "READ COMMITTED",
+          "REPEATABLE READ",
+          "Dirty reads",
+          "Non-repeatable reads",
+          "Concurrency"
+        ],
+        "expected_points": [
+          "Explains that READ COMMITTED prevents dirty reads",
+          "Explains the stronger repeat-read guarantee",
+          "Distinguishes non-repeatable reads from phantom behavior",
+          "Recognizes database-specific implementation differences"
+        ],
+        "common_mistakes": [
+          "Claiming READ COMMITTED provides a consistent snapshot for the entire transaction in every database",
+          "Saying REPEATABLE READ always prevents every form of concurrent change",
+          "Choosing the strongest isolation level without considering throughput"
+        ],
+        "example": "A transaction reading an account balance twice may see a committed update between the reads under READ COMMITTED, while REPEATABLE READ may provide a stable view according to the database's implementation.",
+        "follow_up_questions": [
+          "What is a phantom read?",
+          "How does MVCC affect the behavior of these isolation levels?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "transactions",
+          "concurrency",
+          "isolation"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "read_committed",
+          "repeatable_read",
+          "isolation_levels"
+        ]
+      },
+      {
+        "id": "BE-202",
+        "domain": "sql_relational_databases",
+        "topic": "Isolation, Locking & Deadlocks",
+        "subtopic": "Deadlocks",
+        "difficulty": "Expert",
+        "question_type": "production_incident",
+        "question": "Two transactions periodically deadlock while updating related rows. How would you diagnose the deadlock and prevent or reduce its occurrence?",
+        "answer": "A deadlock occurs when transactions hold locks that the other transactions need, creating a cycle in the wait-for relationship. Diagnosis starts with the database's deadlock report or lock-wait diagnostics to identify the statements, resources, and lock acquisition order involved. Common mitigations include acquiring locks in a consistent order, keeping transactions short, reducing unnecessary locking, and retrying transactions after deadlock detection. Schema and query changes may also be needed if a query locks more rows than intended.",
+        "key_concepts": [
+          "Deadlock",
+          "Lock ordering",
+          "Wait-for cycle",
+          "Transaction retry",
+          "Lock contention"
+        ],
+        "expected_points": [
+          "Explains the circular wait condition",
+          "Uses database deadlock diagnostics to identify statements and resources",
+          "Recommends consistent lock ordering and shorter transactions",
+          "Recognizes safe retry as an important application-level mitigation"
+        ],
+        "common_mistakes": [
+          "Saying a deadlock is the same as a slow query",
+          "Fixing only one transaction without examining lock order",
+          "Retrying indefinitely without a bounded retry policy"
+        ],
+        "example": "Transaction A locks account 1 then account 2 while transaction B locks account 2 then account 1; each can wait for the other, creating a deadlock.",
+        "follow_up_questions": [
+          "Why does consistent resource ordering reduce deadlocks?",
+          "What should an application do after the database aborts a transaction because of a deadlock?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "concurrency",
+          "production_troubleshooting"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "deadlocks",
+          "locking",
+          "transaction_retry"
+        ]
+      },
+      {
+        "id": "BE-203",
+        "domain": "sql_relational_databases",
+        "topic": "Isolation, Locking & Deadlocks",
+        "subtopic": "Lost Updates",
+        "difficulty": "Expert",
+        "question_type": "scenario",
+        "question": "Two API requests read the same account balance, calculate new values in application code, and then both write the result. How can a lost update occur, and how would you prevent it?",
+        "answer": "A lost update can occur when both requests read the same old value, independently calculate new values, and then the later write overwrites the earlier update. Prevention options include atomic SQL updates such as balance = balance + amount, pessimistic row locking within a transaction, or optimistic concurrency using a version column and conditional UPDATE. The appropriate choice depends on contention, latency, and the business invariant.",
+        "key_concepts": [
+          "Lost update",
+          "Atomic UPDATE",
+          "Pessimistic locking",
+          "Optimistic concurrency",
+          "Version column"
+        ],
+        "expected_points": [
+          "Explains the read-modify-write race",
+          "Provides an atomic database-side update as one solution",
+          "Explains pessimistic and optimistic concurrency approaches",
+          "Connects the choice to contention and business requirements"
+        ],
+        "common_mistakes": [
+          "Relying on application-level reads and writes without concurrency control",
+          "Using a lock but releasing it before the update",
+          "Assuming transactions automatically prevent lost updates at every isolation level"
+        ],
+        "example": "UPDATE accounts SET balance = balance + 100 WHERE id = 42 performs the increment atomically at the database operation level rather than overwriting a value read earlier by the application.",
+        "follow_up_questions": [
+          "How would optimistic locking work with a version column?",
+          "When would pessimistic locking be preferable?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "concurrency",
+          "transactions"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "lost_update",
+          "optimistic_locking",
+          "pessimistic_locking"
+        ]
+      },
+      {
+        "id": "BE-204",
+        "domain": "sql_relational_databases",
+        "topic": "Transactions & ACID",
+        "subtopic": "Long-Running Transactions",
+        "difficulty": "Hard",
+        "question_type": "production_incident",
+        "question": "A production database shows increasing lock contention and a growing transaction history or storage footprint. Investigation finds several transactions remaining open for minutes. Why are long-running transactions dangerous, and how would you troubleshoot them?",
+        "answer": "Long-running transactions can hold locks for extended periods and prevent cleanup of row versions or transaction history in database engines that use MVCC. This can increase blocking, storage consumption, vacuum or garbage-collection pressure, and overall latency. Troubleshooting should identify sessions with old transaction start times, inspect the application code and connection lifecycle, determine whether idle-in-transaction sessions exist, and correlate transaction age with lock waits and resource usage. Fixes include narrowing transaction scope, avoiding slow external work inside transactions, and correcting connection or error-handling paths.",
+        "key_concepts": [
+          "Long-running transaction",
+          "Lock contention",
+          "MVCC",
+          "Transaction history",
+          "Idle in transaction"
+        ],
+        "expected_points": [
+          "Explains lock and version-retention consequences",
+          "Identifies how to find old or idle transactions",
+          "Connects transaction age to application connection lifecycle",
+          "Recommends reducing transaction scope and avoiding external latency inside transactions"
+        ],
+        "common_mistakes": [
+          "Assuming only active CPU-heavy transactions are dangerous",
+          "Ignoring idle-in-transaction sessions",
+          "Increasing database resources without fixing transaction lifecycle"
+        ],
+        "example": "An API opens a transaction, calls a slow external service, and commits several minutes later; during that period locks or row versions may remain active.",
+        "follow_up_questions": [
+          "How can connection-pool configuration contribute to idle transactions?",
+          "What metrics would you monitor to detect this issue early?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "transactions",
+          "production_troubleshooting",
+          "observability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "long_running_transactions",
+          "mvcc",
+          "lock_contention"
+        ]
+      },
+      {
+        "id": "BE-205",
+        "domain": "sql_relational_databases",
+        "topic": "Transactions & ACID",
+        "subtopic": "Transaction Failure and Retry Semantics",
+        "difficulty": "Expert",
+        "question_type": "production_incident",
+        "question": "A backend service retries a failed database transaction automatically, but some operations occasionally execute twice. How can transaction retries create duplicate effects, and how should the design handle retries safely?",
+        "answer": "A database transaction may fail because of a deadlock, serialization conflict, transient connection failure, or other retryable condition. Retrying is safe only when the transaction's operations are designed to be repeatable and the application correctly distinguishes a failed transaction from an externally visible side effect that may already have happened. Database writes can often be made safe with unique constraints or idempotency keys, while external side effects should be coordinated using patterns such as an outbox. Retry policies should be bounded, observable, and based on errors known to be transient.",
+        "key_concepts": [
+          "Transaction retry",
+          "Idempotency",
+          "Unique constraint",
+          "Idempotency key",
+          "Outbox pattern"
+        ],
+        "expected_points": [
+          "Explains why retrying can repeat database effects",
+          "Distinguishes retryable database failures from uncertain external side effects",
+          "Uses idempotency keys or unique constraints for duplicate protection",
+          "Recommends bounded and observable retry behavior"
+        ],
+        "common_mistakes": [
+          "Assuming every database error is safe to retry",
+          "Retrying an external payment or email call blindly",
+          "Using retries without a uniqueness or idempotency strategy"
+        ],
+        "example": "An order-creation request can use an idempotency key enforced by a unique constraint so a client retry does not create a second order.",
+        "follow_up_questions": [
+          "How would you design an idempotent order-creation API?",
+          "What is the difference between a transaction retry and an HTTP request retry?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect or vague explanation and misses the core database behavior.",
+          "average": "Explains the basic idea but misses important correctness, performance, or production considerations.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides precise reasoning, handles edge cases, and connects the concept to execution behavior and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "transactions",
+          "reliability",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "retry",
+          "idempotency",
+          "outbox"
+        ]
+      }
+    ]
+  }
+}

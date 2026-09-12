@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.admin import router as admin_router
 from app.api.health import router as health_router
 from app.api.interviews import router as interviews_router
 from app.api.question_bank import router as question_bank_router
@@ -14,3 +15,4 @@ api_router.include_router(interviews_router)
 api_router.include_router(users_router)
 api_router.include_router(question_bank_router)
 api_router.include_router(voice_router)
+api_router.include_router(admin_router)

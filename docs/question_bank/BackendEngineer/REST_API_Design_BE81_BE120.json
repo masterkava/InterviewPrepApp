@@ -1,0 +1,2100 @@
+{
+  "question_bank": {
+    "id": "backend-engineering-500",
+    "title": "Backend Engineering Interview Question Bank — 500 Questions",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "domain": "rest_api_design",
+    "question_count": 40,
+    "questions": [
+      {
+        "id": "BE-081",
+        "domain": "rest_api_design",
+        "topic": "Resource Naming",
+        "subtopic": "Nouns vs Verbs in Endpoint Design",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "Why do RESTful API conventions favor nouns over verbs in endpoint URLs?",
+        "answer": "REST models interactions around resources (nouns), and the HTTP method itself (GET, POST, PUT, DELETE) already conveys the action (verb) being performed on that resource. Using a verb in the URL, like /getUser or /createOrder, duplicates and conflicts with the semantics already carried by the HTTP method, making the API inconsistent and harder to predict.",
+        "key_concepts": [
+          "REST resource modeling",
+          "HTTP method semantics",
+          "noun-based URLs"
+        ],
+        "expected_points": [
+          "URLs represent resources, not actions",
+          "HTTP method already conveys the action",
+          "Verb-based URLs create redundant/conflicting semantics",
+          "Noun-based design improves predictability and consistency"
+        ],
+        "common_mistakes": [
+          "Designing endpoints like /getUser or /deleteOrder",
+          "Believing verbs make the API more explicit/readable",
+          "Mixing verb-based and noun-based endpoints in the same API"
+        ],
+        "example": "Instead of POST /createUser, a RESTful design uses POST /users, where the resource is 'users' and POST conveys the create action.",
+        "follow_up_questions": [
+          "Are there legitimate cases where an action-based endpoint is acceptable in an otherwise RESTful API?",
+          "How would you model a 'login' action that doesn't map cleanly to CRUD on a resource?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why verbs are discouraged.",
+          "average": "Says verbs are 'against convention' without explaining the redundancy with HTTP methods.",
+          "good": "Explains that HTTP methods already convey action, and verbs create redundancy.",
+          "excellent": "Explains the redundancy plus discusses legitimate exceptions, such as actions that don't map to CRUD."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "url_design",
+          "rest",
+          "naming_conventions"
+        ]
+      },
+      {
+        "id": "BE-082",
+        "domain": "rest_api_design",
+        "topic": "Resource Naming",
+        "subtopic": "Plural vs Singular Resource Names",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "Should REST resource collection endpoints use plural or singular nouns, and why does consistency matter here?",
+        "answer": "Convention strongly favors plural nouns for collection endpoints (e.g., /users, /orders), with an individual resource addressed by appending an identifier (e.g., /users/123). This keeps the mental model consistent: the collection is always plural, and a specific item is a member of that collection. Mixing plural and singular arbitrarily across an API makes it harder for consumers to predict URL structure.",
+        "key_concepts": [
+          "plural resource naming",
+          "collection endpoints",
+          "consistency"
+        ],
+        "expected_points": [
+          "Plural nouns are the dominant convention for collections",
+          "A specific resource is addressed as a member of the plural collection",
+          "Consistency across the API reduces cognitive load for consumers",
+          "Inconsistent naming, mixing singular/plural, creates confusion"
+        ],
+        "common_mistakes": [
+          "Using singular for some resources and plural for others without reason",
+          "Believing singular is 'more correct' grammatically and therefore better for APIs",
+          "Not applying the convention consistently across nested resources"
+        ],
+        "example": "/products and /products/42 follow the convention consistently, rather than mixing in something like /product/42 elsewhere in the same API.",
+        "follow_up_questions": [
+          "How would you name an endpoint for a resource that inherently has only one instance, like a user's profile settings?",
+          "Does this convention still apply to non-CRUD action endpoints?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Has no clear stance or reasoning.",
+          "average": "Knows plural is conventional but can't explain why consistency matters.",
+          "good": "Explains the convention and the value of consistency.",
+          "excellent": "Explains the convention, consistency value, and handles the edge case of singleton resources."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "url_design",
+          "naming_conventions",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-083",
+        "domain": "rest_api_design",
+        "topic": "Resource Naming",
+        "subtopic": "Nested Resources (Parent/Child URLs)",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "When should you model a resource as nested under a parent (e.g., /authors/5/books) versus as a flat, independent collection (e.g., /books?author_id=5)?",
+        "answer": "Nesting is appropriate when the child resource's existence and identity are strongly scoped to the parent — it doesn't meaningfully exist outside that parent context, and access is naturally always in the context of a specific parent. A flat collection with a filter is preferable when the resource can exist and be queried independently of any single parent, or when it can belong to multiple parents, since deep nesting would force an artificial hierarchy.",
+        "key_concepts": [
+          "nested resources",
+          "resource ownership",
+          "flat collections with filters"
+        ],
+        "expected_points": [
+          "Nesting fits when the child is strongly scoped/owned by the parent",
+          "Flat collections fit when the resource has independent identity or multiple relationships",
+          "Overusing nesting can force an artificial single-parent hierarchy",
+          "Both approaches can coexist for the same resource type depending on access pattern"
+        ],
+        "common_mistakes": [
+          "Nesting every related resource regardless of ownership semantics",
+          "Assuming a resource can only be modeled one way, not both depending on context",
+          "Ignoring that a resource might have multiple valid 'parents', i.e. a many-to-many relationship"
+        ],
+        "example": "/orders/123/items makes sense because order items are meaningless outside their order, while a book with multiple authors is better modeled as /books?author_id=5 rather than forcing it under a single author's nested path.",
+        "follow_up_questions": [
+          "How would you design endpoints for a resource that can belong to more than one parent?",
+          "What are the trade-offs of allowing both /authors/5/books and a top-level /books?author_id=5 for the same data?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot articulate any criteria for nesting vs flat.",
+          "average": "Prefers one approach universally without discussing trade-offs.",
+          "good": "Correctly identifies ownership/scoping as the deciding factor with an example.",
+          "excellent": "Identifies the deciding factor, discusses many-to-many complications, and notes both approaches can coexist."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "url_design",
+          "nested_resources",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-084",
+        "domain": "rest_api_design",
+        "topic": "Resource Naming",
+        "subtopic": "When Nesting Goes Too Deep",
+        "difficulty": "Hard",
+        "question_type": "tradeoff",
+        "question": "An API has an endpoint like /companies/1/departments/3/teams/7/members/42/tasks/99. What problems does this deep nesting create, and how would you redesign it?",
+        "answer": "Deeply nested URLs become brittle and hard to work with: every level requires the client to already know all ancestor IDs, URLs become long and fragile to change, and it conflates resource identity with resource location, making it hard to access a resource directly, such as a task, without traversing its entire ancestry. A better design flattens deeper levels into top-level, independently addressable collections (e.g., /tasks/99) using filters or query parameters for hierarchical context when needed (e.g., /tasks?member_id=42), typically limiting nesting to one, or at most two, levels.",
+        "key_concepts": [
+          "deep nesting problems",
+          "URL brittleness",
+          "resource identity vs location",
+          "flattening strategy"
+        ],
+        "expected_points": [
+          "Deep nesting requires clients to know the entire ancestor chain",
+          "Deep nesting makes direct resource access difficult and URLs fragile",
+          "Recommends flattening to top-level collections with filtering",
+          "Suggests a practical nesting depth limit, commonly one level"
+        ],
+        "common_mistakes": [
+          "Not identifying any concrete problems with deep nesting beyond 'it's ugly'",
+          "Proposing to keep full nesting but just shorten IDs",
+          "Not offering a concrete flattened alternative"
+        ],
+        "example": "Instead of /companies/1/departments/3/teams/7/members/42/tasks/99, expose /tasks/99 directly since a task has a unique ID, and /tasks?member_id=42 for listing a member's tasks.",
+        "follow_up_questions": [
+          "How would you still enforce authorization checks for a flattened resource that logically belongs to a nested hierarchy?",
+          "What's a reasonable rule of thumb for how many levels of nesting an API should allow?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Doesn't identify concrete problems with deep nesting.",
+          "average": "Identifies it's problematic but proposes no concrete redesign.",
+          "good": "Identifies key problems and proposes flattening with filters.",
+          "excellent": "Identifies problems, proposes flattening, gives a practical nesting-depth guideline, and considers authorization implications."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "url_design",
+          "nested_resources",
+          "tradeoffs"
+        ]
+      },
+      {
+        "id": "BE-085",
+        "domain": "rest_api_design",
+        "topic": "Versioning",
+        "subtopic": "URL Path Versioning vs Header Versioning",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What are the trade-offs between versioning an API via the URL path (e.g., /v1/users) versus via a header (e.g., Accept: application/vnd.myapi.v1+json)?",
+        "answer": "URL path versioning is highly visible, simple to understand, easy to test/debug since the version is right there in the URL, and works well with caching and browser navigation, but it technically violates the idea that a URL should identify a single, stable resource, since the same resource now has multiple URLs across versions. Header-based versioning keeps the URL stable and resource-identity clean, and is more aligned with REST's content negotiation model, but it's less discoverable, harder to test casually, and more error-prone for clients who forget to set the header.",
+        "key_concepts": [
+          "URL path versioning",
+          "header/media-type versioning",
+          "content negotiation",
+          "resource identity"
+        ],
+        "expected_points": [
+          "URL versioning is visible, simple, and cache/browser-friendly",
+          "URL versioning technically breaks the principle that a URL should identify one stable resource",
+          "Header versioning preserves URL/resource identity stability",
+          "Header versioning is less discoverable and easier for clients to misuse or forget"
+        ],
+        "common_mistakes": [
+          "Presenting one approach as strictly superior with no trade-offs",
+          "Not mentioning the resource-identity/caching implications of URL versioning",
+          "Confusing header versioning with query-parameter versioning"
+        ],
+        "example": "GitHub's API uses a header-based approach with an Accept header version, while many public APIs prefer /v1/ or /v2/ in the URL for simplicity and discoverability.",
+        "follow_up_questions": [
+          "How does query-parameter versioning (e.g., ?version=2) compare to these two approaches?",
+          "How would caching behavior differ between URL-based and header-based versioning?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe either approach accurately.",
+          "average": "Describes one approach's trade-offs but not the other's.",
+          "good": "Describes both approaches' trade-offs including visibility and resource-identity concerns.",
+          "excellent": "Describes both plus caching/discoverability implications and mentions the query-parameter alternative."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "versioning",
+          "rest",
+          "api_design"
+        ]
+      },
+      {
+        "id": "BE-086",
+        "domain": "rest_api_design",
+        "topic": "Versioning",
+        "subtopic": "Media Type (Content-Type) Versioning",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "What is media type (content-type) versioning, and how does it differ conceptually from putting a version number in the URL or a custom header?",
+        "answer": "Media type versioning embeds the version directly in the Accept/Content-Type header's media type itself, e.g., Accept: application/vnd.myapi.v2+json, treating each version as a distinct representation format of the same underlying resource, negotiated through standard HTTP content negotiation. This is conceptually different from URL versioning, which creates a distinct resource per version, or a generic custom header, which is versioning bolted on outside HTTP's native negotiation mechanism, because it leverages the Accept header's built-in purpose of choosing a representation rather than introducing an out-of-band signal.",
+        "key_concepts": [
+          "media type versioning",
+          "content negotiation",
+          "vendor-specific media types",
+          "representation vs resource identity"
+        ],
+        "expected_points": [
+          "Version is encoded in the media type string within Accept/Content-Type",
+          "Treats different versions as different representations of the same resource, not different resources",
+          "Leverages HTTP's native content negotiation mechanism",
+          "Contrasts with URL versioning, which creates a new resource per version, and generic custom headers, which are out-of-band"
+        ],
+        "common_mistakes": [
+          "Treating media type versioning as identical to generic custom-header versioning",
+          "Not explaining the 'same resource, different representation' philosophy",
+          "Assuming this approach is simpler for typical API consumers than URL versioning"
+        ],
+        "example": "Accept: application/vnd.github.v3+json tells the server which version of the resource's representation to return, using content negotiation rather than a different URL.",
+        "follow_up_questions": [
+          "What practical adoption challenges have led many public APIs to prefer simpler URL versioning over media type versioning?",
+          "How would a server handle a client that doesn't specify any version in the Accept header?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what media type versioning is.",
+          "average": "Describes it vaguely as 'header versioning' without the representation/resource-identity distinction.",
+          "good": "Correctly explains the media-type mechanism and the representation-vs-resource distinction.",
+          "excellent": "Correctly explains the mechanism, the distinction, and practical adoption trade-offs versus URL versioning."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "versioning",
+          "content_negotiation",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-087",
+        "domain": "rest_api_design",
+        "topic": "Versioning",
+        "subtopic": "Deprecating an API Version Without Breaking Clients",
+        "difficulty": "Hard",
+        "question_type": "scenario",
+        "question": "You need to retire API v1 in favor of v2, but you know some long-tail clients are still integrated against v1. How would you manage this deprecation responsibly?",
+        "answer": "Start by adding a Deprecation and Sunset header, or equivalent documentation/communication, to v1 responses well in advance, clearly communicating a firm retirement date. Instrument v1 endpoints to track which clients or API keys are still using it, and proactively reach out to identified consumers. Continue running v1 in parallel with v2 for a defined transition window rather than an abrupt cutover, and consider a final hard-deprecation phase where v1 returns errors with clear migration guidance before actually shutting it down. Avoid silently changing v1's behavior during the transition, since that itself would be a breaking change to something clients rely on.",
+        "key_concepts": [
+          "API deprecation",
+          "Sunset/Deprecation headers",
+          "usage monitoring",
+          "migration communication"
+        ],
+        "expected_points": [
+          "Communicates deprecation clearly and early, e.g., via headers and documentation",
+          "Monitors actual usage to identify still-active consumers",
+          "Provides a defined transition/overlap period rather than an abrupt cutover",
+          "Avoids silently changing v1 behavior during the deprecation window"
+        ],
+        "common_mistakes": [
+          "Proposing to just shut off v1 on a fixed date without monitoring who's still using it",
+          "Not mentioning any concrete signaling mechanism, such as headers or docs",
+          "Assuming all clients will proactively notice a deprecation notice without direct outreach"
+        ],
+        "example": "A team adds Deprecation: true and a Sunset header with a firm date to all v1 responses, tracks API-key-level usage, and emails the remaining active integrators with migration guidance three months before the sunset date.",
+        "follow_up_questions": [
+          "How would you handle a client who never migrates and is still active past the sunset date?",
+          "What's the difference between a 'soft deprecation' and a 'hard deprecation' phase?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes a single abrupt cutover date with no communication plan.",
+          "average": "Mentions communicating deprecation but not usage monitoring or a transition window.",
+          "good": "Proposes clear signaling, usage monitoring, and a transition window.",
+          "excellent": "Proposes signaling, usage monitoring, a transition window, and a defined hard-deprecation escalation phase for stragglers."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design",
+          "backend_fundamentals"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "versioning",
+          "deprecation",
+          "api_design"
+        ]
+      },
+      {
+        "id": "BE-088",
+        "domain": "rest_api_design",
+        "topic": "Versioning",
+        "subtopic": "Semantic Versioning Applied to APIs",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "How does the semantic versioning concept (major.minor.patch) map onto API versioning decisions, and why do most public APIs only expose the major version number?",
+        "answer": "In semantic versioning, a major version bump signals breaking changes, a minor version bump signals backward-compatible additions like new optional fields or endpoints, and a patch bump signals backward-compatible bug fixes. Most public APIs only expose the major version (e.g., /v1/, /v2/) because minor and patch changes are, by definition, backward-compatible and shouldn't require the client to do anything or even be aware of them — only a major, breaking change genuinely requires a new, explicitly chosen version for clients to opt into.",
+        "key_concepts": [
+          "semantic versioning",
+          "major/minor/patch",
+          "backward-compatible changes",
+          "breaking changes"
+        ],
+        "expected_points": [
+          "Major version = breaking changes",
+          "Minor version = backward-compatible additions",
+          "Patch version = backward-compatible fixes",
+          "Only major versions are exposed publicly since minor/patch shouldn't require client action"
+        ],
+        "common_mistakes": [
+          "Believing every API change should bump the exposed version number",
+          "Not distinguishing backward-compatible additions from breaking changes",
+          "Assuming minor/patch versions need to be explicitly requested by clients"
+        ],
+        "example": "Adding a new optional field to a response is a minor, non-breaking change that doesn't require a new API version; removing or renaming an existing field is a breaking change that warrants a new major version like v2.",
+        "follow_up_questions": [
+          "What criteria would you use to decide whether a given API change is actually breaking or not?",
+          "How would you handle a change that's breaking for some clients but not others, depending on how they use the field?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain semantic versioning's major/minor/patch distinction.",
+          "average": "Explains the distinction generically but doesn't connect it to why only major is exposed.",
+          "good": "Correctly explains the distinction and why only major versions are exposed.",
+          "excellent": "Correctly explains the distinction, the exposure rationale, and gives concrete examples of breaking vs non-breaking changes."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "versioning",
+          "semantic_versioning",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-089",
+        "domain": "rest_api_design",
+        "topic": "Backward Compatibility",
+        "subtopic": "What Counts as a Breaking Change",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What types of API changes are generally considered 'breaking' versus 'non-breaking' for consumers?",
+        "answer": "Breaking changes typically include removing or renaming a field or endpoint, changing a field's data type or meaning, making a previously optional field required, changing existing validation rules to be stricter, or altering the status code or error format a client already depends on. Non-breaking changes typically include adding a new optional field to a response, adding a new endpoint, adding a new optional request parameter, or relaxing an existing validation constraint. The general principle is whether existing, correctly-written client code would continue to function without modification.",
+        "key_concepts": [
+          "breaking changes",
+          "non-breaking changes",
+          "backward compatibility",
+          "client contract"
+        ],
+        "expected_points": [
+          "Removing/renaming fields or endpoints is breaking",
+          "Changing a field's type/meaning is breaking",
+          "Adding new optional fields/endpoints is generally non-breaking",
+          "The core test is whether existing correct client code still works unmodified"
+        ],
+        "common_mistakes": [
+          "Assuming any change to the API is automatically breaking",
+          "Believing adding a required field is safe because 'it's just an addition'",
+          "Not applying the 'would existing client code still work' test consistently"
+        ],
+        "example": "Adding an optional 'nickname' field to a user response is non-breaking, but renaming 'email' to 'emailAddress' is breaking because existing clients parsing 'email' would silently lose that data.",
+        "follow_up_questions": [
+          "Is adding a new required field to a request body a breaking change? Why or why not?",
+          "How would strict client-side JSON schema validation change what counts as 'breaking' in practice?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish breaking from non-breaking changes.",
+          "average": "Gives a couple of examples but no general principle.",
+          "good": "Gives accurate examples of both categories and states the general 'existing code still works' principle.",
+          "excellent": "Gives accurate examples, states the principle, and discusses an edge case like strict client-side validation changing the calculus."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "backward_compatibility",
+          "breaking_changes",
+          "versioning"
+        ]
+      },
+      {
+        "id": "BE-090",
+        "domain": "rest_api_design",
+        "topic": "Backward Compatibility",
+        "subtopic": "Adding a Required Field Safely",
+        "difficulty": "Hard",
+        "question_type": "scenario",
+        "question": "Product wants to make a 'phoneNumber' field required on the user creation endpoint, but you have existing client integrations that don't send it. How would you roll this out without breaking them?",
+        "answer": "Making a field required immediately would break any existing client that doesn't send it, resulting in validation errors on their existing, working integration. Instead, roll it out in phases: first make it optional but start requiring or prompting for it in the primary first-party client, communicate the upcoming requirement to third-party integrators with a firm deadline, monitor how many requests are still omitting it, and only enforce the requirement once usage data shows adoption is high enough or the deadline has passed — potentially behind a new major API version if truly required for everyone, so old clients aren't retroactively broken.",
+        "key_concepts": [
+          "required field rollout",
+          "backward compatibility",
+          "phased enforcement",
+          "client migration"
+        ],
+        "expected_points": [
+          "Recognizes that immediately requiring it breaks existing clients",
+          "Proposes a phased rollout: optional first, then monitor adoption",
+          "Proposes clear communication and a deadline to third-party integrators",
+          "Considers gating true enforcement behind a new major version rather than retroactively breaking v1"
+        ],
+        "common_mistakes": [
+          "Just making the field required immediately without considering existing clients",
+          "Proposing a phased approach without any monitoring or deadline to actually reach full enforcement",
+          "Not considering versioning as an option for truly mandatory changes"
+        ],
+        "example": "The team makes phoneNumber optional but strongly recommended for three months, monitors that 95% of traffic now includes it, sends final warnings to the remaining integrators, and only then enforces it as required, or introduces v2 with the requirement rather than breaking v1 consumers outright.",
+        "follow_up_questions": [
+          "How would you handle the small percentage of clients who never send the field even after the deadline passes?",
+          "What monitoring would you put in place to track adoption before enforcing the requirement?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes making the field required immediately with no transition.",
+          "average": "Recognizes the risk but proposes a vague 'communicate it' plan without monitoring or a concrete mechanism.",
+          "good": "Proposes a phased rollout with monitoring and a deadline.",
+          "excellent": "Proposes a phased rollout, monitoring, a deadline, and considers versioning as a fallback for true enforcement."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design",
+          "backend_fundamentals"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "backward_compatibility",
+          "breaking_changes",
+          "rollout_strategy"
+        ]
+      },
+      {
+        "id": "BE-091",
+        "domain": "rest_api_design",
+        "topic": "Pagination",
+        "subtopic": "Offset-Based Pagination",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "How does offset-based pagination work, and what does a typical request look like?",
+        "answer": "Offset-based pagination retrieves a page of results by specifying how many records to skip, the offset, and how many to return, the limit — e.g., GET /products?offset=40&limit=20 returns records 41 through 60. It's simple to implement and understand, and allows jumping directly to an arbitrary page without having walked through prior pages.",
+        "key_concepts": [
+          "offset-based pagination",
+          "limit/offset parameters",
+          "arbitrary page access"
+        ],
+        "expected_points": [
+          "Uses offset, records to skip, and limit, page size, parameters",
+          "Allows jumping directly to any page",
+          "Simple to implement and reason about",
+          "Typically implemented via a database OFFSET/LIMIT clause"
+        ],
+        "common_mistakes": [
+          "Confusing offset, records to skip, with page number directly",
+          "Not knowing how it maps to underlying database queries",
+          "Assuming offset pagination has no downsides"
+        ],
+        "example": "GET /products?offset=40&limit=20 skips the first 40 products and returns the next 20.",
+        "follow_up_questions": [
+          "What performance problem does offset-based pagination have with very large offsets?",
+          "How would you compute the offset for a given page number and page size?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain how offset pagination works.",
+          "average": "Describes it vaguely without concrete parameters.",
+          "good": "Correctly explains offset/limit and gives an accurate example.",
+          "excellent": "Correctly explains it and previews the performance limitation with large offsets."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "pagination",
+          "rest",
+          "api_design"
+        ]
+      },
+      {
+        "id": "BE-092",
+        "domain": "rest_api_design",
+        "topic": "Pagination",
+        "subtopic": "Cursor-Based Pagination",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "How does cursor-based pagination differ from offset-based pagination, and what problem does it solve?",
+        "answer": "Instead of specifying a numeric offset, cursor-based pagination returns an opaque token, the cursor, pointing to a specific position in the result set, typically derived from a unique, sortable field like an ID or timestamp of the last item seen. The client passes this cursor back to fetch the next page. This avoids the performance degradation of large OFFSET values in the database and, importantly, avoids skipped or duplicated records when the underlying data set changes between page requests, such as when new items are inserted.",
+        "key_concepts": [
+          "cursor-based pagination",
+          "opaque cursor token",
+          "stable pagination under mutation",
+          "performance at scale"
+        ],
+        "expected_points": [
+          "Uses an opaque cursor pointing to a position instead of a numeric offset",
+          "Cursor is typically derived from a stable, sortable field",
+          "Avoids performance issues with large offsets",
+          "Avoids skipped/duplicated results when data changes between requests"
+        ],
+        "common_mistakes": [
+          "Believing a cursor is just an offset encoded differently",
+          "Not explaining the data-consistency benefit under concurrent inserts/deletes",
+          "Assuming cursor pagination allows jumping to an arbitrary page like offset pagination does"
+        ],
+        "example": "GET /products?after=eyJpZCI6NDB9&limit=20 returns the next 20 products after the one referenced by the cursor, remaining stable even if products are inserted earlier in the list between requests.",
+        "follow_up_questions": [
+          "Why can't cursor-based pagination easily support jumping directly to 'page 5'?",
+          "What field(s) make a good basis for a pagination cursor, and why does uniqueness matter?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what a cursor is or how it differs from offset.",
+          "average": "Knows it's 'different from offset' but can't explain the mechanism or benefit.",
+          "good": "Correctly explains the cursor mechanism and the performance benefit.",
+          "excellent": "Correctly explains the mechanism, performance benefit, and the data-consistency benefit under concurrent mutation."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "pagination",
+          "rest",
+          "scalability"
+        ]
+      },
+      {
+        "id": "BE-093",
+        "domain": "rest_api_design",
+        "topic": "Pagination",
+        "subtopic": "Offset vs Cursor Trade-offs at Scale",
+        "difficulty": "Hard",
+        "question_type": "tradeoff",
+        "question": "For a social media feed with millions of rapidly changing posts, would you choose offset-based or cursor-based pagination, and why?",
+        "answer": "Cursor-based pagination is strongly preferred here. Offset-based pagination would degrade in performance as the offset grows large, since the database still has to scan or skip all preceding rows, and with a rapidly mutating dataset, offset pagination is prone to showing duplicate or skipped posts as new posts are inserted ahead of the current page between requests. Cursor-based pagination avoids both problems: it performs efficiently regardless of position by using an indexed comparison instead of a skip, and it remains stable relative to a fixed reference point, the cursor, even as new posts are added. The trade-off is that cursor pagination can't support jumping to an arbitrary page number, which is usually acceptable for a feed UI that only scrolls forward.",
+        "key_concepts": [
+          "cursor pagination at scale",
+          "offset pagination performance degradation",
+          "pagination stability under mutation"
+        ],
+        "expected_points": [
+          "Recommends cursor-based pagination for this scenario",
+          "Explains offset pagination's performance degradation with large offsets",
+          "Explains offset pagination's duplicate/skipped-record risk under frequent inserts",
+          "Acknowledges the trade-off that cursor pagination can't jump to arbitrary pages, but notes this is acceptable for a feed"
+        ],
+        "common_mistakes": [
+          "Recommending offset pagination for a high-scale, rapidly mutating feed without acknowledging the risks",
+          "Not explaining why performance degrades specifically with large offsets",
+          "Not acknowledging any trade-off/limitation of the recommended approach"
+        ],
+        "example": "A feed using cursor-based pagination based on created_at and id lets a user scroll indefinitely with consistent performance and without seeing duplicate posts, even as thousands of new posts are created per minute.",
+        "follow_up_questions": [
+          "How would you implement a stable cursor when sorting by a non-unique field, like created_at, where ties can occur?",
+          "Would your recommendation change if the product required jump-to-page functionality?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Recommends an approach without justification tied to the scale/mutation scenario.",
+          "average": "Recommends cursor pagination but explains only one of the two benefits, performance or stability.",
+          "good": "Recommends cursor pagination and explains both the performance and stability benefits.",
+          "excellent": "Recommends cursor pagination, explains both benefits, and explicitly acknowledges the page-jump limitation as an accepted trade-off."
+        },
+        "skills": [
+          "rest_api_design",
+          "distributed_systems",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "pagination",
+          "scalability",
+          "tradeoffs"
+        ]
+      },
+      {
+        "id": "BE-094",
+        "domain": "rest_api_design",
+        "topic": "Filtering & Sorting",
+        "subtopic": "Designing Query Parameters for Filtering",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What conventions are commonly used for designing filtering query parameters on a collection endpoint, like GET /orders?",
+        "answer": "A common convention is to use the field name directly as the query parameter for equality filters, such as ?status=shipped, and to use a suffix or operator syntax for comparison filters, such as ?created_after=2026-01-01 or ?price[gte]=100. Multiple values for the same field are often supported via repeated parameters or comma-separated lists, such as ?status=shipped,delivered. Consistency in naming and operator conventions across the whole API matters more than which specific convention is chosen.",
+        "key_concepts": [
+          "filtering conventions",
+          "equality filters",
+          "range/comparison filters",
+          "multi-value filters"
+        ],
+        "expected_points": [
+          "Equality filters typically use the field name directly as the parameter",
+          "Range/comparison filters need an explicit convention, such as a suffix or operator syntax",
+          "Multi-value filtering needs a defined convention, such as repeated params or comma-separated values",
+          "Consistency across the API matters more than the specific convention chosen"
+        ],
+        "common_mistakes": [
+          "Inventing a different filtering syntax for every endpoint",
+          "Not accounting for range/comparison filters beyond simple equality",
+          "Overloading a single parameter name to mean different things across endpoints"
+        ],
+        "example": "GET /orders?status=shipped&created_after=2026-01-01&price[gte]=100 filters orders by exact status, a date range, and a minimum price using a consistent, documented convention.",
+        "follow_up_questions": [
+          "How would you design filtering for a field that needs both an exact match and a range comparison depending on context?",
+          "What are the trade-offs of a flexible query-language-style filter parameter versus individual named parameters?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot propose any filtering convention.",
+          "average": "Proposes a convention for equality filters only.",
+          "good": "Proposes conventions covering equality, range, and multi-value filters.",
+          "excellent": "Proposes conventions for all three and emphasizes consistency as the key design principle across the API."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "filtering",
+          "query_parameters",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-095",
+        "domain": "rest_api_design",
+        "topic": "Filtering & Sorting",
+        "subtopic": "Complex Filter Expressions (AND/OR)",
+        "difficulty": "Hard",
+        "question_type": "implementation",
+        "question": "A client needs to filter orders using a complex boolean expression like (status = shipped OR status = delivered) AND created_after > 2026-01-01. How would you design an API to support this without letting query complexity spiral out of control?",
+        "answer": "For genuinely complex, ad-hoc boolean filtering, simple flat query parameters become insufficient because they can't express arbitrary AND/OR nesting. Options include supporting a constrained filter query language in a single parameter with a well-documented, limited grammar; accepting a structured filter object in the request body via a POST-based search endpoint, such as POST /orders/search, since GET with a body is non-standard; or exposing a small set of common, pre-defined composite filters instead of fully general boolean expressions, if the use cases are actually limited. A fully general query language should only be built if there's a real, ongoing need for it, since it adds significant complexity and potential injection-style risk if not carefully validated.",
+        "key_concepts": [
+          "complex filter expressions",
+          "filter query language",
+          "search endpoint pattern",
+          "avoiding overengineering"
+        ],
+        "expected_points": [
+          "Recognizes flat query parameters can't express arbitrary boolean logic",
+          "Proposes either a constrained filter-query-language parameter or a POST-based search endpoint",
+          "Notes GET with a request body is non-standard, motivating the POST /search pattern for complex queries",
+          "Cautions against building unnecessary complexity if simpler predefined filters would suffice"
+        ],
+        "common_mistakes": [
+          "Proposing an unbounded, fully general query language without considering validation/injection risk",
+          "Not recognizing the GET-with-body limitation as a reason to use POST for complex search",
+          "Jumping straight to a heavy solution, such as a full query DSL, without considering simpler predefined filters first"
+        ],
+        "example": "A POST /orders/search endpoint accepts a structured JSON filter body describing nested AND/OR conditions, avoiding the awkwardness of expressing that logic in a GET query string.",
+        "follow_up_questions": [
+          "What validation would you need to prevent a filter query language from becoming a vector for resource-exhausting or malicious queries?",
+          "How would this approach affect cacheability compared to a GET-based filtering endpoint?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes cramming arbitrary boolean logic into simple flat query parameters without acknowledging the limitation.",
+          "average": "Recognizes the limitation but proposes only one option without discussing its trade-offs.",
+          "good": "Proposes at least one workable pattern, filter language or POST search, with reasonable justification.",
+          "excellent": "Proposes multiple options, discusses the GET-body limitation, and cautions against overengineering plus mentions validation/injection risk."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "filtering",
+          "search",
+          "api_design"
+        ]
+      },
+      {
+        "id": "BE-096",
+        "domain": "rest_api_design",
+        "topic": "Sparse Fieldsets",
+        "subtopic": "Letting Clients Request Partial Fields",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is a 'sparse fieldset', and why might an API want to let clients request only specific fields of a resource?",
+        "answer": "A sparse fieldset lets a client specify which fields it wants included in the response, such as GET /users/42?fields=id,name,email, rather than always returning the full resource representation. This reduces response payload size, which matters for bandwidth-constrained clients like mobile apps, and for reducing unnecessary serialization work on the server, especially for resources with many fields or expensive-to-compute fields the client doesn't need.",
+        "key_concepts": [
+          "sparse fieldsets",
+          "partial response",
+          "payload size reduction",
+          "field selection"
+        ],
+        "expected_points": [
+          "Client specifies which fields to include via a query parameter",
+          "Reduces payload size and bandwidth usage",
+          "Reduces unnecessary server-side serialization/computation",
+          "Particularly useful for resources with many or expensive fields"
+        ],
+        "common_mistakes": [
+          "Assuming sparse fieldsets are the same as filtering, which selects resources, not fields",
+          "Not recognizing the server-side computation savings, only the payload-size savings",
+          "Assuming this is always necessary rather than a targeted optimization"
+        ],
+        "example": "GET /users/42?fields=id,name,email returns only those three fields instead of the full user object, which might include rarely-needed fields like a lengthy biography or activity history.",
+        "follow_up_questions": [
+          "How would you handle a client requesting a field that doesn't exist on the resource?",
+          "How does this interact with caching if different clients request different field subsets?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what a sparse fieldset is.",
+          "average": "Describes it vaguely as 'choosing what data to get back' without explaining the motivation.",
+          "good": "Correctly explains the mechanism and the bandwidth/serialization motivation.",
+          "excellent": "Correctly explains the mechanism, motivation, and a practical consideration like caching implications."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "sparse_fieldsets",
+          "rest",
+          "performance"
+        ]
+      },
+      {
+        "id": "BE-097",
+        "domain": "rest_api_design",
+        "topic": "Data Shaping",
+        "subtopic": "REST's Over/Under-fetching vs GraphQL",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "What are 'over-fetching' and 'under-fetching' in the context of REST APIs, and how does GraphQL address these problems?",
+        "answer": "Over-fetching happens when a REST endpoint returns more data than the client actually needs, since the response shape is fixed by the server — for example, a mobile screen only needs a user's name and avatar, but the endpoint returns the entire user object. Under-fetching happens when a single REST endpoint doesn't return enough related data, forcing the client to make multiple sequential requests to different endpoints to assemble what it needs. GraphQL addresses both by letting the client specify exactly which fields and nested relationships it wants in a single query, so the server returns precisely that shape in one round trip.",
+        "key_concepts": [
+          "over-fetching",
+          "under-fetching",
+          "fixed response shape",
+          "GraphQL query flexibility"
+        ],
+        "expected_points": [
+          "Over-fetching: server returns more data than the client needs",
+          "Under-fetching: a single endpoint doesn't return enough related data, requiring multiple requests",
+          "Both stem from REST's fixed, server-defined response shape per endpoint",
+          "GraphQL lets clients specify the exact fields/relationships needed in one request"
+        ],
+        "common_mistakes": [
+          "Confusing over-fetching and under-fetching with each other",
+          "Believing REST can never address these problems, since sparse fieldsets and endpoint design can partially mitigate them",
+          "Presenting GraphQL as strictly superior without mentioning its own trade-offs"
+        ],
+        "example": "A mobile app screen needing a user's name, their 3 most recent posts, and each post's comment count would require several REST requests to different endpoints, but could be expressed as a single GraphQL query specifying exactly that shape.",
+        "follow_up_questions": [
+          "What REST techniques, like sparse fieldsets or endpoint composition, can partially mitigate over/under-fetching without adopting GraphQL?",
+          "What trade-offs does GraphQL introduce in exchange for solving this problem, such as caching complexity?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot define over-fetching or under-fetching.",
+          "average": "Defines one correctly but confuses the other, or doesn't connect them to GraphQL's solution.",
+          "good": "Correctly defines both and explains GraphQL's approach to addressing them.",
+          "excellent": "Correctly defines both, explains GraphQL's approach, and discusses REST-side mitigations or GraphQL's own trade-offs."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "graphql",
+          "over_fetching",
+          "under_fetching",
+          "api_design"
+        ]
+      },
+      {
+        "id": "BE-098",
+        "domain": "rest_api_design",
+        "topic": "Error Handling",
+        "subtopic": "Consistent Error Response Format (RFC 7807)",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Why is it valuable to standardize API error responses using a consistent format like RFC 7807 (Problem Details for HTTP APIs), and what does such a format typically include?",
+        "answer": "Without a consistent error format, every endpoint, or every developer, might shape error responses differently, forcing clients to write endpoint-specific error-parsing logic. RFC 7807 defines a standard JSON structure for error responses including fields like type, a URI identifying the error category; title, a short human-readable summary; status, the HTTP status code duplicated in the body for convenience; detail, a specific, human-readable explanation; and instance, a URI identifying this specific occurrence. Standardizing on a format like this lets clients build one generic error-handling path across the entire API.",
+        "key_concepts": [
+          "RFC 7807",
+          "Problem Details",
+          "standardized error format",
+          "type/title/status/detail/instance"
+        ],
+        "expected_points": [
+          "Explains the problem of inconsistent, endpoint-specific error formats",
+          "Names RFC 7807 and its purpose of standardizing error responses",
+          "Describes key fields such as type, title, status, and detail",
+          "Explains the client-side benefit of a single generic error-handling path"
+        ],
+        "common_mistakes": [
+          "Only describing 'returning a proper status code' without addressing the body's structure",
+          "Not naming any of the standard fields",
+          "Assuming every API needs a fully custom error format instead of considering an existing standard"
+        ],
+        "example": "A validation failure might return a body with type identifying the error category, title as 'Validation Failed', status 400, and detail explaining the 'email' field is not a valid email address.",
+        "follow_up_questions": [
+          "How would you extend RFC 7807's format to represent multiple field-level validation errors in one response?",
+          "What are the trade-offs of adopting a formal standard like RFC 7807 versus a simpler custom error format?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the value of standardizing error formats.",
+          "average": "Explains the general value of consistency but doesn't reference concrete fields or the standard.",
+          "good": "Explains the value and names RFC 7807 with some of its fields.",
+          "excellent": "Explains the value, names RFC 7807, describes its fields accurately, and gives a concrete example."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "error_handling",
+          "rfc7807",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-099",
+        "domain": "rest_api_design",
+        "topic": "Error Handling",
+        "subtopic": "Validation Errors Across Multiple Fields",
+        "difficulty": "Medium",
+        "question_type": "scenario",
+        "question": "A client submits a form with three invalid fields at once. Should the API return all three validation errors in a single response, or stop at the first one found? How would you design the response?",
+        "answer": "Generally, an API should collect and return all validation errors in a single response rather than stopping at the first failure, since returning only one error forces the client and the end user through a frustrating trial-and-error loop across multiple round trips. The response body should include a list of field-level error objects, each identifying the specific field, the validation rule that failed, and a human-readable message, wrapped in an overall 400 Bad Request or 422 Unprocessable Entity response.",
+        "key_concepts": [
+          "batch validation errors",
+          "field-level error reporting",
+          "422 Unprocessable Entity"
+        ],
+        "expected_points": [
+          "Recommends returning all validation errors at once rather than one at a time",
+          "Explains the UX/round-trip cost of stopping at the first error",
+          "Proposes a response structure with a list of field-level errors",
+          "Mentions an appropriate status code such as 400 or 422"
+        ],
+        "common_mistakes": [
+          "Defaulting to returning only the first validation error found",
+          "Not proposing a concrete structure for representing multiple field errors",
+          "Confusing validation errors, 422, with generic malformed request errors, 400, without acknowledging both are reasonably used in practice"
+        ],
+        "example": "A response might list errors as an array of objects, each with a field name and message, such as email must be a valid email and age must be a positive integer, with an overall 422 status.",
+        "follow_up_questions": [
+          "Should validation ever stop early, such as when one field's invalidity makes further validation of dependent fields meaningless?",
+          "How would you localize validation error messages for clients in different languages?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Recommends stopping at the first error with no justification.",
+          "average": "Recommends returning all errors but proposes no concrete response structure.",
+          "good": "Recommends returning all errors, proposes a field-level error structure, and mentions an appropriate status code.",
+          "excellent": "Recommends returning all errors, proposes a structure, mentions status code, and discusses a legitimate exception for early stopping."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "error_handling",
+          "validation",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-100",
+        "domain": "rest_api_design",
+        "topic": "HATEOAS",
+        "subtopic": "What It Means and Why It's Rarely Fully Implemented",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "What does HATEOAS (Hypermedia as the Engine of Application State) mean in REST, and why is it rarely fully implemented in practice despite being part of Roy Fielding's original REST definition?",
+        "answer": "HATEOAS means that a client should be able to navigate an API's available actions entirely through hyperlinks embedded in server responses, rather than the client hardcoding endpoint URLs and knowing in advance what actions are possible, similar to how a human navigates a website by following links rather than typing every URL from memory. It's rarely fully implemented because it adds significant server-side complexity to generate contextual links, most client tooling and SDKs are built around hardcoded endpoint knowledge rather than dynamic link-following, and in practice API consumers are developers reading documentation and writing code against a known contract, not generic clients discovering behavior at runtime the way a browser does.",
+        "key_concepts": [
+          "HATEOAS",
+          "hypermedia controls",
+          "discoverability",
+          "REST maturity"
+        ],
+        "expected_points": [
+          "Clients navigate available actions via links embedded in responses, not hardcoded URLs",
+          "Analogous to browsing a website by following links",
+          "Rarely implemented due to server-side complexity of generating contextual links",
+          "Most real-world client tooling is built around known, hardcoded contracts rather than runtime discovery"
+        ],
+        "common_mistakes": [
+          "Confusing HATEOAS with simply including some links, like pagination 'next' links, without the fuller discoverability concept",
+          "Not explaining any reason why it's rarely fully implemented",
+          "Believing HATEOAS is required for an API to be 'RESTful' in the colloquial sense used by most engineers today"
+        ],
+        "example": "A fully HATEOAS response for an order might include links for cancel, pay, or ship only when those actions are actually valid given the order's current state, letting the client discover valid next actions dynamically rather than hardcoding that logic.",
+        "follow_up_questions": [
+          "What's an example of a partial HATEOAS pattern, like pagination links, that many APIs do implement without going all the way?",
+          "Does HATEOAS provide real value for machine-to-machine API integrations the way it does for a human browsing a website?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what HATEOAS means.",
+          "average": "Gives a rough definition but can't explain why it's rarely fully adopted.",
+          "good": "Correctly explains the concept and at least one reason for low adoption.",
+          "excellent": "Correctly explains the concept, multiple reasons for low adoption, and gives a concrete example of dynamic, state-dependent links."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "hateoas",
+          "rest",
+          "hypermedia"
+        ]
+      },
+      {
+        "id": "BE-101",
+        "domain": "rest_api_design",
+        "topic": "API Contracts",
+        "subtopic": "Purpose of OpenAPI/Swagger Specifications",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is OpenAPI (formerly Swagger), and what problem does it solve for API development?",
+        "answer": "OpenAPI is a standardized, machine-readable specification format, typically YAML or JSON, for describing a REST API's endpoints, request/response schemas, parameters, and authentication methods. It solves the problem of API documentation drifting out of sync with the actual implementation and enables tooling, such as auto-generated interactive documentation, client SDK generation, server stub generation, and automated request/response validation, to be built directly from a single source of truth describing the API's contract.",
+        "key_concepts": [
+          "OpenAPI specification",
+          "machine-readable API contract",
+          "documentation tooling",
+          "code generation"
+        ],
+        "expected_points": [
+          "OpenAPI is a standardized format for describing an API's contract",
+          "Solves documentation drift by having a single source of truth",
+          "Enables tooling like auto-generated docs and client/server code generation",
+          "Describes endpoints, schemas, parameters, and auth methods"
+        ],
+        "common_mistakes": [
+          "Believing OpenAPI is just a documentation UI, like Swagger UI, rather than the underlying specification format",
+          "Not mentioning any of the tooling benefits, such as codegen or validation",
+          "Confusing OpenAPI with a specific programming language or framework"
+        ],
+        "example": "A team maintains an OpenAPI spec file describing all endpoints, which automatically generates interactive API documentation and a TypeScript client SDK, keeping docs and code in sync with the actual API contract.",
+        "follow_up_questions": [
+          "What's the difference between writing the OpenAPI spec by hand versus generating it automatically from code annotations?",
+          "How can an OpenAPI spec be used to automatically validate incoming requests before they reach application logic?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what OpenAPI is.",
+          "average": "Knows it's 'API documentation' without explaining the machine-readable contract aspect.",
+          "good": "Correctly explains it as a machine-readable contract and names at least one tooling benefit.",
+          "excellent": "Correctly explains it and names multiple tooling benefits like codegen, validation, and interactive docs."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "openapi",
+          "swagger",
+          "documentation"
+        ]
+      },
+      {
+        "id": "BE-102",
+        "domain": "rest_api_design",
+        "topic": "API Contracts",
+        "subtopic": "Contract-First vs Code-First API Design",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between 'contract-first' and 'code-first' API design, and what are the trade-offs of each?",
+        "answer": "In contract-first design, the API specification is written and agreed upon before any implementation code is written, allowing frontend and backend teams to work in parallel against a shared, reviewed contract, and catching design problems early. In code-first design, the specification is generated from annotations or reflection on the actual implementation code, making it faster to get started and guaranteeing the spec never drifts from the real behavior, but design decisions are made implicitly through code structure rather than deliberately reviewed upfront, and the API shape can be more strongly influenced by implementation convenience than good API design.",
+        "key_concepts": [
+          "contract-first design",
+          "code-first design",
+          "API design review",
+          "spec/implementation drift"
+        ],
+        "expected_points": [
+          "Contract-first: spec is written and agreed upon before implementation",
+          "Contract-first enables parallel frontend/backend work and early design review",
+          "Code-first: spec is generated from the implementation itself",
+          "Code-first is faster to start and avoids drift, but design is less deliberate and can be shaped by implementation convenience"
+        ],
+        "common_mistakes": [
+          "Presenting one approach as universally correct without trade-offs",
+          "Not mentioning the parallel-work benefit of contract-first",
+          "Not mentioning the drift-avoidance benefit of code-first"
+        ],
+        "example": "A team building a public-facing API used by many external partners might choose contract-first to ensure a well-reviewed, stable design, while an internal microservice's API might use code-first for speed since drift concerns and external partner impact are lower.",
+        "follow_up_questions": [
+          "What process would you put in place to prevent an OpenAPI spec from drifting out of sync with the implementation under contract-first design?",
+          "Can contract-first and code-first practices be combined in the same project?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the two approaches.",
+          "average": "Describes one approach accurately but not the trade-offs of the other.",
+          "good": "Describes both approaches and at least one trade-off for each.",
+          "excellent": "Describes both approaches, their trade-offs, and gives a concrete scenario for choosing one over the other."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "openapi",
+          "api_design_process"
+        ]
+      },
+      {
+        "id": "BE-103",
+        "domain": "rest_api_design",
+        "topic": "Bulk Operations",
+        "subtopic": "Designing a Bulk Create Endpoint",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "How would you design an endpoint that allows a client to create multiple resources, such as 100 products, in a single request, rather than making 100 separate POST requests?",
+        "answer": "Design a dedicated bulk endpoint, such as POST /products/bulk, accepting an array of resource objects in the request body. The response should return per-item results, including which items succeeded with their created IDs and which failed with a reason, rather than a single pass/fail outcome for the whole batch, since partial success is common and the client needs to know exactly which items to retry or fix. Consider limiting the maximum batch size to avoid excessively large requests overwhelming the server.",
+        "key_concepts": [
+          "bulk create endpoint",
+          "batch request design",
+          "per-item result reporting",
+          "batch size limits"
+        ],
+        "expected_points": [
+          "Proposes a dedicated bulk endpoint accepting an array of items",
+          "Returns per-item success/failure results rather than one aggregate result",
+          "Explains why partial success matters for a usable client experience",
+          "Considers a maximum batch size limit"
+        ],
+        "common_mistakes": [
+          "Designing the endpoint to succeed or fail as an all-or-nothing unit without per-item reporting",
+          "Not considering a batch size limit, risking very large or abusive requests",
+          "Reusing the singular POST /products endpoint with an array body without a distinct route or clear documentation"
+        ],
+        "example": "POST /products/bulk with an array of 100 product objects returns a response listing which of the 100 succeeded with their new IDs and which failed with specific validation errors, rather than a single 200 or 400 for the entire batch.",
+        "follow_up_questions": [
+          "Should a bulk create operation be transactional, all-or-nothing, or allow partial success? What are the trade-offs?",
+          "How would you design rate limiting for bulk endpoints differently than for single-item endpoints?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes no concrete design beyond 'accept an array'.",
+          "average": "Proposes accepting an array but no per-item result handling.",
+          "good": "Proposes a dedicated endpoint with per-item result reporting.",
+          "excellent": "Proposes a dedicated endpoint, per-item result reporting, and a batch size limit consideration."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "bulk_operations",
+          "batch_requests",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-104",
+        "domain": "rest_api_design",
+        "topic": "Bulk Operations",
+        "subtopic": "Handling Partial Failure in Bulk Requests",
+        "difficulty": "Hard",
+        "question_type": "scenario",
+        "question": "In a bulk request creating 100 orders, 95 succeed and 5 fail due to validation errors. What HTTP status code should the overall response use, and how should the response body communicate this mixed outcome?",
+        "answer": "Since the outcome is neither a complete success nor a complete failure, a common approach is to return 207 Multi-Status, borrowed from WebDAV, to explicitly signal a mixed-result response, though some APIs pragmatically use 200 OK with a detailed body instead, since 207 isn't universally supported by tooling. Regardless of the top-level status code chosen, the response body must clearly enumerate each item's individual outcome, its index or identifier, whether it succeeded with the created resource's ID or failed with a specific error, so the client can distinguish and act on the failures without guessing.",
+        "key_concepts": [
+          "207 Multi-Status",
+          "partial success handling",
+          "per-item outcome reporting"
+        ],
+        "expected_points": [
+          "Recognizes this isn't a clean success or failure and needs a status code reflecting mixed results",
+          "Names 207 Multi-Status as a relevant option, or a pragmatic 200 with a detailed body",
+          "Requires the body to enumerate per-item outcomes clearly",
+          "Explains the client needs enough detail to identify and retry just the failed items"
+        ],
+        "common_mistakes": [
+          "Returning a plain 200 with no indication that some items failed",
+          "Returning a plain 400/500 for the whole batch even though 95 items succeeded",
+          "Not proposing a concrete per-item result structure in the body"
+        ],
+        "example": "The response body lists all 100 items by index, each marked success with an ID or failure with a specific validation message, allowing the client to isolate and retry just the 5 that failed rather than resubmitting all 100.",
+        "follow_up_questions": [
+          "How would you design client-side retry logic that only resubmits the failed items from a bulk response?",
+          "What are the arguments for using 200 OK instead of 207 Multi-Status for pragmatic tooling compatibility reasons?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes a single clean status code, 200 or 400, without acknowledging the mixed outcome.",
+          "average": "Recognizes the mixed outcome but proposes no specific status code or body structure.",
+          "good": "Proposes a reasonable status code, 207 or documented 200, and a per-item body structure.",
+          "excellent": "Proposes a reasonable status code, discusses the 207-vs-200 trade-off, and a clear per-item body structure enabling targeted retries."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "bulk_operations",
+          "error_handling",
+          "status_codes"
+        ]
+      },
+      {
+        "id": "BE-105",
+        "domain": "rest_api_design",
+        "topic": "Long-Running Operations",
+        "subtopic": "202 Accepted + Polling Pattern",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "A client requests a report generation that takes several minutes to complete. How would you design the API around this using the 202 Accepted pattern?",
+        "answer": "Rather than holding the HTTP connection open for minutes, risking timeouts, or forcing the client to guess when it's done, the server should immediately respond with 202 Accepted and a Location header, or a body field, pointing to a status resource representing the asynchronous job, e.g., a job status URL. The client then polls that job status endpoint, which returns a status like pending, processing, completed, or failed, and once completed, includes a link to the finished report resource. This decouples request acceptance from request completion and gives the client a durable way to track progress.",
+        "key_concepts": [
+          "202 Accepted",
+          "asynchronous job pattern",
+          "polling",
+          "job status resource"
+        ],
+        "expected_points": [
+          "Server responds immediately with 202 Accepted rather than blocking on completion",
+          "Response includes a reference, such as a Location header, to a job status resource",
+          "Client polls the job status endpoint for progress/completion",
+          "Completed job status includes a link to the resulting resource"
+        ],
+        "common_mistakes": [
+          "Proposing to just hold the HTTP connection open until the report finishes",
+          "Not proposing a concrete mechanism for the client to check on progress",
+          "Forgetting to reference how the client eventually retrieves the actual completed resource"
+        ],
+        "example": "POST /reports triggers generation and immediately returns 202 Accepted with a Location header pointing to a job status URL; the client polls that URL until it returns status completed with a link to the finished report.",
+        "follow_up_questions": [
+          "What are the trade-offs of polling versus using webhooks or WebSockets to notify the client when the job completes?",
+          "How would you design reasonable polling intervals to avoid overwhelming the server with status checks?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes blocking synchronously or has no concrete asynchronous mechanism.",
+          "average": "Mentions 202 Accepted but no concrete polling/status resource design.",
+          "good": "Proposes 202 Accepted with a job status resource and polling flow.",
+          "excellent": "Proposes the full pattern and discusses an alternative to polling, like webhooks, as a trade-off."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design",
+          "architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "async_operations",
+          "polling",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-106",
+        "domain": "rest_api_design",
+        "topic": "Idempotency",
+        "subtopic": "Designing Idempotent PUT for Resource Creation",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "How can PUT be used to create a resource idempotently when the client, not the server, determines the resource's identifier?",
+        "answer": "When the client supplies the resource ID, for example a UUID it generates, PUT /resources/{client-generated-id} with the resource body can be used for creation: if the resource doesn't exist, the server creates it with that ID and returns 201 Created; if it already exists, the server replaces it with the given representation and returns 200 OK or 204 No Content. Calling this same request repeatedly with the same ID and body results in the same end state every time, satisfying idempotency, unlike POST /resources which would typically create a new resource with a new server-assigned ID on every call.",
+        "key_concepts": [
+          "idempotent PUT",
+          "client-generated identifiers",
+          "create-or-replace semantics"
+        ],
+        "expected_points": [
+          "Client supplies the resource ID as part of the URL",
+          "Server creates the resource if it doesn't exist, 201, or replaces it if it does, 200/204",
+          "Repeated identical requests produce the same end state",
+          "Contrasts with POST's typical server-assigned-ID, non-idempotent creation"
+        ],
+        "common_mistakes": [
+          "Assuming PUT can only be used to update, never create, a resource",
+          "Not addressing how the client obtains/generates the resource ID",
+          "Missing the distinction in appropriate status codes for create versus replace"
+        ],
+        "example": "PUT /documents/{client-generated-uuid} with a document body creates the document with that client-generated UUID if it doesn't exist, or replaces it identically if the same request is sent again.",
+        "follow_up_questions": [
+          "What are the risks of letting clients generate their own resource identifiers, such as ID collisions?",
+          "Why is POST typically not idempotent for resource creation by default, and how does this design sidestep that?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain how PUT could be used for idempotent creation.",
+          "average": "Mentions client-generated IDs vaguely without explaining the create-or-replace mechanics.",
+          "good": "Correctly explains the client-generated-ID mechanism and the appropriate status codes.",
+          "excellent": "Correctly explains the mechanism, status codes, and contrasts it with POST's non-idempotent default behavior."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "idempotency",
+          "http_methods",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-107",
+        "domain": "rest_api_design",
+        "topic": "Idempotency",
+        "subtopic": "Idempotency Keys for POST Endpoints",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "How would you implement idempotency key support for a POST endpoint that creates a resource?",
+        "answer": "The client generates a unique key, often a UUID, per logical operation and sends it in a header, such as an Idempotency-Key header. On receiving the request, the server checks whether it has already processed a request with that key: if not, it processes the request normally and stores the key along with the resulting response and status code; if it has, it returns the previously stored response directly without reprocessing, ensuring retries of the same logical operation don't create duplicate resources. Keys are typically stored with an expiration, such as 24 hours, since they only need to protect against retries within a reasonable window.",
+        "key_concepts": [
+          "Idempotency-Key header",
+          "server-side deduplication",
+          "stored response replay",
+          "key expiration"
+        ],
+        "expected_points": [
+          "Client generates a unique key per logical operation and sends it via header",
+          "Server checks for a prior record of that key before processing",
+          "If found, returns the stored prior response instead of reprocessing",
+          "Keys are typically stored with an expiration window"
+        ],
+        "common_mistakes": [
+          "Not addressing what happens if the same key is reused for two intentionally different requests",
+          "Forgetting to store and replay the actual prior response, not just preventing a duplicate write",
+          "Not considering key expiration, leading to unbounded storage growth"
+        ],
+        "example": "A payment POST request includes an Idempotency-Key header; if the client retries with the same key after a network timeout, the server returns the original payment result instead of charging the customer twice.",
+        "follow_up_questions": [
+          "How should the server handle a request that reuses an idempotency key but with a different request body?",
+          "Where would you store idempotency keys and their associated responses in a horizontally scaled system?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe an idempotency key mechanism.",
+          "average": "Mentions using a key but not how the server stores/checks it or replays the response.",
+          "good": "Correctly describes key generation, server-side lookup, and response replay.",
+          "excellent": "Correctly describes the full mechanism plus key expiration and handling of key reuse with a differing body."
+        },
+        "skills": [
+          "rest_api_design",
+          "reliability",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "idempotency",
+          "reliability",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-108",
+        "domain": "rest_api_design",
+        "topic": "Response Design",
+        "subtopic": "Envelope Wrapping vs Returning Bare Data",
+        "difficulty": "Medium",
+        "question_type": "tradeoff",
+        "question": "Should an API response wrap the actual data in an envelope object, e.g., with 'data' and 'meta' fields, or return the resource representation directly at the top level? What are the trade-offs?",
+        "answer": "An envelope structure provides a consistent place for metadata like pagination info, request IDs, or warnings alongside the primary data, and gives the response a uniform shape across all endpoints, which simplifies generic client-side handling. Returning the resource directly at the top level is simpler and more minimal, avoids an extra level of nesting clients must unwrap, and aligns more literally with the idea that the response body is the resource, but it becomes awkward once you need to include metadata like pagination details alongside a collection, often forcing ad hoc solutions like custom headers instead.",
+        "key_concepts": [
+          "response envelope",
+          "bare resource response",
+          "metadata placement",
+          "response consistency"
+        ],
+        "expected_points": [
+          "Envelope provides a consistent place for metadata, such as pagination or request ID, and uniform shape",
+          "Bare response is simpler and avoids extra nesting",
+          "Envelope tends to matter more once metadata like pagination needs to be communicated",
+          "Trade-off is consistency/metadata support versus simplicity/minimalism"
+        ],
+        "common_mistakes": [
+          "Declaring one approach objectively correct with no discussion of trade-offs",
+          "Not connecting the envelope's benefit specifically to metadata needs like pagination",
+          "Proposing to solve metadata needs only via headers without acknowledging the envelope alternative"
+        ],
+        "example": "A paginated list endpoint using an envelope might return a 'data' array alongside a 'meta' object with total count and page number, while a bare response would need to communicate that pagination info via headers instead.",
+        "follow_up_questions": [
+          "If you choose a bare response style, how would you communicate pagination metadata instead?",
+          "Does the choice of envelope vs bare response affect how easily clients can consume the API with generic HTTP/JSON tooling?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Picks one approach with no trade-off reasoning.",
+          "average": "Describes one approach's benefit but not the other's.",
+          "good": "Describes both approaches' trade-offs, connecting envelopes to metadata needs.",
+          "excellent": "Describes both trade-offs and gives a concrete example of how metadata is communicated differently in each approach."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "response_design",
+          "rest",
+          "api_design"
+        ]
+      },
+      {
+        "id": "BE-109",
+        "domain": "rest_api_design",
+        "topic": "Resource Representation",
+        "subtopic": "Choosing What to Include in a Response",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "When designing a resource's JSON representation, how do you decide what fields to include in the response by default?",
+        "answer": "Include fields that are commonly needed by the typical consumer of the endpoint, keeping the default payload reasonably lean rather than including every possible piece of related data. Avoid including sensitive or internal-only fields, like password hashes or internal flags, that clients shouldn't see. Expensive-to-compute or rarely-needed fields are often better left out of the default response and made available on demand, such as through sparse fieldsets, expansion parameters, or a dedicated sub-resource endpoint.",
+        "key_concepts": [
+          "response field selection",
+          "default payload design",
+          "sensitive field exclusion",
+          "on-demand expansion"
+        ],
+        "expected_points": [
+          "Default response should serve the typical/common use case",
+          "Sensitive or internal-only fields should be excluded",
+          "Expensive or rarely-needed fields are good candidates to leave out of the default response",
+          "On-demand mechanisms, like sparse fieldsets or expansion, can expose additional data when actually needed"
+        ],
+        "common_mistakes": [
+          "Including every field the underlying database model has, regardless of sensitivity or relevance",
+          "Accidentally leaking sensitive internal fields like password hashes in a response",
+          "Not considering an on-demand mechanism for less commonly needed data"
+        ],
+        "example": "A user resource response might include id, name, and email by default, but exclude the password hash entirely and leave rarely-needed fields like a full activity history to a dedicated activity sub-resource endpoint.",
+        "follow_up_questions": [
+          "How would you catch accidental exposure of sensitive fields before it reaches production?",
+          "What's the risk of using a generic serializer that dumps the entire database model without an explicit field allowlist?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot articulate any criteria for field inclusion.",
+          "average": "Mentions excluding sensitive fields but no other criteria.",
+          "good": "Mentions excluding sensitive fields and keeping the default payload lean/relevant.",
+          "excellent": "Mentions all of the above plus an on-demand mechanism for less common data and awareness of accidental exposure risk."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "response_design",
+          "rest",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-110",
+        "domain": "rest_api_design",
+        "topic": "Action-Based Endpoints",
+        "subtopic": "When Pure REST Resource Modeling Breaks Down",
+        "difficulty": "Hard",
+        "question_type": "tradeoff",
+        "question": "Some operations, like 'transfer funds between two accounts' or 'archive an email', don't map cleanly onto simple CRUD operations on a single resource. How would you handle designing endpoints for these kinds of actions in an otherwise RESTful API?",
+        "answer": "For operations that represent a meaningful action rather than a straightforward create, read, update, or delete of a single resource, a common pragmatic approach is to model the action itself as a sub-resource, often expressed as a noun representing the action or its result, created via POST — for example, POST /accounts/1/transfers with a body specifying the destination account and amount, rather than trying to force it into a PATCH on one account. This keeps the API mostly resource-oriented while acknowledging that not every real-world operation is naturally a CRUD operation on a single existing resource; the resource being created is effectively the transfer or action record itself, which also has the benefit of being auditable and individually retrievable later.",
+        "key_concepts": [
+          "action-oriented endpoints",
+          "modeling actions as sub-resources",
+          "RESTful pragmatism"
+        ],
+        "expected_points": [
+          "Recognizes that some operations don't map cleanly to single-resource CRUD",
+          "Proposes modeling the action as a resource itself, such as a 'transfer' resource, created via POST",
+          "Explains this keeps the API resource-oriented while accommodating complex actions",
+          "Notes the side benefit of auditability/traceability from treating the action as a persisted resource"
+        ],
+        "common_mistakes": [
+          "Forcing the action into an ill-fitting PATCH on an existing resource, losing clarity about what actually happened",
+          "Reverting entirely to RPC-style verb endpoints without considering the resource-modeling alternative",
+          "Not recognizing the auditability benefit of modeling the action as its own persisted resource"
+        ],
+        "example": "POST /accounts/1/transfers with a destination account and amount creates a 'transfer' resource representing that action, which can later be retrieved to check its status or for audit purposes.",
+        "follow_up_questions": [
+          "How would you handle the case where the action needs to be reversible, like cancelling a pending transfer?",
+          "Are there cases where a pragmatic RPC-style action endpoint is genuinely the better choice despite not being strictly resource-oriented?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot propose a workable approach for action-like operations.",
+          "average": "Proposes an RPC-style verb endpoint without considering the resource-modeling alternative.",
+          "good": "Proposes modeling the action as a sub-resource created via POST with a reasonable example.",
+          "excellent": "Proposes the sub-resource pattern, explains the auditability benefit, and acknowledges legitimate cases for pragmatic exceptions."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "action_endpoints",
+          "rest",
+          "api_design"
+        ]
+      },
+      {
+        "id": "BE-111",
+        "domain": "rest_api_design",
+        "topic": "Rate Limiting",
+        "subtopic": "Communicating Limits via Response Headers",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What response headers are commonly used to communicate rate limiting information to API clients?",
+        "answer": "Common conventions include a limit header communicating the maximum number of requests allowed in the current window, a remaining header communicating how many requests are left in the current window, and a reset header communicating when the current window resets, often as a Unix timestamp or seconds remaining. When a client exceeds the limit, the server typically also includes a Retry-After header alongside the 429 status code, telling the client how long to wait before retrying. These headers let well-behaved clients proactively throttle themselves instead of discovering the limit only by hitting it.",
+        "key_concepts": [
+          "X-RateLimit-Limit",
+          "X-RateLimit-Remaining",
+          "X-RateLimit-Reset",
+          "Retry-After"
+        ],
+        "expected_points": [
+          "A limit header communicates the maximum allowed requests in the window",
+          "A remaining header communicates requests left in the current window",
+          "A reset header communicates when the window resets",
+          "Retry-After accompanies a 429 response to tell the client how long to wait"
+        ],
+        "common_mistakes": [
+          "Naming only one header and assuming that's sufficient information for clients",
+          "Confusing Retry-After, used on the 429 itself, with the proactive limit headers sent on every response",
+          "Assuming these header names are a formal universal standard rather than a widely-adopted but non-standardized convention"
+        ],
+        "example": "A response might include a limit of 1000, a remaining count of 42, and a reset timestamp, letting a well-behaved client slow down proactively before actually being rate limited.",
+        "follow_up_questions": [
+          "Why might it matter whether the reset header is expressed as an absolute timestamp versus seconds remaining?",
+          "What should a client do differently on receiving a 429 with a Retry-After header versus just seeing a low remaining-count value?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot name any relevant rate-limit headers.",
+          "average": "Names one or two headers without explaining their purpose clearly.",
+          "good": "Names and correctly explains the main proactive limit headers and Retry-After.",
+          "excellent": "Names and explains all relevant headers, and notes the convention isn't a single formal standard across all APIs."
+        },
+        "skills": [
+          "rest_api_design",
+          "rate_limiting",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "rate_limiting",
+          "headers",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-112",
+        "domain": "rest_api_design",
+        "topic": "API Gateway",
+        "subtopic": "Role of a Gateway in a REST Architecture",
+        "difficulty": "Medium",
+        "question_type": "architecture",
+        "question": "What responsibilities does an API gateway typically take on in front of a set of RESTful backend services?",
+        "answer": "An API gateway acts as a single entry point for clients, commonly handling request routing to the appropriate backend service, authentication and authorization enforcement, rate limiting, request/response transformation, TLS termination, centralized logging and metrics collection, and sometimes response caching. By centralizing these cross-cutting concerns at the gateway, individual backend services can focus on their core business logic rather than each reimplementing the same infrastructure-level behavior.",
+        "key_concepts": [
+          "API gateway",
+          "cross-cutting concerns",
+          "routing",
+          "authentication enforcement",
+          "rate limiting"
+        ],
+        "expected_points": [
+          "Acts as a single entry point routing requests to backend services",
+          "Commonly enforces authentication/authorization and rate limiting",
+          "Handles TLS termination, and often logging/metrics",
+          "Centralizes cross-cutting concerns so backend services don't duplicate them"
+        ],
+        "common_mistakes": [
+          "Describing a gateway as only a load balancer with no other responsibilities",
+          "Not mentioning authentication/authorization as a common gateway responsibility",
+          "Assuming a gateway is only relevant to microservices architectures, not any layered backend"
+        ],
+        "example": "A gateway in front of several microservices validates the caller's token, enforces a per-client rate limit, and routes requests to the appropriate backend service, all before any backend service sees the request.",
+        "follow_up_questions": [
+          "What are the risks of putting too much business logic into the gateway layer itself?",
+          "How does an API gateway differ from a simple reverse proxy or load balancer?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe what a gateway does beyond 'routing'.",
+          "average": "Names routing and one or two other responsibilities.",
+          "good": "Names routing plus several common responsibilities like auth, rate limiting, and TLS termination.",
+          "excellent": "Names multiple responsibilities and explains the centralization benefit for backend services."
+        },
+        "skills": [
+          "rest_api_design",
+          "distributed_systems",
+          "architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "api_gateway",
+          "architecture",
+          "microservices"
+        ]
+      },
+      {
+        "id": "BE-113",
+        "domain": "rest_api_design",
+        "topic": "Webhooks",
+        "subtopic": "Designing a Reliable Webhook Delivery System",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "You're building a system that sends webhooks to notify third-party integrators of events, such as an order being created. How would you design it to be reliable given that the receiving endpoint might be temporarily down or slow?",
+        "answer": "The sending system should treat webhook delivery as asynchronous and decoupled from the event that triggered it, typically by placing the event onto a queue and having a separate worker attempt delivery, rather than sending it synchronously inline with the triggering request. On failure, such as a timeout, connection error, or non-2xx response, the system should retry with exponential backoff over a bounded period, eventually giving up and marking the delivery as failed after a reasonable number of attempts, while logging each delivery attempt for the integrator to inspect. It should also enforce a reasonable timeout per delivery attempt so one slow receiver doesn't block the delivery system's overall throughput, and expose delivery history and status to integrators so they can debug missed events.",
+        "key_concepts": [
+          "webhook reliability",
+          "asynchronous delivery",
+          "retry with backoff",
+          "delivery attempt logging"
+        ],
+        "expected_points": [
+          "Decouples webhook delivery from the triggering event via a queue and async worker",
+          "Implements retry with exponential backoff on failure",
+          "Sets a reasonable per-attempt timeout to avoid one slow receiver blocking others",
+          "Logs delivery attempts and exposes status/history to integrators"
+        ],
+        "common_mistakes": [
+          "Sending webhooks synchronously inline with the triggering request, risking blocking the main flow on a slow receiver",
+          "Retrying indefinitely without a bound, or not retrying at all on failure",
+          "Not providing any visibility into delivery success/failure for the integrator"
+        ],
+        "example": "An 'order created' event is placed on a queue; a delivery worker posts it to the integrator's registered URL with a short timeout, retrying several times with exponential backoff over 24 hours before marking it permanently failed and notifying the integrator via their dashboard.",
+        "follow_up_questions": [
+          "How would you let integrators verify that a webhook actually came from your system and wasn't spoofed?",
+          "How would you prevent a single misbehaving/slow integrator's webhook endpoint from degrading delivery to other integrators?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes sending webhooks synchronously with no retry mechanism.",
+          "average": "Mentions retries but no async decoupling, backoff strategy, or timeout consideration.",
+          "good": "Proposes async decoupling via a queue, retry with backoff, and per-attempt timeouts.",
+          "excellent": "Proposes all of the above plus delivery visibility/logging for integrators and isolation between integrators."
+        },
+        "skills": [
+          "rest_api_design",
+          "distributed_systems",
+          "reliability",
+          "architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "webhooks",
+          "reliability",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-114",
+        "domain": "rest_api_design",
+        "topic": "Webhooks",
+        "subtopic": "Idempotent Webhook Processing on the Receiver",
+        "difficulty": "Hard",
+        "question_type": "implementation",
+        "question": "Because webhook senders often retry on timeout even if the original delivery actually succeeded, a receiver might get the same webhook event delivered more than once. How should the receiving system handle this to avoid processing the event twice?",
+        "answer": "The receiver should treat webhook processing as idempotent by tracking which event IDs, included by the sender in the payload, have already been successfully processed, typically by recording processed event IDs in a database with a uniqueness constraint. On receiving a webhook, the receiver checks whether that event ID has already been processed; if so, it acknowledges receipt, such as with 200 OK, without re-executing the associated side effects, like charging a card or sending a duplicate notification, a second time. This deduplication check and the actual processing should ideally happen within the same transaction or an equivalent atomic mechanism to avoid a race condition where two near-simultaneous duplicate deliveries both pass the check before either is recorded.",
+        "key_concepts": [
+          "idempotent webhook processing",
+          "event ID deduplication",
+          "at-least-once delivery",
+          "race condition handling"
+        ],
+        "expected_points": [
+          "Recognizes webhook delivery is typically at-least-once, so duplicates are expected",
+          "Proposes tracking processed event IDs to detect duplicates",
+          "Proposes acknowledging duplicates without re-executing side effects",
+          "Addresses the race condition risk of near-simultaneous duplicate deliveries needing atomic dedup"
+        ],
+        "common_mistakes": [
+          "Assuming webhook delivery is exactly-once and duplicates won't happen",
+          "Proposing deduplication without addressing the race condition between checking and recording",
+          "Not distinguishing between acknowledging receipt and actually re-executing business logic side effects"
+        ],
+        "example": "A payment-processing webhook receiver stores processed event IDs in a table with a unique constraint; if the same event arrives twice, the second insert attempt fails uniqueness and the handler skips re-charging the customer, still returning 200 OK to the sender.",
+        "follow_up_questions": [
+          "Why is at-least-once delivery a more common and often more desirable design choice for webhook senders than trying to guarantee exactly-once delivery?",
+          "How would you design the deduplication check and the business-logic side effect to happen atomically?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Doesn't recognize that webhooks may be delivered more than once.",
+          "average": "Recognizes duplicates can happen but proposes no concrete deduplication mechanism.",
+          "good": "Proposes tracking processed event IDs and skipping reprocessing on duplicates.",
+          "excellent": "Proposes the deduplication mechanism and explicitly addresses the race-condition/atomicity concern."
+        },
+        "skills": [
+          "rest_api_design",
+          "distributed_systems",
+          "reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "webhooks",
+          "idempotency",
+          "reliability"
+        ]
+      },
+      {
+        "id": "BE-115",
+        "domain": "rest_api_design",
+        "topic": "REST vs GraphQL",
+        "subtopic": "When to Choose One Over the Other",
+        "difficulty": "Hard",
+        "question_type": "tradeoff",
+        "question": "You're starting a new API that will serve several different client applications, such as web, mobile, and a partner integration, with varying data needs. What factors would lead you to choose REST versus GraphQL?",
+        "answer": "GraphQL tends to fit well when client data needs vary significantly and change often, since different screens need different shapes of related data and clients can request exactly what they need without server-side changes for every new view, reducing over/under-fetching. REST tends to fit well when the API needs strong, simple cacheability via standard HTTP caching semantics, when the team wants simpler operational tooling, since GraphQL requires more specialized tooling for caching, rate limiting, and query complexity control, when the consuming clients are simpler or more uniform in their data needs, or when broad ecosystem familiarity and simplicity for third-party or partner integrators matters, since REST's conventions are more universally understood. The choice often also depends on team GraphQL experience and existing infrastructure investment.",
+        "key_concepts": [
+          "REST vs GraphQL decision factors",
+          "client data need variability",
+          "HTTP caching semantics",
+          "operational complexity"
+        ],
+        "expected_points": [
+          "GraphQL fits well with highly varied, frequently changing client data needs",
+          "REST fits well when strong, simple HTTP caching is valuable",
+          "GraphQL introduces more operational complexity, such as query complexity limits, caching, and tooling",
+          "REST's conventions are more broadly familiar, which matters for external/partner integrators"
+        ],
+        "common_mistakes": [
+          "Declaring one technology universally superior without discussing trade-offs",
+          "Not mentioning caching as a meaningful differentiator",
+          "Not considering the partner-integration audience's familiarity with REST as a practical factor"
+        ],
+        "example": "A mobile app with many different, evolving screens each needing different combinations of nested data might benefit from GraphQL, while the partner-facing integration API might stay REST for simplicity, caching, and broader third-party tooling support.",
+        "follow_up_questions": [
+          "How would you handle a situation where different client types have different preferences, some wanting GraphQL and some wanting REST?",
+          "What operational tooling investment does adopting GraphQL typically require that a REST API might not?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Recommends one technology with no reasoning tied to the described scenario.",
+          "average": "Mentions a relevant factor or two but not a balanced comparison.",
+          "good": "Discusses multiple relevant factors, such as data variability, caching, and operational complexity, reasonably.",
+          "excellent": "Discusses multiple factors in depth and connects them back to the specific mixed-client scenario described."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design",
+          "architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "graphql",
+          "rest",
+          "tradeoffs",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-116",
+        "domain": "rest_api_design",
+        "topic": "REST Maturity",
+        "subtopic": "Richardson Maturity Model Overview",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is the Richardson Maturity Model, and what distinguishes each of its levels?",
+        "answer": "The Richardson Maturity Model describes four levels, 0 through 3, of how fully an API embraces REST principles. Level 0 uses HTTP purely as a transport for RPC-style calls, typically a single endpoint and a single HTTP method, often POST, for everything. Level 1 introduces the concept of individual resources with distinct URLs, but still tends to use a single HTTP method regardless of the operation. Level 2 makes proper use of HTTP methods and status codes to convey semantics, such as GET for reads, POST for creates, and proper 4xx/5xx codes, which is where most APIs described as RESTful today actually sit. Level 3 adds HATEOAS, where responses include hypermedia links guiding clients to available next actions, representing full REST maturity per Fielding's original definition.",
+        "key_concepts": [
+          "Richardson Maturity Model",
+          "Level 0 RPC-style",
+          "Level 1 resources",
+          "Level 2 HTTP verbs/status codes",
+          "Level 3 HATEOAS"
+        ],
+        "expected_points": [
+          "Level 0: single endpoint, RPC-style over HTTP",
+          "Level 1: distinct resource URLs, but limited use of HTTP methods",
+          "Level 2: proper use of HTTP methods and status codes, where most real APIs sit",
+          "Level 3: adds HATEOAS/hypermedia controls"
+        ],
+        "common_mistakes": [
+          "Believing 'RESTful' automatically means Level 3/HATEOAS is implemented",
+          "Confusing the order or content of the levels",
+          "Not recognizing that most production APIs sit at Level 2"
+        ],
+        "example": "An API using a single endpoint with an 'action' parameter and everything sent as POST would be Level 0, while an API with distinct resource URLs, proper HTTP methods, and proper status codes but no hypermedia links would be Level 2.",
+        "follow_up_questions": [
+          "Why do most real-world APIs stop at Level 2 rather than reaching Level 3?",
+          "Is reaching Level 3 always a worthwhile investment, or does it depend on the use case?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe the levels at all.",
+          "average": "Describes one or two levels but not the full progression.",
+          "good": "Correctly describes all four levels with reasonable accuracy.",
+          "excellent": "Correctly describes all four levels and notes that most real-world APIs sit at Level 2."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "richardson_maturity_model",
+          "rest",
+          "hateoas"
+        ]
+      },
+      {
+        "id": "BE-117",
+        "domain": "rest_api_design",
+        "topic": "Search Endpoints",
+        "subtopic": "GET vs POST for Complex Search Queries",
+        "difficulty": "Hard",
+        "question_type": "scenario",
+        "question": "You need to support a complex search with many optional parameters and a large filter payload that could exceed typical URL length limits. Should the search endpoint use GET or POST, and why?",
+        "answer": "When the search criteria are simple and bounded, GET with query parameters is preferable since it's naturally cacheable, bookmarkable, and aligns with GET's semantics as a safe, read-only operation. But when the filter payload is large, deeply nested, or could exceed practical URL length limits, commonly cited around 2000 characters in various clients and proxies, a POST-based search endpoint, such as POST /products/search with the filter criteria in the body, becomes more practical, since it isn't bound by URL length and can express arbitrarily complex, structured filter logic. The trade-off is that a POST-based search loses standard HTTP GET caching and isn't naturally bookmarkable, even though it's conceptually still a read operation.",
+        "key_concepts": [
+          "GET vs POST for search",
+          "URL length limits",
+          "cacheability trade-off",
+          "search endpoint design"
+        ],
+        "expected_points": [
+          "GET is preferable for simple, bounded search criteria due to caching/bookmarkability",
+          "POST becomes necessary when the filter payload is large/complex/exceeds URL length limits",
+          "Acknowledges POST-based search loses standard HTTP caching even though it's semantically a read",
+          "Chooses based on the actual complexity/size of the search criteria described"
+        ],
+        "common_mistakes": [
+          "Insisting search must always use GET regardless of payload size or complexity",
+          "Insisting search must always use POST without acknowledging the caching trade-off",
+          "Not mentioning URL length limits as a concrete practical constraint"
+        ],
+        "example": "A simple product search with a handful of filters fits comfortably in a GET query string, but a search with dozens of nested filter conditions and a large ID array is better sent as a POST body to avoid hitting URL length limits.",
+        "follow_up_questions": [
+          "How would you address the loss of HTTP caching for a POST-based search endpoint if caching were still important?",
+          "Is a POST-based search endpoint still considered 'safe' in the HTTP sense even though it uses POST?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Picks GET or POST with no reasoning tied to payload size/complexity.",
+          "average": "Mentions one relevant factor, either caching or URL length, but not both.",
+          "good": "Correctly weighs both caching/bookmarkability and URL length/complexity to make a reasoned choice.",
+          "excellent": "Weighs both factors, acknowledges the caching trade-off of the POST approach, and connects the choice back to the scenario's described complexity."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "search",
+          "http_methods",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-118",
+        "domain": "rest_api_design",
+        "topic": "Partial Updates",
+        "subtopic": "JSON Merge Patch vs JSON Patch Semantics",
+        "difficulty": "Expert",
+        "question_type": "comparison",
+        "question": "What is the difference between JSON Merge Patch (RFC 7396) and JSON Patch (RFC 6902) for partial updates, and what limitation of Merge Patch does JSON Patch address?",
+        "answer": "JSON Merge Patch represents a partial update as a JSON object containing only the fields to change, where a field set to null signals that field should be removed; the client sends this object and the server merges it shallowly into the existing resource. Its key limitation is that it cannot express certain operations precisely — most notably, it cannot set a field's value to null, since null is reserved to mean delete this field, and it struggles to express array element updates or insertions without replacing the entire array. JSON Patch instead represents an update as an explicit, ordered list of operations, such as add, remove, replace, move, copy, and test, each with a JSON Pointer path, allowing precise, unambiguous operations like inserting an item into a specific array position or explicitly setting a field to null, at the cost of being more verbose and less intuitive to construct by hand.",
+        "key_concepts": [
+          "JSON Merge Patch (RFC 7396)",
+          "JSON Patch (RFC 6902)",
+          "null-as-delete ambiguity",
+          "JSON Pointer operations"
+        ],
+        "expected_points": [
+          "Merge Patch sends a partial object merged shallowly, with null meaning field deletion",
+          "Merge Patch cannot distinguish 'set to null' from 'delete this field'",
+          "Merge Patch struggles to express precise array operations",
+          "JSON Patch uses explicit ordered operations with JSON Pointer paths, resolving these ambiguities at the cost of verbosity"
+        ],
+        "common_mistakes": [
+          "Treating the two formats as interchangeable with no functional difference",
+          "Not identifying the null-as-delete ambiguity as Merge Patch's key limitation",
+          "Not mentioning JSON Patch's explicit operation list, add/remove/replace/etc, as its distinguishing mechanism"
+        ],
+        "example": "To set a field to actual null with Merge Patch is ambiguous with deleting it, but JSON Patch can express this unambiguously with a replace operation whose value is explicitly null.",
+        "follow_up_questions": [
+          "Why might an API choose to support both Merge Patch and JSON Patch depending on client needs?",
+          "What Content-Type header values are conventionally used to distinguish which patch format a request is using?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe either format.",
+          "average": "Describes one format but not its limitation or the other's solution.",
+          "good": "Correctly describes both formats and the null-as-delete limitation of Merge Patch.",
+          "excellent": "Correctly describes both formats, the limitation, and how JSON Patch's explicit operations resolve it, including array handling."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "json_patch",
+          "partial_updates",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-119",
+        "domain": "rest_api_design",
+        "topic": "Relationships",
+        "subtopic": "Modeling Many-to-Many Associations in REST",
+        "difficulty": "Expert",
+        "question_type": "implementation",
+        "question": "How would you design REST endpoints to manage a many-to-many relationship, such as students enrolling in multiple courses and courses having multiple students?",
+        "answer": "Model the association itself as its own resource — an enrollment — rather than trying to force the relationship entirely onto either side. This gives you an endpoint to create an enrollment linking a specific student and course, endpoints to list the association from either direction, such as a course's enrollments or a student's enrollments, and an endpoint to remove a specific association by its own ID. Modeling the join itself as a first-class resource, rather than, say, trying to replace an entire array of course IDs on a student, also naturally accommodates any additional data specific to the relationship itself, such as an enrollment date or grade, which wouldn't belong to either the student or the course alone.",
+        "key_concepts": [
+          "many-to-many modeling",
+          "join resource / association resource",
+          "relationship-specific attributes"
+        ],
+        "expected_points": [
+          "Models the association, such as enrollment, as its own first-class resource",
+          "Provides endpoints to create/list/remove the association, accessible from either side of the relationship",
+          "Explains this naturally accommodates relationship-specific data, like enrollment date or grade",
+          "Contrasts with awkward alternatives like replacing an entire array of IDs on one side"
+        ],
+        "common_mistakes": [
+          "Trying to represent the relationship only as an array of IDs embedded in one resource, losing the ability to store relationship-specific data",
+          "Not providing a way to access the association from both directions, a student's courses and a course's students",
+          "Not considering that the relationship itself might need its own attributes"
+        ],
+        "example": "Creating an enrollment linking a student and a course produces an enrollment resource with its own ID, enrollment date, and later a grade field, retrievable from either the student's or the course's enrollment list, and removable by its own ID.",
+        "follow_up_questions": [
+          "How would you handle a request to enroll a student in a course they're already enrolled in — should it be idempotent?",
+          "How would you design querying for 'all students who are NOT enrolled in any course'?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot propose a workable design for the many-to-many relationship.",
+          "average": "Proposes embedding an array of IDs on one side without addressing relationship-specific data or bidirectional access.",
+          "good": "Proposes modeling the association as its own resource with basic create/list/remove endpoints.",
+          "excellent": "Proposes the association-resource pattern, bidirectional access, and explicitly addresses relationship-specific attributes."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "many_to_many",
+          "resource_modeling",
+          "rest"
+        ]
+      },
+      {
+        "id": "BE-120",
+        "domain": "rest_api_design",
+        "topic": "Production Incident",
+        "subtopic": "A 'Non-Breaking' Release That Broke a Client Anyway",
+        "difficulty": "Expert",
+        "question_type": "production_incident",
+        "question": "Your team added a new optional field to a response and considered it a safe, non-breaking change following semantic versioning, but a major partner integration broke immediately after the release. Their code was using strict JSON schema validation that rejected any unrecognized fields. How do you handle this incident, and what does it reveal about the limits of 'backward compatible' as a concept?",
+        "answer": "Immediately work with the partner to unblock them, likely by asking them to relax their schema validation to allow unknown or additional properties, since that's the standard, forward-compatible way to consume evolving JSON APIs, while acknowledging the disruption regardless of whose fault it technically was. The deeper lesson is that non-breaking is not a purely objective, server-side property — it depends on how permissively clients are built to consume responses; a change can be backward-compatible by convention, additive and following semver, and still break a client that wasn't built to tolerate additive changes. Going forward, this argues for proactively communicating API evolution expectations to integrators, such as stating clients must ignore unrecognized fields, documenting this contract explicitly, and potentially using contract testing or a schema registry with integrators to catch this class of issue before release rather than after.",
+        "key_concepts": [
+          "backward compatibility is contextual, not absolute",
+          "strict client-side schema validation risk",
+          "forward-compatible client design",
+          "integrator communication and contract testing"
+        ],
+        "expected_points": [
+          "Proposes immediate remediation, likely getting the partner to relax strict schema validation",
+          "Explains that 'non-breaking' by semver convention still assumes clients are built to tolerate additive changes",
+          "Recognizes this reveals a gap between server-side compatibility intent and actual client behavior",
+          "Proposes a forward-looking fix, such as explicit consumption contracts or contract testing with integrators"
+        ],
+        "common_mistakes": [
+          "Blaming the partner entirely and not proposing a path to actually unblock them",
+          "Not recognizing that additive changes can still break overly strict client validation",
+          "Treating this as a one-off fluke rather than drawing a systemic lesson about client-consumption assumptions"
+        ],
+        "example": "The partner's JSON schema was configured to reject unknown properties; after switching it to allow unknown properties, the standard forward-compatible posture, their integration works again, and the API team adds explicit guidance in their docs that clients must tolerate additional response fields.",
+        "follow_up_questions": [
+          "What proactive testing or communication could have caught this specific risk before the release went out?",
+          "Should an API ever guarantee that no new fields will ever be added, and what would that cost the API's ability to evolve?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Only addresses the immediate fix without reflecting on what it reveals about compatibility assumptions.",
+          "average": "Addresses the immediate fix and vaguely acknowledges client behavior matters, without a clear systemic lesson.",
+          "good": "Addresses the immediate fix and clearly articulates that backward compatibility depends on client tolerance for additive changes.",
+          "excellent": "Addresses the immediate fix, articulates the systemic lesson clearly, and proposes a concrete forward-looking prevention measure like contract testing or explicit consumption guidance."
+        },
+        "skills": [
+          "rest_api_design",
+          "api_design",
+          "incident_response"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "backward_compatibility",
+          "production_incident",
+          "versioning"
+        ]
+      }
+    ]
+  }
+}

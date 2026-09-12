@@ -99,6 +99,8 @@ async def speech_to_text(audio: UploadFile = File(...)):
                 model="whisper-1",
                 file=f,
                 response_format="text",
+                language="en",
+                prompt="This is a technical interview answer about software engineering, backend development, databases, APIs, and system design.",
             )
 
         logger.info("stt.transcribed", chars=len(transcript), file=temp_name)

@@ -1,0 +1,659 @@
+{
+  "question_bank": {
+    "id": "backend-engineering-500",
+    "title": "Backend Engineering Interview Question Bank — NoSQL & Data Modeling — Batch 02",
+    "description": "Advanced interview questions covering document evolution, query-driven NoSQL modeling, partition design, consistency, migrations, database selection, and production architecture.",
+    "language": "Technology-neutral NoSQL",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "domain": "nosql_data_modeling",
+    "question_count": 11,
+    "batch": {
+      "batch_number": 2,
+      "batch_size": 11,
+      "domain_target": 35,
+      "question_id_range": [
+        "BE-225",
+        "BE-235"
+      ]
+    },
+    "intended_use": [
+      "preparation",
+      "mock_interview",
+      "ai_evaluation",
+      "adaptive_follow_up"
+    ],
+    "roles": [
+      "backend_developer",
+      "software_developer",
+      "full_stack_developer"
+    ],
+    "questions": [
+      {
+        "id": "BE-225",
+        "domain": "nosql_data_modeling",
+        "topic": "Document Data Modeling",
+        "subtopic": "Modeling Around Aggregates",
+        "difficulty": "Medium",
+        "question_type": "data_modeling",
+        "question": "In a document database, what is an aggregate, and why is identifying the right aggregate boundary important when designing documents?",
+        "answer": "An aggregate is a group of data that the application commonly treats as one logical unit for reads, writes, and consistency decisions. A good aggregate boundary keeps data that is frequently accessed or modified together close together while avoiding unbounded growth and unnecessary contention. If the aggregate is too small, common operations may require multiple reads or writes; if it is too large, documents can become oversized, frequently updated, or difficult to scale. The boundary should therefore reflect application behavior rather than simply mirroring every business entity.",
+        "key_concepts": [
+          "aggregate",
+          "document boundary",
+          "access patterns",
+          "consistency boundary",
+          "write contention"
+        ],
+        "expected_points": [
+          "Defines an aggregate in application and data-modeling terms.",
+          "Explains why related data may be grouped for locality and atomic operations.",
+          "Recognizes the risks of aggregates that are too large or too small.",
+          "Uses access patterns and update behavior to determine the boundary."
+        ],
+        "common_mistakes": [
+          "Treating every business entity as a separate document by default.",
+          "Putting an entire domain model into one document.",
+          "Choosing aggregate boundaries based only on object-oriented class structure."
+        ],
+        "example": "An order and its line items may form a natural aggregate when they are normally created and read together. A customer's complete transaction history should usually not be part of that same document because it can grow without bound.",
+        "follow_up_questions": [
+          "How would frequent independent updates to child records affect your aggregate boundary?",
+          "What signals indicate that a document represents too many unrelated concepts?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain an aggregate and treats document boundaries as arbitrary.",
+          "average": "Understands grouping related data but misses growth and contention concerns.",
+          "good": "Explains aggregate boundaries using access patterns, lifecycle, consistency, and size.",
+          "excellent": "Shows architectural judgment by balancing locality, atomicity, boundedness, update frequency, contention, and future query evolution."
+        },
+        "skills": [
+          "NoSQL",
+          "Data Modeling",
+          "Database Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "aggregate",
+          "document-boundary",
+          "access-patterns",
+          "data-modeling"
+        ]
+      },
+      {
+        "id": "BE-226",
+        "domain": "nosql_data_modeling",
+        "topic": "Document Data Modeling",
+        "subtopic": "Document Versioning",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "Your document schema changes over time and old records have different fields from new records. How would you manage schema evolution without breaking the application?",
+        "answer": "I would establish an explicit schema-versioning strategy rather than relying on accidental flexibility. New application versions should be able to understand the versions they may encounter, and migrations can be performed eagerly, lazily on read, or through controlled background jobs depending on scale and risk. For major changes, dual-read or dual-write periods may be useful during migration. Validation, observability, rollback planning, and a clear deprecation policy are important so that old document shapes do not remain indefinitely without ownership.",
+        "key_concepts": [
+          "schema evolution",
+          "document versioning",
+          "backward compatibility",
+          "lazy migration",
+          "background migration",
+          "dual-read"
+        ],
+        "expected_points": [
+          "Uses explicit schema versions or equivalent compatibility mechanisms.",
+          "Explains eager versus lazy/background migration trade-offs.",
+          "Plans application compatibility during rollout.",
+          "Includes validation, observability, rollback, and eventual cleanup."
+        ],
+        "common_mistakes": [
+          "Assuming schema flexibility means migrations are unnecessary.",
+          "Changing all documents synchronously without considering production scale.",
+          "Supporting unlimited historical schemas forever."
+        ],
+        "example": "A profile document may move from schema version 1 to version 2 by adding a normalized address structure. The service can temporarily read both versions, write only version 2, and migrate old documents asynchronously.",
+        "follow_up_questions": [
+          "When would you choose lazy migration over a one-time bulk migration?",
+          "How would you safely roll back an application deployment that has already started writing a new document version?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only that new fields can be added because NoSQL is flexible.",
+          "average": "Mentions migrations but lacks a compatibility or rollout strategy.",
+          "good": "Explains versioning, migration approaches, backward compatibility, and controlled rollout.",
+          "excellent": "Designs a complete evolution strategy covering compatibility windows, migration mechanics, validation, observability, rollback, and retirement of legacy schemas."
+        },
+        "skills": [
+          "NoSQL",
+          "Schema Evolution",
+          "Data Migration",
+          "System Design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "schema-versioning",
+          "schema-evolution",
+          "migration",
+          "backward-compatibility"
+        ]
+      },
+      {
+        "id": "BE-227",
+        "domain": "nosql_data_modeling",
+        "topic": "Document Data Modeling",
+        "subtopic": "Read-Optimized Denormalized Views",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "When would you create a separate denormalized read model instead of trying to serve a query directly from your primary NoSQL data model?",
+        "answer": "A separate read model is useful when an important query has access patterns that conflict with the primary write model, especially when the query is high-volume, latency-sensitive, or requires combining data that is expensive to retrieve repeatedly. The read model can be maintained synchronously or asynchronously depending on consistency requirements. This introduces extra storage, propagation complexity, monitoring, and recovery concerns, so it should be justified by workload needs. The design should explicitly identify the source of truth and how the read model is rebuilt if it becomes stale or corrupted.",
+        "key_concepts": [
+          "read model",
+          "CQRS-style separation",
+          "denormalization",
+          "source of truth",
+          "asynchronous propagation",
+          "rebuildability"
+        ],
+        "expected_points": [
+          "Identifies workload mismatch as a reason for a separate read model.",
+          "Explains synchronous versus asynchronous maintenance trade-offs.",
+          "Defines a source of truth.",
+          "Addresses stale data, monitoring, and rebuilding the read model."
+        ],
+        "common_mistakes": [
+          "Creating read models for every query without operational justification.",
+          "Treating the read model as an independent source of truth accidentally.",
+          "Ignoring propagation failures and rebuild procedures."
+        ],
+        "example": "An order system may maintain an operational order store while generating a customer-summary read model containing order counts and recent totals for a high-volume dashboard. The summary can be rebuilt from authoritative order data if needed.",
+        "follow_up_questions": [
+          "What consistency guarantees would you expose to clients if the read model is asynchronously updated?",
+          "How would you rebuild a read model after losing or corrupting its derived data?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests duplicating data without explaining why or how it stays correct.",
+          "average": "Understands read optimization but misses source-of-truth and recovery concerns.",
+          "good": "Explains when a separate read model is justified and covers propagation and rebuilds.",
+          "excellent": "Makes a disciplined CQRS-style decision using latency, workload, consistency, storage, failure recovery, and operational ownership criteria."
+        },
+        "skills": [
+          "NoSQL",
+          "Data Modeling",
+          "System Design",
+          "Consistency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "read-model",
+          "denormalization",
+          "cqrs",
+          "source-of-truth"
+        ]
+      },
+      {
+        "id": "BE-228",
+        "domain": "nosql_data_modeling",
+        "topic": "Key-Value Data Modeling",
+        "subtopic": "Key Design and Namespacing",
+        "difficulty": "Medium",
+        "question_type": "design",
+        "question": "How would you design keys for a key-value store used by multiple backend features, and why is key namespacing useful?",
+        "answer": "Keys should encode enough stable identity to make ownership and lookup unambiguous while avoiding accidental collisions between features. A common approach is to use a structured namespace such as feature:entity:identifier, optionally including a version or scope where required. Key design should also consider maximum key size, cardinality, operational debugging, expiration behavior, and whether related keys need to be discovered or deleted together. Namespacing is especially useful when multiple features share one logical key-value store because it separates ownership and reduces collision risk.",
+        "key_concepts": [
+          "key design",
+          "namespacing",
+          "key cardinality",
+          "TTL",
+          "ownership",
+          "collision avoidance"
+        ],
+        "expected_points": [
+          "Uses deterministic, unique key structures.",
+          "Explains namespacing for isolation and ownership.",
+          "Considers TTL, versioning, and operational management.",
+          "Avoids designs that require expensive scans to discover related keys."
+        ],
+        "common_mistakes": [
+          "Using generic keys such as 'user:123' across unrelated features.",
+          "Putting excessive mutable information into keys.",
+          "Assuming a key-value store can efficiently find arbitrary keys by partial text."
+        ],
+        "example": "Session data might use session:v2:<session_id>, while rate-limit state could use ratelimit:<user_id>:<window>. The namespaces make ownership and expiration policies explicit.",
+        "follow_up_questions": [
+          "How would you handle a key-format change without breaking existing clients?",
+          "What risks arise if a key namespace is based on a mutable business attribute such as an email address?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Creates arbitrary keys and cannot explain collision or ownership problems.",
+          "average": "Understands unique keys and basic prefixes but misses operational considerations.",
+          "good": "Designs deterministic namespaced keys and considers TTL, versioning, and lifecycle.",
+          "excellent": "Treats key design as part of the data contract, including ownership, migration, cardinality, lifecycle, debugging, and avoidance of scan-dependent operations."
+        },
+        "skills": [
+          "NoSQL",
+          "Key-Value Databases",
+          "Data Modeling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "key-design",
+          "namespacing",
+          "ttl",
+          "key-value"
+        ]
+      },
+      {
+        "id": "BE-229",
+        "domain": "nosql_data_modeling",
+        "subtopic": "Query-Driven Table Design",
+        "topic": "Wide-Column Data Modeling",
+        "difficulty": "Hard",
+        "question_type": "data_modeling",
+        "question": "In a wide-column database, why might you create multiple tables containing similar data instead of one normalized table?",
+        "answer": "Wide-column systems often optimize around specific partition and clustering patterns rather than arbitrary joins. If the application needs two different high-volume query patterns, separate tables can be designed so each query is served efficiently from the appropriate partition key and sort order. The duplicated data increases storage and write maintenance, but it can avoid expensive scans or unsupported joins in latency-sensitive paths. This is intentional denormalization driven by access patterns.",
+        "key_concepts": [
+          "query-driven modeling",
+          "wide-column",
+          "partition key",
+          "clustering order",
+          "denormalization",
+          "write amplification"
+        ],
+        "expected_points": [
+          "Explains why multiple tables can represent different query paths.",
+          "Connects table design to partition and clustering keys.",
+          "Acknowledges storage and write-maintenance costs.",
+          "Distinguishes intentional query optimization from accidental duplication."
+        ],
+        "common_mistakes": [
+          "Assuming duplicate tables always indicate poor database design.",
+          "Trying to normalize all data into one table.",
+          "Ignoring the consistency cost of maintaining multiple representations."
+        ],
+        "example": "An event service may need both 'events by device over time' and 'events by event type over time.' Two purpose-built tables can support those queries efficiently rather than forcing one table to satisfy incompatible partitioning requirements.",
+        "follow_up_questions": [
+          "How would you keep two denormalized tables consistent when a write partially succeeds?",
+          "What factors would make you reject a second table despite its query-performance benefits?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why duplicated tables are intentional in wide-column systems.",
+          "average": "Recognizes query-specific tables but misses consistency and write costs.",
+          "good": "Explains partition-driven design and justified denormalization.",
+          "excellent": "Shows clear understanding of query-based physical modeling, write amplification, consistency, operational recovery, and the cost-benefit decision for maintaining multiple access paths."
+        },
+        "skills": [
+          "NoSQL",
+          "Wide-Column Databases",
+          "Data Modeling",
+          "Distributed Systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "wide-column",
+          "query-driven",
+          "denormalization",
+          "clustering"
+        ]
+      },
+      {
+        "id": "BE-230",
+        "domain": "nosql_data_modeling",
+        "topic": "Wide-Column Data Modeling",
+        "subtopic": "Partition Sizing",
+        "difficulty": "Expert",
+        "question_type": "architecture",
+        "question": "A Cassandra-style workload has a partition key of tenant_id, but some tenants accumulate hundreds of millions of rows. What risks does this design create, and how would you redesign it?",
+        "answer": "A tenant_id-only partition can create oversized partitions, concentrated storage and traffic, expensive repairs or compaction, and unpredictable query latency for large tenants. I would examine the actual access patterns and introduce a bounded dimension such as a time bucket, logical shard, or other deterministic bucket when the workload permits it. Queries would then target the relevant buckets instead of one unbounded partition. The design must preserve acceptable query fan-out while distributing both data volume and request load.",
+        "key_concepts": [
+          "partition sizing",
+          "Cassandra",
+          "time bucketing",
+          "logical sharding",
+          "query fan-out",
+          "data skew"
+        ],
+        "expected_points": [
+          "Identifies oversized partitions and skew as risks.",
+          "Explains why tenant_id alone may be insufficient for large tenants.",
+          "Introduces bounded partitioning such as time or logical buckets.",
+          "Considers query fan-out and operational consequences."
+        ],
+        "common_mistakes": [
+          "Adding cluster nodes without changing the partitioning scheme.",
+          "Choosing an arbitrary bucket without considering query patterns.",
+          "Ignoring the difference between storage balance and request balance."
+        ],
+        "example": "A tenant's events could be partitioned by tenant_id plus month, or by tenant_id plus a deterministic shard, so each partition remains bounded while queries for a time range target only the required buckets.",
+        "follow_up_questions": [
+          "How would you choose the bucket size for a workload whose traffic changes significantly over time?",
+          "What trade-off does bucketing introduce for queries spanning a long historical period?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests only adding nodes and does not identify partition-size problems.",
+          "average": "Recognizes large partitions but gives no concrete redesign or query implications.",
+          "good": "Explains bounded partitioning, skew, and query fan-out.",
+          "excellent": "Designs a scalable partition strategy based on measured volume and traffic, explicitly balancing partition size, request distribution, query fan-out, compaction/repair behavior, and future growth."
+        },
+        "skills": [
+          "NoSQL",
+          "Cassandra",
+          "Data Partitioning",
+          "Scalability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cassandra",
+          "partition-sizing",
+          "bucketing",
+          "data-skew"
+        ]
+      },
+      {
+        "id": "BE-231",
+        "domain": "nosql_data_modeling",
+        "topic": "Consistency and Replication",
+        "subtopic": "Read-After-Write Requirements",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "Your NoSQL database uses asynchronous replication. A user updates their profile and immediately refreshes the page, but the read sometimes returns the old value. How would you solve this without necessarily making every operation strongly consistent?",
+        "answer": "First, I would determine whether the product truly requires read-after-write consistency for this user flow or whether brief staleness is acceptable. If read-your-own-writes is required, options include routing the user's subsequent reads to a replica guaranteed to have the write, using session or causal consistency mechanisms where supported, temporarily reading from the authoritative path, or carrying a version that lets the application reject older responses. Making every operation globally strongly consistent may be unnecessary and could increase cost or latency.",
+        "key_concepts": [
+          "read-after-write consistency",
+          "asynchronous replication",
+          "session consistency",
+          "versioning",
+          "stale reads"
+        ],
+        "expected_points": [
+          "Identifies the specific consistency requirement rather than defaulting to global strong consistency.",
+          "Explains one or more mechanisms for read-your-own-writes behavior.",
+          "Considers latency, availability, and implementation trade-offs.",
+          "Uses versions or routing carefully to prevent stale responses."
+        ],
+        "common_mistakes": [
+          "Immediately switching the entire database to strong consistency.",
+          "Assuming replication lag is always a database bug.",
+          "Using client-side delays as the primary correctness mechanism."
+        ],
+        "example": "After a profile update, the application can route that user's reads to the authoritative replica for a short period or use a version token so that a response older than the acknowledged write is not displayed.",
+        "follow_up_questions": [
+          "How would you implement version checks if requests can reach different backend instances?",
+          "What would you monitor to determine whether replication lag is causing the user-visible problem?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only to make the whole system strongly consistent.",
+          "average": "Recognizes replication lag but provides no precise consistency strategy.",
+          "good": "Identifies read-after-write consistency and proposes appropriate routing, versioning, or session-level techniques.",
+          "excellent": "Precisely scopes the consistency requirement, proposes a targeted mechanism, and evaluates latency, failure modes, monitoring, and behavior during replica lag or failover."
+        },
+        "skills": [
+          "NoSQL",
+          "Consistency",
+          "Distributed Systems",
+          "Backend Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "read-after-write",
+          "replication-lag",
+          "session-consistency",
+          "stale-read"
+        ]
+      },
+      {
+        "id": "BE-232",
+        "domain": "nosql_data_modeling",
+        "topic": "Consistency and Replication",
+        "subtopic": "Conflict Resolution",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "Two geographically distributed clients update the same logical record while temporarily disconnected. When connectivity returns, both updates exist but conflict. How would you design conflict resolution?",
+        "answer": "The correct strategy depends on the business meaning of the data. For fields where last-write-wins is safe, timestamps or versions may be sufficient, but clock assumptions and lost updates must be considered. For business-critical state, I would prefer domain-specific conflict rules, such as merging independent fields, retaining both versions for review, or rejecting ambiguous conflicts for explicit resolution. The system should record enough version or causality information to detect conflicts and make resolution deterministic and observable.",
+        "key_concepts": [
+          "conflict resolution",
+          "multi-region",
+          "versioning",
+          "causality",
+          "last-write-wins",
+          "domain-specific merge"
+        ],
+        "expected_points": [
+          "Starts with business semantics rather than choosing a generic merge rule.",
+          "Explains the limitations of last-write-wins.",
+          "Uses version or causality information to detect concurrent updates.",
+          "Provides a deterministic and observable conflict-resolution process."
+        ],
+        "common_mistakes": [
+          "Always using the latest timestamp.",
+          "Assuming wall-clock time perfectly represents causality.",
+          "Silently discarding one user's update without considering business impact."
+        ],
+        "example": "For independent profile fields, concurrent updates to phone_number and address may be merged. For a financial limit, conflicting concurrent changes may require one operation to be rejected or reviewed rather than automatically taking the latest timestamp.",
+        "follow_up_questions": [
+          "Why is last-write-wins dangerous for some business-critical fields?",
+          "How would you test conflict-resolution logic before deploying it to a multi-region production system?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Uses last-write-wins for every conflict without discussing correctness.",
+          "average": "Knows conflicts need resolution but gives only generic merge logic.",
+          "good": "Explains versioning, causality, domain-specific rules, and deterministic resolution.",
+          "excellent": "Designs a conflict model from business invariants, distinguishes concurrent from sequential updates, addresses clock limitations, preserves auditability, and defines testing and recovery behavior."
+        },
+        "skills": [
+          "NoSQL",
+          "Distributed Systems",
+          "Consistency",
+          "System Design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "conflict-resolution",
+          "multi-region",
+          "causality",
+          "last-write-wins"
+        ]
+      },
+      {
+        "id": "BE-233",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Architecture",
+        "subtopic": "Migration from Relational to NoSQL",
+        "difficulty": "Expert",
+        "question_type": "architecture",
+        "question": "A team wants to migrate a high-traffic relational service to NoSQL because of scaling concerns. What questions would you ask before approving the migration?",
+        "answer": "I would first establish whether the relational database is actually the bottleneck and whether partitioning, indexing, query optimization, caching, read replicas, or schema changes could solve the problem more simply. If NoSQL remains justified, I would identify the application's critical access patterns, consistency and transaction requirements, relationship complexity, data volume, partition strategy, operational capabilities, and migration constraints. I would also define how data correctness will be validated, how dual writes or change data capture will work, how rollback will be handled, and how the new system will be measured against the existing one.",
+        "key_concepts": [
+          "migration assessment",
+          "access patterns",
+          "consistency",
+          "transaction requirements",
+          "dual write",
+          "change data capture"
+        ],
+        "expected_points": [
+          "Challenges the assumption that NoSQL is automatically the solution.",
+          "Analyzes workload, bottlenecks, access patterns, and consistency requirements.",
+          "Defines migration and correctness strategy.",
+          "Includes rollback, observability, and operational readiness."
+        ],
+        "common_mistakes": [
+          "Migrating solely because NoSQL is perceived as more scalable.",
+          "Copying the relational schema directly into NoSQL.",
+          "Ignoring dual-write consistency and rollback complexity."
+        ],
+        "example": "Before migrating an order service, the team should determine whether its real bottleneck is a small number of poorly indexed queries. If the workload genuinely requires distributed write scaling, the migration should define order access patterns, transaction boundaries, source-of-truth ownership, and a staged cutover.",
+        "follow_up_questions": [
+          "How would you prove that the NoSQL design is better before migrating all production traffic?",
+          "What consistency risks arise during a dual-write migration period?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Approves migration based only on expected scale and cannot describe migration risks.",
+          "average": "Mentions access patterns and dual writes but lacks a systematic decision process.",
+          "good": "Evaluates bottlenecks, workload fit, consistency, modeling, migration, validation, and rollback.",
+          "excellent": "Treats the migration as an architectural hypothesis, requiring evidence, explicit invariants, a query-driven target model, staged rollout, correctness verification, and a credible rollback plan."
+        },
+        "skills": [
+          "NoSQL",
+          "System Design",
+          "Data Migration",
+          "Scalability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "sql-to-nosql",
+          "migration",
+          "dual-write",
+          "change-data-capture"
+        ]
+      },
+      {
+        "id": "BE-234",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Architecture",
+        "subtopic": "Database Selection",
+        "difficulty": "Expert",
+        "question_type": "architecture",
+        "question": "You are designing a new backend and can choose among a document database, key-value store, wide-column database, graph database, or relational database. What decision framework would you use?",
+        "answer": "I would start with business invariants and required operations, then characterize the workload: dominant reads and writes, query shapes, relationships, transaction boundaries, consistency, latency, throughput, data growth, and geographic distribution. Next I would map those requirements to the strengths and limitations of each data model and evaluate operational maturity, tooling, team expertise, cost, backup/recovery, and observability. I would prototype the highest-risk access patterns and test realistic load rather than selecting a database from a feature checklist.",
+        "key_concepts": [
+          "database selection",
+          "workload characterization",
+          "access patterns",
+          "consistency",
+          "transactions",
+          "operational trade-offs"
+        ],
+        "expected_points": [
+          "Starts with business requirements and invariants.",
+          "Characterizes reads, writes, relationships, scale, latency, consistency, and transactions.",
+          "Compares data models against workload requirements.",
+          "Includes operational and organizational considerations and validates risky assumptions with testing."
+        ],
+        "common_mistakes": [
+          "Choosing based on popularity or benchmark numbers alone.",
+          "Choosing NoSQL simply because the system is large.",
+          "Ignoring operational maturity, backup, recovery, and team expertise."
+        ],
+        "example": "A recommendation graph may favor a graph database, session lookup may favor key-value storage, a large predictable time-series workload may favor wide-column storage, and a transactional order system may favor relational storage. A real platform can also legitimately use multiple stores for distinct workloads.",
+        "follow_up_questions": [
+          "When is using multiple database technologies justified, and when does it become unnecessary operational complexity?",
+          "Which requirement would cause you to eliminate a candidate database immediately?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Chooses a database from popularity, language ecosystem, or expected traffic alone.",
+          "average": "Considers basic workload differences but ignores operational and consistency requirements.",
+          "good": "Uses a structured workload-first framework covering access patterns, consistency, transactions, scale, and operations.",
+          "excellent": "Demonstrates architecture-level judgment by prioritizing business invariants, testing high-risk assumptions, considering polyglot persistence carefully, and accounting for lifecycle and operational cost."
+        },
+        "skills": [
+          "Database Architecture",
+          "NoSQL",
+          "System Design",
+          "Trade-off Analysis"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "database-selection",
+          "polyglot-persistence",
+          "architecture",
+          "trade-offs"
+        ]
+      },
+      {
+        "id": "BE-235",
+        "domain": "nosql_data_modeling",
+        "topic": "NoSQL Production Scenarios",
+        "subtopic": "Designing for Access Patterns and Scale",
+        "difficulty": "Expert",
+        "question_type": "architecture",
+        "question": "Design a NoSQL data model for a high-traffic notification service where the application must efficiently retrieve unread notifications for a user, mark individual notifications as read, and automatically expire old notifications.",
+        "answer": "I would begin by modeling the dominant access patterns: fetch unread notifications for one user, update one notification's read state, and remove or ignore records after a retention period. A practical design would partition notifications by user with a bounded time dimension if a user's volume can become large, while giving each notification a stable identifier for targeted updates. The unread query should have a predictable access path rather than scanning all notifications, and TTL or an equivalent expiration mechanism can handle retention. If the unread set can become extremely large, I would consider a separate unread index/read model and explicitly manage consistency between it and the notification record.",
+        "key_concepts": [
+          "access-pattern-driven modeling",
+          "partitioning",
+          "unread index",
+          "TTL",
+          "bounded partitions",
+          "targeted updates"
+        ],
+        "expected_points": [
+          "Designs directly around the three required operations.",
+          "Chooses a partition strategy that considers high-volume users and bounded growth.",
+          "Provides an efficient way to find unread notifications without scanning everything.",
+          "Uses TTL/retention and addresses consistency if a separate unread representation is introduced."
+        ],
+        "common_mistakes": [
+          "Partitioning only by notification_id, making user queries expensive.",
+          "Putting all notifications for a high-volume user into one unbounded partition.",
+          "Scanning every notification to find unread records."
+        ],
+        "example": "Notifications can be partitioned by user_id plus a time bucket, with notification_id as a targeted key and read state included in the record. A separate unread access path can be maintained if unread queries dominate and the primary record layout cannot support them efficiently.",
+        "follow_up_questions": [
+          "What would you change if one user could receive 100 million notifications?",
+          "How would you keep an unread index consistent when a notification is marked read and the write to the primary record succeeds but the index update fails?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Stores all notifications in one structure and relies on full scans.",
+          "average": "Uses user_id as a partition key and TTL but does not address unbounded users or unread-query efficiency.",
+          "good": "Designs bounded partitions, targeted updates, efficient unread access, and expiration.",
+          "excellent": "Produces a production-ready query-driven design that anticipates skew, partition growth, read amplification, TTL semantics, consistency between derived views, and failure recovery."
+        },
+        "skills": [
+          "NoSQL",
+          "Data Modeling",
+          "System Design",
+          "Scalability",
+          "Consistency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "notifications",
+          "access-patterns",
+          "ttl",
+          "partitioning",
+          "read-model"
+        ]
+      }
+    ]
+  }
+}

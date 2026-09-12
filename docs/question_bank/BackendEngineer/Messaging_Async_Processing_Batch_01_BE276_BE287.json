@@ -1,0 +1,657 @@
+{
+  "question_bank": {
+    "id": "backend-messaging-async-35",
+    "title": "Messaging & Asynchronous Processing Interview Question Bank",
+    "description": "Production-oriented interview questions covering messaging fundamentals, queues, pub-sub, delivery semantics, producer/consumer reliability, and asynchronous backend processing.",
+    "language": "Backend Engineering",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "question_count": 12,
+    "difficulty_distribution": {
+      "Easy": 4,
+      "Medium": 6,
+      "Hard": 2,
+      "Expert": 0
+    },
+    "questions": [
+      {
+        "id": "BE-276",
+        "domain": "messaging_async_processing",
+        "topic": "Messaging Fundamentals",
+        "subtopic": "Message-Oriented Communication",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What problem does asynchronous messaging solve in a backend system, and how is it different from a synchronous request-response call?",
+        "answer": "Asynchronous messaging lets a producer send work or an event to a messaging system without requiring the consumer to process it during the same request. The message can be stored until a consumer is ready, which decouples producer and consumer availability and processing speed. This can improve resilience, smoothing of traffic spikes, and responsiveness, but it introduces concerns such as delivery semantics, retries, duplicate processing, ordering, and eventual consistency.",
+        "key_concepts": [
+          "asynchronous communication",
+          "producer-consumer decoupling",
+          "buffering",
+          "eventual consistency"
+        ],
+        "expected_points": [
+          "The producer does not need to wait for the consumer to finish processing.",
+          "A broker or messaging system can buffer messages between producers and consumers.",
+          "Messaging can absorb traffic spikes and isolate temporary consumer failures.",
+          "Asynchronous systems introduce operational concerns such as retries, duplicates, ordering, and delayed processing."
+        ],
+        "common_mistakes": [
+          "Claiming asynchronous messaging always makes a system faster.",
+          "Assuming the broker guarantees exactly-once processing by default.",
+          "Ignoring the additional failure and consistency considerations introduced by asynchronous processing."
+        ],
+        "example": "An order API can synchronously validate and create an order, then publish an OrderCreated message. Email, analytics, and fulfillment consumers can process that message independently without blocking the order request.",
+        "follow_up_questions": [
+          "When would synchronous communication be preferable to asynchronous messaging?",
+          "What new failure modes appear after introducing a message broker?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the difference between synchronous and asynchronous communication or describes messaging only as a performance optimization.",
+          "average": "Explains that messages allow work to be processed later but misses important trade-offs or reliability concerns.",
+          "good": "Clearly explains producer-consumer decoupling, buffering, responsiveness, and major asynchronous failure considerations.",
+          "excellent": "Explains the architectural trade-offs in depth and connects asynchronous messaging to resilience, load smoothing, eventual consistency, and independent consumer scaling."
+        },
+        "skills": [
+          "backend_architecture",
+          "asynchronous_processing"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "messaging",
+          "async",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-277",
+        "domain": "messaging_async_processing",
+        "topic": "Messaging Fundamentals",
+        "subtopic": "Message Broker",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is a message broker, and what responsibilities can it provide between producers and consumers?",
+        "answer": "A message broker is an intermediary system that accepts messages from producers and makes them available to consumers. Depending on the messaging model, it can provide durable storage, routing, delivery tracking, acknowledgements, retries, ordering within defined boundaries, and consumer coordination. The exact guarantees depend on the broker and its configuration, so a broker should not be treated as automatically providing every reliability guarantee.",
+        "key_concepts": [
+          "message broker",
+          "routing",
+          "durability",
+          "acknowledgement",
+          "consumer coordination"
+        ],
+        "expected_points": [
+          "The broker decouples producers from consumers.",
+          "It receives and stores or routes messages according to the messaging model.",
+          "It can support acknowledgements, retries, persistence, and delivery tracking.",
+          "Broker guarantees vary and must be understood rather than assumed."
+        ],
+        "common_mistakes": [
+          "Describing the broker as only a network transport.",
+          "Assuming every broker guarantees exactly-once delivery.",
+          "Ignoring broker persistence and acknowledgement configuration when discussing reliability."
+        ],
+        "example": "A payment service publishes PaymentAuthorized events to a broker. Separate consumers for invoicing and notifications receive the events without the payment service needing direct connections to each consumer.",
+        "follow_up_questions": [
+          "What is the difference between a broker and a simple in-memory queue inside an application?",
+          "How does message durability affect broker failure recovery?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot define a broker or says it simply sends messages directly from one service to another.",
+          "average": "Identifies the broker as an intermediary but provides little detail about routing, persistence, or delivery behavior.",
+          "good": "Explains producer-consumer decoupling and several broker responsibilities while acknowledging configurable guarantees.",
+          "excellent": "Explains broker responsibilities precisely and distinguishes routing, persistence, acknowledgements, consumer coordination, and delivery guarantees."
+        },
+        "skills": [
+          "message_brokers",
+          "backend_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "broker",
+          "messaging",
+          "queues"
+        ]
+      },
+      {
+        "id": "BE-278",
+        "domain": "messaging_async_processing",
+        "topic": "Messaging Fundamentals",
+        "subtopic": "Queue Semantics",
+        "difficulty": "Easy",
+        "question_type": "comparison",
+        "question": "What is a message queue, and how does it help control the rate at which work is processed?",
+        "answer": "A message queue holds work items until consumers are ready to process them. Producers can continue submitting work while consumers process messages at their available capacity, creating a buffer between arrival rate and processing rate. This protects downstream services from sudden bursts, but if messages arrive faster than they can be processed for a sustained period, the queue grows and latency increases.",
+        "key_concepts": [
+          "queue",
+          "buffering",
+          "producer-consumer rate mismatch",
+          "backlog",
+          "consumer capacity"
+        ],
+        "expected_points": [
+          "Messages wait in the queue until consumers process them.",
+          "The queue decouples arrival rate from processing rate.",
+          "A backlog can absorb temporary traffic spikes.",
+          "A sustained arrival rate above processing capacity causes queue growth and increased latency."
+        ],
+        "common_mistakes": [
+          "Saying a queue permanently solves overload.",
+          "Confusing queue depth with throughput.",
+          "Ignoring consumer processing capacity and backlog growth."
+        ],
+        "example": "If an image-processing service normally handles 100 jobs per second but receives 500 jobs per second for one minute, a queue can absorb the temporary burst while consumers continue processing at their sustainable rate.",
+        "follow_up_questions": [
+          "How would you decide when to add more consumers?",
+          "What metrics would you monitor to detect an unhealthy queue backlog?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why messages are queued or thinks the queue eliminates overload entirely.",
+          "average": "Understands buffering but does not explain the relationship between arrival rate, processing rate, and backlog.",
+          "good": "Explains queue buffering and correctly identifies backlog growth when producers consistently outpace consumers.",
+          "excellent": "Connects queue depth, arrival rate, service rate, consumer scaling, latency, and sustainable capacity into a coherent operational model."
+        },
+        "skills": [
+          "queues",
+          "capacity_planning",
+          "asynchronous_processing"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "queue",
+          "backpressure",
+          "throughput"
+        ]
+      },
+      {
+        "id": "BE-279",
+        "domain": "messaging_async_processing",
+        "topic": "Messaging Fundamentals",
+        "subtopic": "Queue vs Pub-Sub",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between a work queue and a publish-subscribe model, and when would you choose each?",
+        "answer": "In a work-queue model, each message is generally intended to be processed by one consumer or one consumer group, so multiple consumers can divide the work. In publish-subscribe, a published event can be delivered independently to multiple subscribers, allowing each subscriber to maintain its own processing stream. A queue is a natural fit for distributing jobs, while pub-sub is useful when multiple independent systems need to react to the same event.",
+        "key_concepts": [
+          "work queue",
+          "publish-subscribe",
+          "consumer group",
+          "fan-out",
+          "independent subscribers"
+        ],
+        "expected_points": [
+          "Work queues distribute work among consumers rather than requiring every consumer to receive every message.",
+          "Pub-sub supports fan-out to multiple independent subscribers.",
+          "Queues fit task processing such as background jobs.",
+          "Pub-sub fits domain events that multiple services need to consume independently."
+        ],
+        "common_mistakes": [
+          "Saying pub-sub means only one consumer receives each message.",
+          "Assuming a queue and pub-sub have identical delivery semantics.",
+          "Choosing a model without considering whether work should be shared or independently observed."
+        ],
+        "example": "A video transcoding job belongs in a work queue so one worker handles each job. A VideoPublished event may use pub-sub so notification, analytics, and search indexing consumers can each receive it.",
+        "follow_up_questions": [
+          "How does consumer-group behavior change pub-sub delivery?",
+          "What happens if one subscriber is temporarily unavailable?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish work distribution from event fan-out.",
+          "average": "Understands that queues and pub-sub differ but gives vague selection criteria.",
+          "good": "Clearly explains shared work versus independent subscriptions and gives appropriate use cases.",
+          "excellent": "Explains fan-out, consumer groups, independent offsets or delivery state, failure isolation, and selection trade-offs."
+        },
+        "skills": [
+          "messaging_patterns",
+          "event_driven_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "queue",
+          "pub-sub",
+          "fan-out"
+        ]
+      },
+      {
+        "id": "BE-280",
+        "domain": "messaging_async_processing",
+        "topic": "Queues & Pub/Sub",
+        "subtopic": "Consumer Groups",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is a consumer group, and why is it useful when scaling message processing?",
+        "answer": "A consumer group represents a set of consumers that cooperate to process messages from the same logical stream, with each message assigned to one consumer within that group under the system's delivery model. This allows processing capacity to scale horizontally without every consumer processing every message. A separate consumer group can independently consume the same event stream for a different purpose.",
+        "key_concepts": [
+          "consumer group",
+          "horizontal scaling",
+          "work sharing",
+          "independent consumption"
+        ],
+        "expected_points": [
+          "Consumers in the same group share processing responsibility.",
+          "A message is normally assigned to one member of a group according to the broker's partition/assignment model.",
+          "Adding consumers can increase parallel processing within available parallelism.",
+          "Different groups can independently consume the same event stream."
+        ],
+        "common_mistakes": [
+          "Assuming every broker implements consumer groups identically.",
+          "Saying adding unlimited consumers always increases throughput.",
+          "Confusing multiple consumers in one group with multiple independent subscribers."
+        ],
+        "example": "An order-events stream can have an analytics consumer group and a search-indexing consumer group. Within the analytics group, several consumers divide the available partitions or work.",
+        "follow_up_questions": [
+          "What limits the useful number of consumers in a consumer group?",
+          "How should a consumer group recover after one consumer crashes?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain how consumers cooperate or why groups are useful.",
+          "average": "Understands that consumers share work but misses parallelism limits or independent groups.",
+          "good": "Explains horizontal scaling, shared work, and separate groups for independent processing.",
+          "excellent": "Connects consumer groups to partitions, assignment, parallelism limits, rebalancing, and independent processing semantics."
+        },
+        "skills": [
+          "consumer_scaling",
+          "message_processing"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "consumer-group",
+          "scaling",
+          "pub-sub"
+        ]
+      },
+      {
+        "id": "BE-281",
+        "domain": "messaging_async_processing",
+        "topic": "Queues & Pub/Sub",
+        "subtopic": "Topic and Subscription",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is the relationship between a topic, a subscription, and a consumer in a publish-subscribe system?",
+        "answer": "A topic represents a stream or category to which producers publish messages. A subscription represents an independent view or delivery relationship to that topic and tracks which messages are available to a particular subscriber or consumer group according to the messaging system. Consumers read messages through the subscription rather than requiring producers to know the individual consumers.",
+        "key_concepts": [
+          "topic",
+          "subscription",
+          "consumer",
+          "fan-out",
+          "delivery state"
+        ],
+        "expected_points": [
+          "Producers publish messages to a topic rather than directly to consumers.",
+          "A subscription provides an independent consumption path for a topic.",
+          "Different subscriptions can receive the same published events.",
+          "Consumers process messages through their subscription and maintain delivery or acknowledgement state according to the system."
+        ],
+        "common_mistakes": [
+          "Treating a topic as the same thing as a single consumer.",
+          "Assuming a topic automatically stores an independent copy for every consumer.",
+          "Ignoring subscription-level delivery or acknowledgement state."
+        ],
+        "example": "An OrderCreated topic can have separate subscriptions for billing, notifications, and analytics, allowing each consumer path to process the same event independently.",
+        "follow_up_questions": [
+          "Why would you create separate subscriptions instead of multiple consumers on one subscription?",
+          "How does subscription retention affect replay and recovery?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe how topics and consumers relate.",
+          "average": "Knows that producers publish to topics but cannot explain subscriptions clearly.",
+          "good": "Explains topic, subscription, and consumer responsibilities and their role in fan-out.",
+          "excellent": "Explains independent subscriptions, delivery state, retention/replay, and consumer isolation with precise terminology."
+        },
+        "skills": [
+          "pub_sub",
+          "event_driven_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "topic",
+          "subscription",
+          "consumer"
+        ]
+      },
+      {
+        "id": "BE-282",
+        "domain": "messaging_async_processing",
+        "topic": "Queues & Pub/Sub",
+        "subtopic": "Event vs Command",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between a command message and an event message, and why does the distinction matter in backend architecture?",
+        "answer": "A command asks a specific consumer or service to perform an action, while an event records that something has already happened. Commands therefore usually have an intended handler and can be rejected or fail as work, whereas events are typically published for interested consumers to react to independently. Making the distinction explicit improves API and message contracts because consumers can understand whether they are being asked to do something or being informed about a completed fact.",
+        "key_concepts": [
+          "command",
+          "event",
+          "message intent",
+          "coupling",
+          "message contract"
+        ],
+        "expected_points": [
+          "A command expresses requested work or intent.",
+          "An event represents a fact about something that occurred.",
+          "Commands commonly target a responsible handler; events may have multiple independent consumers.",
+          "The distinction affects naming, ownership, coupling, and error semantics."
+        ],
+        "common_mistakes": [
+          "Using the terms event and command interchangeably.",
+          "Assuming an event always means successful business completion without defining its semantics.",
+          "Designing commands as if any number of consumers can independently perform the same action."
+        ],
+        "example": "CreateInvoice is a command directed toward the billing service. InvoiceCreated is an event that can be consumed independently by notification, analytics, and accounting systems.",
+        "follow_up_questions": [
+          "How would you design an event contract so consumers remain decoupled?",
+          "When might a command be retried differently from an event notification?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish an instruction from a fact.",
+          "average": "Recognizes the difference but cannot explain architectural consequences.",
+          "good": "Clearly explains command intent versus event fact and connects the distinction to consumers and coupling.",
+          "excellent": "Discusses ownership, idempotency, retries, schema evolution, event semantics, and why confusing commands with events can create unintended side effects."
+        },
+        "skills": [
+          "event_driven_architecture",
+          "message_contracts"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "commands",
+          "events",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-283",
+        "domain": "messaging_async_processing",
+        "topic": "Queues & Pub/Sub",
+        "subtopic": "Message Persistence",
+        "difficulty": "Medium",
+        "question_type": "scenario_based",
+        "question": "A consumer crashes after receiving a message but before completing its work. What should a reliable messaging design do to avoid silently losing that work?",
+        "answer": "The messaging system should distinguish message receipt from successful processing, typically by requiring an acknowledgement after the consumer has completed the necessary work. If the consumer crashes before acknowledgement, the message can become eligible for redelivery according to the broker's delivery model. The consumer must therefore be designed to tolerate duplicate delivery, because a crash can occur after the business operation succeeds but before the acknowledgement is recorded.",
+        "key_concepts": [
+          "acknowledgement",
+          "redelivery",
+          "durability",
+          "at-least-once delivery",
+          "idempotent processing"
+        ],
+        "expected_points": [
+          "Do not acknowledge successful processing before the required work is complete.",
+          "Unacknowledged messages should be recoverable or redeliverable according to the broker.",
+          "The crash window can create duplicate processing even with acknowledgements.",
+          "Consumers should make side effects idempotent or otherwise safely deduplicated."
+        ],
+        "common_mistakes": [
+          "Acknowledging immediately on receipt and assuming processing succeeded.",
+          "Assuming redelivery means the message will never be duplicated.",
+          "Ignoring the failure window between side effect completion and acknowledgement."
+        ],
+        "example": "A payment notification consumer updates a notification record and then acknowledges the message. If it crashes after the database commit but before the acknowledgement, the message may be delivered again, so the database operation needs an idempotency strategy.",
+        "follow_up_questions": [
+          "Where should the acknowledgement occur relative to a database transaction?",
+          "How can a consumer prevent duplicate side effects after redelivery?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says only to retry the message or acknowledges it immediately.",
+          "average": "Understands acknowledgements and redelivery but misses duplicate side effects.",
+          "good": "Explains acknowledgement timing, redelivery, and the need for idempotent processing.",
+          "excellent": "Precisely explains crash windows, at-least-once delivery, transaction boundaries, idempotency, and the limits of broker-level guarantees."
+        },
+        "skills": [
+          "message_reliability",
+          "idempotency",
+          "failure_handling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "acknowledgement",
+          "redelivery",
+          "reliability"
+        ]
+      },
+      {
+        "id": "BE-284",
+        "domain": "messaging_async_processing",
+        "topic": "Message Delivery Semantics",
+        "subtopic": "At-Most-Once Delivery",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What does at-most-once message delivery mean, and what trade-off does it make compared with at-least-once delivery?",
+        "answer": "At-most-once delivery means a message is delivered zero or one time; the system avoids redelivering it after certain failure conditions, so duplicates are minimized at the cost of potentially losing messages. At-least-once delivery instead prioritizes avoiding loss and may deliver a message multiple times. At-most-once can be appropriate when occasional loss is acceptable and duplicate processing is particularly undesirable, but it is unsuitable for business-critical work where every message must be accounted for.",
+        "key_concepts": [
+          "at-most-once",
+          "message loss",
+          "duplicates",
+          "delivery guarantee"
+        ],
+        "expected_points": [
+          "A message is delivered no more than once, but it may not be delivered at all.",
+          "The trade-off favors avoiding duplicates over avoiding loss.",
+          "At-least-once favors delivery and requires duplicate-safe consumers.",
+          "The appropriate guarantee depends on business consequences of loss versus duplicate processing."
+        ],
+        "common_mistakes": [
+          "Claiming at-most-once means exactly one delivery.",
+          "Saying at-most-once guarantees message durability.",
+          "Ignoring whether message loss is acceptable for the business operation."
+        ],
+        "example": "A low-value telemetry signal where occasional loss is acceptable may use at-most-once semantics, while an order-processing command normally requires stronger protection against loss.",
+        "follow_up_questions": [
+          "Why is exactly-once processing difficult across a broker and an external database?",
+          "What application-level techniques can make at-least-once delivery safe?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Confuses at-most-once with exactly-once or cannot explain the possibility of loss.",
+          "average": "Defines at-most-once correctly but does not articulate the business trade-off.",
+          "good": "Explains zero-or-one delivery, possible loss, and contrast with at-least-once.",
+          "excellent": "Connects delivery semantics to failure windows, business criticality, idempotency, and the practical difficulty of exactly-once effects."
+        },
+        "skills": [
+          "delivery_semantics",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "at-most-once",
+          "delivery",
+          "reliability"
+        ]
+      },
+      {
+        "id": "BE-285",
+        "domain": "messaging_async_processing",
+        "topic": "Message Delivery Semantics",
+        "subtopic": "At-Least-Once Delivery",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Why is at-least-once delivery common in backend messaging systems, and what must an application do to work safely with it?",
+        "answer": "At-least-once delivery is common because systems can prioritize preventing message loss by retaining and redelivering messages when acknowledgement or processing confirmation is uncertain. The unavoidable consequence is that the same message may be processed more than once. Applications therefore need idempotent handlers, deduplication, transactional techniques, or business-level safeguards for side effects that cannot safely repeat.",
+        "key_concepts": [
+          "at-least-once",
+          "redelivery",
+          "idempotent consumer",
+          "deduplication",
+          "side effects"
+        ],
+        "expected_points": [
+          "The system may redeliver when processing success cannot be confirmed.",
+          "Redelivery protects against some forms of message loss.",
+          "Duplicate delivery is a normal possibility, not necessarily a broker bug.",
+          "Consumers must make important side effects safe to repeat or detect duplicates."
+        ],
+        "common_mistakes": [
+          "Treating duplicate delivery as an exceptional case that can be ignored.",
+          "Assuming acknowledgements guarantee exactly-once business effects.",
+          "Using a random retry without controlling repeated side effects."
+        ],
+        "example": "For a shipment-created event, the consumer can use the event ID as a unique business-processing key so a repeated delivery does not create a second shipment record.",
+        "follow_up_questions": [
+          "What makes an operation idempotent?",
+          "How would you design deduplication when the consumer updates an external system?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why duplicates occur or how to handle them.",
+          "average": "Knows at-least-once can duplicate messages but offers only generic retries.",
+          "good": "Explains redelivery and recommends idempotency or deduplication for side effects.",
+          "excellent": "Explains the acknowledgement uncertainty window and compares idempotency, deduplication, transactional boundaries, and business safeguards."
+        },
+        "skills": [
+          "idempotency",
+          "message_reliability",
+          "failure_handling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "at-least-once",
+          "duplicates",
+          "idempotency"
+        ]
+      },
+      {
+        "id": "BE-286",
+        "domain": "messaging_async_processing",
+        "topic": "Message Delivery Semantics",
+        "subtopic": "Exactly-Once Semantics",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "What does exactly-once processing mean, and why is it different from exactly-once message delivery?",
+        "answer": "Exactly-once message delivery means the messaging system attempts to make a message appear to a consumer exactly once, while exactly-once processing means the business effect occurs exactly once. The latter is harder because the consumer may interact with systems outside the broker, such as a database or payment provider. A crash can occur after an external side effect succeeds but before the broker records successful processing, so application-level idempotency or transactional coordination is often required even when a broker provides strong delivery guarantees.",
+        "key_concepts": [
+          "exactly-once delivery",
+          "exactly-once processing",
+          "external side effects",
+          "failure window",
+          "idempotency"
+        ],
+        "expected_points": [
+          "Delivery count and business-effect count are different guarantees.",
+          "External systems create failure windows between side effect and acknowledgement.",
+          "Broker-level exactly-once behavior does not automatically make external business operations exactly once.",
+          "Idempotency or transactional coordination is commonly needed."
+        ],
+        "common_mistakes": [
+          "Claiming exactly-once delivery automatically guarantees exactly-once business effects.",
+          "Ignoring external databases and APIs.",
+          "Assuming a successful acknowledgement proves the business transaction happened exactly once."
+        ],
+        "example": "A broker may ensure a message is processed once within its transaction model, but if the consumer charges a third-party payment API outside that transaction, a crash after the charge and before commit can still create uncertainty. An idempotency key at the payment boundary can address that problem.",
+        "follow_up_questions": [
+          "What is the difference between idempotency and deduplication?",
+          "How can an outbox or transactional pattern help coordinate database changes and message publication?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Treats exactly-once as a simple broker configuration and cannot distinguish delivery from processing.",
+          "average": "Understands that exactly-once is difficult but gives no concrete failure scenario.",
+          "good": "Explains the distinction and the external side-effect problem with a sound idempotency strategy.",
+          "excellent": "Analyzes failure windows across broker, database, and external APIs and explains why exactly-once business effects require end-to-end design rather than a single broker setting."
+        },
+        "skills": [
+          "distributed_systems",
+          "delivery_semantics",
+          "idempotency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "exactly-once",
+          "transactions",
+          "idempotency"
+        ]
+      },
+      {
+        "id": "BE-287",
+        "domain": "messaging_async_processing",
+        "topic": "Producers, Consumers & Processing",
+        "subtopic": "Producer Reliability",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A backend service writes an order to its database and then publishes an OrderCreated message. How can the system avoid ending up with the order saved but the message missing?",
+        "answer": "The core problem is that the database transaction and message publication are two separate operations, so a failure between them can leave inconsistent state. A common solution is the transactional outbox pattern: the service writes the order and an outbox record in the same database transaction, then a separate publisher reliably reads the outbox and publishes the message. The publisher marks or records successful publication so the message can be retried safely. Consumers should still be idempotent because publication or acknowledgement can be retried.",
+        "key_concepts": [
+          "transactional outbox",
+          "atomic database transaction",
+          "reliable publication",
+          "retry",
+          "idempotent consumer"
+        ],
+        "expected_points": [
+          "A database commit followed by a failed publish can lose the event.",
+          "The order and outbox record can be committed atomically in one database transaction.",
+          "A publisher can asynchronously relay outbox records to the messaging system.",
+          "Publishing may be retried, so consumers should tolerate duplicates."
+        ],
+        "common_mistakes": [
+          "Using a simple database write followed by publish and assuming the gap is harmless.",
+          "Assuming a distributed transaction is always required or always available.",
+          "Designing the outbox publisher without handling retries or duplicate publication."
+        ],
+        "example": "The order service inserts both the order row and an OutboxEvent row in one transaction. A relay process publishes the OutboxEvent and records its progress, allowing a temporary broker outage to delay publication without losing the event.",
+        "follow_up_questions": [
+          "How would you prevent the outbox table from growing indefinitely?",
+          "What failure can still occur after the outbox publisher sends a message but before it marks the outbox row as published?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests publishing after the database commit without addressing the failure gap.",
+          "average": "Knows about the outbox pattern but cannot explain why the database transaction matters.",
+          "good": "Clearly explains the atomic order-plus-outbox transaction and retryable publication.",
+          "excellent": "Analyzes the full failure lifecycle, publisher retries, duplicate publication, cleanup/retention, monitoring, and idempotent consumers."
+        },
+        "skills": [
+          "transactional_outbox",
+          "reliable_messaging",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "outbox",
+          "reliability",
+          "events"
+        ]
+      }
+    ]
+  }
+}

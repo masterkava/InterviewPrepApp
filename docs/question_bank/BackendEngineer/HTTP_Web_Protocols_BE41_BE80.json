@@ -1,0 +1,2144 @@
+{
+  "question_bank": {
+    "id": "backend-engineering-500",
+    "title": "Backend Engineering Interview Question Bank — 500 Questions",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "domain": "http_networking",
+    "question_count": 40,
+    "questions": [
+      {
+        "id": "BE-041",
+        "domain": "http_networking",
+        "topic": "HTTP Methods",
+        "subtopic": "Semantics of GET/POST/PUT/PATCH/DELETE",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What are the primary HTTP methods used in a RESTful API, and what does each represent?",
+        "answer": "GET retrieves a resource without modifying server state; POST creates a new resource or triggers a non-idempotent action; PUT replaces a resource entirely; PATCH applies a partial update to a resource; DELETE removes a resource. Each method carries an implicit contract about how the server should treat the request.",
+        "key_concepts": [
+          "HTTP methods",
+          "GET",
+          "POST",
+          "PUT",
+          "PATCH",
+          "DELETE",
+          "REST semantics"
+        ],
+        "expected_points": [
+          "GET retrieves data without side effects",
+          "POST creates resources or triggers actions",
+          "PUT replaces an entire resource",
+          "PATCH partially updates a resource",
+          "DELETE removes a resource"
+        ],
+        "common_mistakes": [
+          "Using GET to perform state-changing operations",
+          "Treating PUT and PATCH as interchangeable",
+          "Assuming POST is always used only for creation"
+        ],
+        "example": "A client uses POST /orders to create a new order, then PATCH /orders/123 to update only the shipping address without resending the entire order payload.",
+        "follow_up_questions": [
+          "Why is it problematic to use GET for an operation that changes server state?",
+          "What is the difference between PUT and PATCH in terms of payload expectations?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Lists methods with no explanation of semantics.",
+          "average": "Correctly names GET/POST/PUT/DELETE but confuses PUT and PATCH or omits semantics.",
+          "good": "Explains all five methods correctly including the PUT vs PATCH distinction.",
+          "excellent": "Explains all methods, ties them to REST conventions, and discusses implications like idempotency or caching for each."
+        },
+        "skills": [
+          "http",
+          "rest_api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "http_methods",
+          "rest",
+          "api_design"
+        ]
+      },
+      {
+        "id": "BE-042",
+        "domain": "http_networking",
+        "topic": "HTTP Methods",
+        "subtopic": "Safe vs Idempotent Methods",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between a 'safe' HTTP method and an 'idempotent' HTTP method?",
+        "answer": "A safe method does not alter server state — it is intended only to retrieve data (e.g., GET, HEAD, OPTIONS). An idempotent method may change state, but calling it multiple times with identical input produces the same end state as calling it once (e.g., PUT, DELETE). All safe methods are idempotent, but not all idempotent methods are safe; POST is neither safe nor idempotent by default.",
+        "key_concepts": [
+          "safe methods",
+          "idempotent methods",
+          "GET",
+          "PUT",
+          "DELETE",
+          "POST"
+        ],
+        "expected_points": [
+          "Safe methods do not modify server state",
+          "Idempotent methods can modify state but repeated calls yield the same result",
+          "GET and HEAD are both safe and idempotent",
+          "PUT and DELETE are idempotent but not safe",
+          "POST is neither safe nor idempotent by default"
+        ],
+        "common_mistakes": [
+          "Assuming idempotent means 'has no side effects'",
+          "Believing POST is always idempotent",
+          "Confusing safety with idempotency as the same property"
+        ],
+        "example": "Calling DELETE /users/42 once deletes the user; calling it five times in a row still leaves the system with no user 42 — the same end state. This makes DELETE idempotent even though it changes state.",
+        "follow_up_questions": [
+          "Why does idempotency matter for retry logic in unreliable networks?",
+          "Can you design an endpoint so that repeated POST requests behave idempotently?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Conflates safe and idempotent, or defines neither correctly.",
+          "average": "Defines one property correctly but not the other, or misses examples.",
+          "good": "Correctly defines both properties with accurate method classification.",
+          "excellent": "Defines both precisely, correctly classifies all common methods, and explains why the distinction matters for retries/caching."
+        },
+        "skills": [
+          "http",
+          "api_design",
+          "reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "idempotency",
+          "http_methods",
+          "safety"
+        ]
+      },
+      {
+        "id": "BE-043",
+        "domain": "http_networking",
+        "topic": "HTTP Methods",
+        "subtopic": "Idempotency in Practice (PUT vs POST)",
+        "difficulty": "Medium",
+        "question_type": "scenario",
+        "question": "A mobile client has a flaky network connection and sometimes resends the same 'create payment' request after not receiving a response. How would you design the API to avoid creating duplicate payments?",
+        "answer": "The most direct fix is to require the client to generate a unique idempotency key per logical request and send it in a header. The server stores the outcome associated with that key; if the same key is retried, the server returns the original result rather than processing the payment again, instead of relying on POST's default non-idempotent behavior.",
+        "key_concepts": [
+          "idempotency key",
+          "POST idempotency",
+          "duplicate request handling",
+          "retry safety"
+        ],
+        "expected_points": [
+          "Recognizes POST is not idempotent by default",
+          "Proposes an idempotency key or similar deduplication mechanism",
+          "Server stores/looks up prior result for a given key",
+          "Discusses returning the cached response instead of reprocessing"
+        ],
+        "common_mistakes": [
+          "Suggesting the client simply 'wait longer' without addressing duplicate creation",
+          "Assuming switching to PUT alone solves it without a resource identifier",
+          "Ignoring what happens if two different requests reuse the same key by accident"
+        ],
+        "example": "The client sends Idempotency-Key: 8f14e45 with the payment request; if the same key arrives again within a time window, the server returns the previously recorded payment result instead of charging twice.",
+        "follow_up_questions": [
+          "How long should the server retain idempotency keys, and what happens after they expire?",
+          "How would you handle a partial failure where the payment succeeded but the response was lost before reaching the client?"
+        ],
+        "evaluation_rubric": {
+          "poor": "No concrete mechanism, just says 'add validation'.",
+          "average": "Mentions idempotency keys but not how the server matches/stores them.",
+          "good": "Describes an idempotency key mechanism with server-side lookup and correctly explains why POST is unsafe here.",
+          "excellent": "Full unique-key mechanism plus expiry policy and mention of partial-failure edge cases."
+        },
+        "skills": [
+          "http",
+          "reliability",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "idempotency",
+          "payments",
+          "retry_safety"
+        ]
+      },
+      {
+        "id": "BE-044",
+        "domain": "http_networking",
+        "topic": "HTTP Status Codes",
+        "subtopic": "2xx/4xx/5xx Categories",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What do the different classes of HTTP status codes (2xx, 3xx, 4xx, 5xx) broadly represent?",
+        "answer": "1xx codes are informational and rarely surfaced to applications. 2xx codes indicate the request was successfully received, understood, and processed. 3xx codes indicate further action (usually a redirect) is needed to complete the request. 4xx codes indicate the client made an error, such as invalid input or missing authentication. 5xx codes indicate the server failed to fulfill a valid request due to an internal problem.",
+        "key_concepts": [
+          "status code classes",
+          "2xx success",
+          "3xx redirection",
+          "4xx client error",
+          "5xx server error"
+        ],
+        "expected_points": [
+          "2xx means success",
+          "3xx means redirection required",
+          "4xx means the client made an error",
+          "5xx means the server failed to process a valid request",
+          "Status code class communicates who is responsible for the outcome"
+        ],
+        "common_mistakes": [
+          "Returning 200 for error conditions with an error message in the body",
+          "Treating all errors as 500 regardless of cause",
+          "Confusing 4xx and 5xx responsibility"
+        ],
+        "example": "A malformed JSON body returns 400 (client error), while a database outage while processing a valid request returns 503 (server error).",
+        "follow_up_questions": [
+          "Why is it problematic to return 200 with an error payload in the body?",
+          "What is the practical difference between 502 and 503?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe what any class means beyond 'success or failure'.",
+          "average": "Correctly explains 2xx and 4xx/5xx broadly but confuses details.",
+          "good": "Correctly explains all four classes and gives at least one accurate example.",
+          "excellent": "Explains all classes, gives accurate examples, and explains why returning the correct class matters for clients and monitoring."
+        },
+        "skills": [
+          "http",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "status_codes",
+          "http"
+        ]
+      },
+      {
+        "id": "BE-045",
+        "domain": "http_networking",
+        "topic": "HTTP Status Codes",
+        "subtopic": "Choosing 401 vs 403",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between returning a 401 and a 403 status code, and when should each be used?",
+        "answer": "401 Unauthorized means the request lacks valid authentication credentials — the server doesn't know who the caller is, or the credentials provided are invalid or expired. 403 Forbidden means the server has identified the caller but the caller does not have permission to perform the requested action on the resource. 401 is about authentication; 403 is about authorization.",
+        "key_concepts": [
+          "401 Unauthorized",
+          "403 Forbidden",
+          "authentication vs authorization"
+        ],
+        "expected_points": [
+          "401 indicates missing or invalid authentication",
+          "403 indicates the identity is known but lacks permission",
+          "Distinguishes authentication from authorization",
+          "A 401 response typically prompts re-authentication; a 403 typically does not"
+        ],
+        "common_mistakes": [
+          "Using 401 for permission failures on an authenticated user",
+          "Returning 403 when credentials are simply missing",
+          "Treating 401 and 403 as interchangeable 'access denied' errors"
+        ],
+        "example": "An anonymous request to a protected endpoint returns 401; a logged-in regular user requesting an admin-only endpoint returns 403.",
+        "follow_up_questions": [
+          "What response headers are conventionally included with a 401?",
+          "How would you handle exposing (or hiding) the existence of a resource when returning 403 vs 404?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Does not distinguish authentication from authorization.",
+          "average": "Gives roughly correct definitions but mixes up when to apply each.",
+          "good": "Correctly distinguishes and gives accurate examples.",
+          "excellent": "Correctly distinguishes, gives examples, and discusses security nuances like using 404 instead of 403 to avoid leaking resource existence."
+        },
+        "skills": [
+          "http",
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "status_codes",
+          "auth",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-046",
+        "domain": "http_networking",
+        "topic": "HTTP Status Codes",
+        "subtopic": "429 Too Many Requests",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What does a 429 status code indicate, and how should a client typically respond to it?",
+        "answer": "429 Too Many Requests indicates the client has exceeded a rate limit imposed by the server. The server may include a Retry-After header indicating how long the client should wait before retrying. Clients should back off — typically with an exponential backoff strategy — rather than retrying immediately.",
+        "key_concepts": [
+          "rate limiting",
+          "429 status code",
+          "Retry-After header",
+          "backoff"
+        ],
+        "expected_points": [
+          "429 means the client has been rate limited",
+          "Server may specify Retry-After",
+          "Client should back off rather than retry immediately",
+          "Repeated immediate retries can worsen the situation"
+        ],
+        "common_mistakes": [
+          "Retrying immediately in a tight loop after a 429",
+          "Ignoring the Retry-After header when present",
+          "Assuming 429 indicates a server-side failure"
+        ],
+        "example": "An API allows 100 requests per minute per client; the 101st request within that window returns 429 with Retry-After: 30.",
+        "follow_up_questions": [
+          "How would you implement exponential backoff with jitter for handling 429 responses?",
+          "What's the difference between rate limiting per client and a global rate limit?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what 429 means.",
+          "average": "Knows 429 relates to rate limits but doesn't mention client-side handling.",
+          "good": "Explains 429 and correct client backoff behavior.",
+          "excellent": "Explains 429, Retry-After, and backoff strategy including risks of naive retry loops."
+        },
+        "skills": [
+          "http",
+          "rate_limiting",
+          "reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "status_codes",
+          "rate_limiting"
+        ]
+      },
+      {
+        "id": "BE-047",
+        "domain": "http_networking",
+        "topic": "HTTP Status Codes",
+        "subtopic": "Debugging 502 vs 504",
+        "difficulty": "Hard",
+        "question_type": "troubleshooting",
+        "question": "Your API gateway starts returning a mix of 502 and 504 errors for a downstream service. How would you distinguish the two, and what would you investigate for each?",
+        "answer": "502 Bad Gateway typically means the gateway received an invalid or malformed response from the upstream service (e.g., a crash, connection reset, or protocol violation), while 504 Gateway Timeout means the gateway did not receive any response within its configured timeout window. For 502s, investigate upstream crashes, unexpected connection closures, or malformed responses. For 504s, investigate upstream latency, resource exhaustion, thread pool saturation, or an overly aggressive gateway timeout setting.",
+        "key_concepts": [
+          "502 Bad Gateway",
+          "504 Gateway Timeout",
+          "upstream failures",
+          "timeout configuration"
+        ],
+        "expected_points": [
+          "502 indicates an invalid/broken response from upstream",
+          "504 indicates no response within the timeout window",
+          "Different investigation paths for each (crash vs latency)",
+          "Mentions checking upstream logs, timeouts, and resource saturation"
+        ],
+        "common_mistakes": [
+          "Treating 502 and 504 as the same failure mode",
+          "Immediately increasing the timeout without investigating root cause",
+          "Ignoring the possibility that the gateway's own configuration is at fault"
+        ],
+        "example": "A downstream service that crashes mid-request produces 502s, while a downstream service under heavy load that simply responds too slowly produces 504s at the gateway.",
+        "follow_up_questions": [
+          "What metrics would help you tell whether the root cause is upstream saturation versus a network issue between the gateway and upstream?",
+          "Should you always increase the timeout if you're seeing 504s? Why or why not?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish 502 from 504.",
+          "average": "Gives rough definitions but no investigation approach.",
+          "good": "Correctly distinguishes both and lists reasonable investigation steps for each.",
+          "excellent": "Distinguishes both, gives an investigation plan, and discusses trade-offs of blindly raising timeouts vs fixing root cause."
+        },
+        "skills": [
+          "http",
+          "troubleshooting",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "status_codes",
+          "gateway",
+          "incident_response"
+        ]
+      },
+      {
+        "id": "BE-048",
+        "domain": "http_networking",
+        "topic": "HTTP Headers",
+        "subtopic": "Purpose of Common Request/Response Headers",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What role do HTTP headers play in a request or response, and can you name a few commonly used ones and their purposes?",
+        "answer": "Headers carry metadata about the request or response separate from the body — things like content format, authentication credentials, caching instructions, and client/server capabilities. Common examples include Content-Type (format of the body), Authorization (credentials), Cache-Control (caching behavior), and User-Agent (identifies the client).",
+        "key_concepts": [
+          "HTTP headers",
+          "Content-Type",
+          "Authorization",
+          "Cache-Control",
+          "User-Agent"
+        ],
+        "expected_points": [
+          "Headers carry metadata, not the primary payload",
+          "Content-Type describes the body's format",
+          "Authorization carries credentials",
+          "Cache-Control governs caching behavior",
+          "Headers exist for both requests and responses"
+        ],
+        "common_mistakes": [
+          "Believing headers can only appear in responses",
+          "Confusing header purpose with body content",
+          "Not knowing any concrete header examples"
+        ],
+        "example": "A client sends Content-Type: application/json and Authorization: Bearer <token>; the server responds with Cache-Control: no-store to prevent caching of a sensitive response.",
+        "follow_up_questions": [
+          "What happens if a client sends a body but omits Content-Type?",
+          "What's the difference between Cache-Control and Expires headers?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot name any headers or their purpose.",
+          "average": "Names a header or two without explaining purpose clearly.",
+          "good": "Names several headers with accurate purposes.",
+          "excellent": "Names several headers, explains purposes accurately, and distinguishes request-specific vs response-specific headers."
+        },
+        "skills": [
+          "http"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "headers",
+          "http"
+        ]
+      },
+      {
+        "id": "BE-049",
+        "domain": "http_networking",
+        "topic": "HTTP Headers",
+        "subtopic": "Content-Type vs Accept",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between the Content-Type and Accept headers?",
+        "answer": "Content-Type describes the format of the data actually being sent in the current request or response body (e.g., application/json). Accept, sent by the client, indicates what response formats the client is willing to receive, allowing the server to choose an appropriate representation through content negotiation.",
+        "key_concepts": [
+          "Content-Type",
+          "Accept header",
+          "content negotiation"
+        ],
+        "expected_points": [
+          "Content-Type describes the body being sent",
+          "Accept describes what formats the client can handle in the response",
+          "Both can appear together but serve different directions",
+          "Content negotiation may use Accept to pick a response format"
+        ],
+        "common_mistakes": [
+          "Using Accept to describe the request body's format",
+          "Assuming a mismatch between Accept and the server's default always errors instead of possibly falling back",
+          "Treating both headers as synonyms"
+        ],
+        "example": "A client sends a JSON body with Content-Type: application/json, and includes Accept: application/xml to request the response be returned as XML.",
+        "follow_up_questions": [
+          "What should a server do if it cannot satisfy the client's Accept header?",
+          "How does content negotiation interact with API versioning?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the two headers.",
+          "average": "Defines one correctly but confuses the other.",
+          "good": "Correctly explains both and their directions.",
+          "excellent": "Correctly explains both and discusses content negotiation fallback behavior (e.g., 406 Not Acceptable)."
+        },
+        "skills": [
+          "http",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "headers",
+          "content_negotiation"
+        ]
+      },
+      {
+        "id": "BE-050",
+        "domain": "http_networking",
+        "topic": "HTTP Caching",
+        "subtopic": "Cache-Control Directives",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What do common Cache-Control directives like no-store, no-cache, max-age, and private/public control?",
+        "answer": "no-store tells caches not to store the response at all. no-cache allows caching but requires revalidation with the origin before reuse. max-age=N specifies how many seconds a cached response is considered fresh without revalidation. public allows the response to be cached by shared caches (like CDNs), while private restricts caching to the end-user's own client.",
+        "key_concepts": [
+          "Cache-Control",
+          "no-store",
+          "no-cache",
+          "max-age",
+          "public/private"
+        ],
+        "expected_points": [
+          "no-store prevents any caching",
+          "no-cache allows caching but requires revalidation",
+          "max-age sets a freshness window in seconds",
+          "public/private controls whether shared caches may store the response",
+          "Directives can be combined"
+        ],
+        "common_mistakes": [
+          "Assuming no-cache means 'do not cache at all'",
+          "Confusing max-age with an absolute expiration timestamp",
+          "Forgetting that private responses shouldn't be stored in shared/CDN caches"
+        ],
+        "example": "A response with Cache-Control: private, max-age=60 can be cached by the user's browser for 60 seconds but must not be stored by a shared proxy or CDN.",
+        "follow_up_questions": [
+          "Why might you use no-cache instead of no-store for sensitive but frequently requested data?",
+          "How does a CDN decide whether it's allowed to cache a given response?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain any directive correctly.",
+          "average": "Explains max-age correctly but confuses no-cache with no-store.",
+          "good": "Explains all four directives correctly.",
+          "excellent": "Explains all directives correctly plus a concrete scenario for choosing between them."
+        },
+        "skills": [
+          "http",
+          "caching"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "caching",
+          "headers"
+        ]
+      },
+      {
+        "id": "BE-051",
+        "domain": "http_networking",
+        "topic": "HTTP Caching",
+        "subtopic": "ETag vs Last-Modified",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "How do ETag and Last-Modified headers support cache validation, and how do they differ?",
+        "answer": "Both allow a client to ask the server \"has this resource changed?\" without re-downloading the full body. Last-Modified stores a timestamp of the resource's last change; the client sends it back via If-Modified-Since, and the server responds 304 Not Modified if unchanged. ETag stores an opaque version identifier (often a hash) of the resource; the client sends it back via If-None-Match. ETag is more precise since it can detect changes that don't affect the timestamp, or when timestamp resolution is too coarse.",
+        "key_concepts": [
+          "ETag",
+          "Last-Modified",
+          "conditional requests",
+          "304 Not Modified",
+          "If-None-Match",
+          "If-Modified-Since"
+        ],
+        "expected_points": [
+          "Both support conditional GET requests to avoid re-downloading unchanged data",
+          "Last-Modified uses a timestamp, validated via If-Modified-Since",
+          "ETag uses a version identifier/hash, validated via If-None-Match",
+          "Server responds 304 if the resource hasn't changed",
+          "ETag is generally more precise than timestamp-based validation"
+        ],
+        "common_mistakes": [
+          "Assuming ETag and Last-Modified must always be used together",
+          "Believing 304 responses include a body",
+          "Not knowing which request header pairs with which validator"
+        ],
+        "example": "A client requests a large image with If-None-Match: \"abc123\"; if the ETag still matches, the server responds 304 Not Modified with no body, saving bandwidth.",
+        "follow_up_questions": [
+          "Why might a Last-Modified timestamp fail to detect a change that an ETag would catch?",
+          "What are the trade-offs of computing a strong ETag (e.g., a full content hash) versus a weak ETag?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain conditional caching at all.",
+          "average": "Explains one mechanism correctly but not the other.",
+          "good": "Explains both mechanisms and their associated headers correctly.",
+          "excellent": "Explains both, correctly pairs the request headers, and discusses precision trade-offs between strong and weak validators."
+        },
+        "skills": [
+          "http",
+          "caching"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "caching",
+          "conditional_requests"
+        ]
+      },
+      {
+        "id": "BE-052",
+        "domain": "http_networking",
+        "topic": "HTTP Caching",
+        "subtopic": "Stale Cache Invalidation Scenario",
+        "difficulty": "Hard",
+        "question_type": "scenario",
+        "question": "Users report seeing outdated product prices on your site even after the backend price was updated. The response is served through a CDN with Cache-Control: public, max-age=300. How would you diagnose and fix this?",
+        "answer": "First confirm whether the stale response is coming from the CDN cache or a downstream application/browser cache by checking cache headers (e.g., Age, X-Cache) in the response. Since max-age=300 means the CDN can legitimately serve a 5-minute-old price, the immediate fix might be to actively purge or invalidate the specific cached URL when the price changes, rather than waiting for expiry. Longer-term, consider reducing max-age for volatile data, using cache versioning (e.g., embedding a version or hash in the URL), or issuing explicit cache invalidation calls to the CDN on price updates.",
+        "key_concepts": [
+          "CDN caching",
+          "cache invalidation",
+          "max-age",
+          "cache purging",
+          "cache versioning"
+        ],
+        "expected_points": [
+          "Recognizes max-age=300 legitimately permits stale data for up to 5 minutes",
+          "Proposes checking response headers to confirm where staleness originates",
+          "Proposes active cache purge/invalidation on price update",
+          "Considers longer-term fixes like shorter TTL or versioned URLs"
+        ],
+        "common_mistakes": [
+          "Assuming CDN caching is inherently broken rather than working as configured",
+          "Jumping straight to disabling caching entirely instead of targeted invalidation",
+          "Not considering intermediate caches (browser, proxy) besides the CDN"
+        ],
+        "example": "When a price changes, the backend calls the CDN's purge API for the specific product URL immediately after the database update, rather than waiting for the 5-minute TTL to expire.",
+        "follow_up_questions": [
+          "What are the trade-offs of very short TTLs versus active invalidation for frequently changing data?",
+          "How would you handle cache invalidation across multiple CDN edge locations reliably?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Doesn't recognize the caching TTL as the cause.",
+          "average": "Identifies caching as the cause but proposes only 'turn off caching'.",
+          "good": "Identifies the TTL behavior and proposes purge-on-update as a fix.",
+          "excellent": "Identifies the cause, proposes purge-on-update, and discusses longer-term architectural options like versioned caching."
+        },
+        "skills": [
+          "http",
+          "caching",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "caching",
+          "cdn",
+          "incident_response"
+        ]
+      },
+      {
+        "id": "BE-053",
+        "domain": "http_networking",
+        "topic": "Statelessness",
+        "subtopic": "Why HTTP Is Stateless",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What does it mean for HTTP to be a stateless protocol?",
+        "answer": "Each HTTP request is processed independently, with no inherent memory of previous requests from the same client. The server does not automatically retain context between requests; any continuity, such as being 'logged in', must be explicitly carried by the client (e.g., via a cookie or token) or reconstructed by the server from stored data.",
+        "key_concepts": [
+          "statelessness",
+          "HTTP protocol design",
+          "session state"
+        ],
+        "expected_points": [
+          "Each request is independent by default",
+          "The server doesn't automatically remember prior requests",
+          "Continuity must be explicitly provided via tokens/cookies or external storage",
+          "Statelessness is a deliberate protocol design choice"
+        ],
+        "common_mistakes": [
+          "Believing statelessness means applications can never have state",
+          "Assuming the server automatically 'remembers' a logged-in user without a token/cookie",
+          "Confusing protocol statelessness with application architecture statelessness"
+        ],
+        "example": "Without a session cookie or token, a second request to a shopping cart API has no inherent knowledge that it came from the same user as the first request.",
+        "follow_up_questions": [
+          "How do cookies or tokens work around HTTP's statelessness?",
+          "What are the benefits of statelessness for scaling backend servers?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what statelessness means.",
+          "average": "Says HTTP 'forgets' requests without explaining implications.",
+          "good": "Explains statelessness and how continuity is achieved via cookies/tokens.",
+          "excellent": "Explains statelessness, how it's worked around, and why it benefits scalability."
+        },
+        "skills": [
+          "http",
+          "backend_fundamentals"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "statelessness",
+          "http"
+        ]
+      },
+      {
+        "id": "BE-054",
+        "domain": "http_networking",
+        "topic": "Statelessness",
+        "subtopic": "Simulating State with Cookies/Sessions",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Since HTTP is stateless, how do web applications maintain a concept of a logged-in user across multiple requests?",
+        "answer": "The server issues an identifier — typically a session ID stored in a cookie, or a self-contained token like a JWT — after successful login. The client automatically includes this identifier on each subsequent request. For session IDs, the server looks up stored session data (in memory, a database, or a cache like Redis) to reconstruct the user's context. For tokens like JWTs, the necessary claims are embedded in the token itself, so no server-side lookup is required.",
+        "key_concepts": [
+          "session ID",
+          "cookies",
+          "JWT",
+          "server-side session store",
+          "stateless authentication"
+        ],
+        "expected_points": [
+          "Server issues an identifier after login",
+          "Client automatically resends the identifier via a cookie or header",
+          "Session-based approaches require server-side storage lookup",
+          "Token-based approaches (e.g., JWT) embed claims and avoid server-side lookup",
+          "Both approaches simulate continuity over stateless HTTP"
+        ],
+        "common_mistakes": [
+          "Assuming cookies alone create state without a backing session store or embedded claims",
+          "Believing JWTs require a database lookup like sessions do",
+          "Forgetting that the mechanism relies on the client resending the identifier every request"
+        ],
+        "example": "After login, the server sets Set-Cookie: session_id=abc123; the browser resends this cookie on every subsequent request, and the server looks up session abc123 in Redis to identify the user.",
+        "follow_up_questions": [
+          "What are the trade-offs between server-side sessions and stateless JWTs?",
+          "How would you invalidate a user's session before its natural expiry in each approach?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain any mechanism for maintaining login state.",
+          "average": "Mentions cookies but not how the server reconstructs identity.",
+          "good": "Explains session ID and lookup, or JWT and embedded claims.",
+          "excellent": "Explains both approaches and compares their trade-offs, such as revocation difficulty with JWTs."
+        },
+        "skills": [
+          "http",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "sessions",
+          "jwt",
+          "statelessness"
+        ]
+      },
+      {
+        "id": "BE-055",
+        "domain": "http_networking",
+        "topic": "Cookies & Sessions",
+        "subtopic": "Session vs Token-Based Auth",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What are the key trade-offs between session-based authentication and token-based (e.g., JWT) authentication?",
+        "answer": "Session-based auth stores session state server-side, often in a shared store like Redis, so sessions can be revoked instantly and hold arbitrary data, but it requires a lookup on every request and coordination across servers. Token-based auth embeds claims directly in a signed token, allowing stateless verification without a server-side lookup and easier horizontal scaling, but revoking an individual token before expiry is harder since the server doesn't track issued tokens by default.",
+        "key_concepts": [
+          "session-based auth",
+          "token-based auth",
+          "JWT",
+          "statelessness",
+          "revocation"
+        ],
+        "expected_points": [
+          "Sessions require server-side storage and lookup",
+          "Sessions support easy, immediate revocation",
+          "Tokens are self-contained and verified without a lookup",
+          "Tokens scale more easily across stateless servers",
+          "Tokens are harder to revoke before natural expiry"
+        ],
+        "common_mistakes": [
+          "Assuming JWTs are inherently 'more secure' than sessions",
+          "Believing sessions can't scale horizontally at all",
+          "Ignoring the revocation problem with tokens"
+        ],
+        "example": "A banking app might prefer sessions for instant logout capability, while a public API serving many independent microservices might prefer JWTs to avoid a shared session store bottleneck.",
+        "follow_up_questions": [
+          "How would you implement early revocation for JWTs despite their statelessness?",
+          "What are the security implications of storing a JWT in localStorage versus an HttpOnly cookie?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe either approach accurately.",
+          "average": "Describes one approach's trade-offs but not the other's.",
+          "good": "Describes both approaches' trade-offs including scaling and revocation.",
+          "excellent": "Describes both plus practical mitigations, such as short-lived tokens with refresh tokens or token blocklists, for the revocation problem."
+        },
+        "skills": [
+          "authentication_authorization",
+          "http",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "auth",
+          "jwt",
+          "sessions"
+        ]
+      },
+      {
+        "id": "BE-056",
+        "domain": "http_networking",
+        "topic": "Cookies & Sessions",
+        "subtopic": "Cookie Attributes (HttpOnly, Secure, SameSite)",
+        "difficulty": "Medium",
+        "question_type": "security",
+        "question": "What do the HttpOnly, Secure, and SameSite cookie attributes protect against?",
+        "answer": "HttpOnly prevents client-side JavaScript from reading the cookie, reducing the impact of XSS attacks that try to steal session tokens. Secure ensures the cookie is only sent over HTTPS connections, preventing exposure over plaintext HTTP. SameSite restricts whether the cookie is sent along with cross-site requests, mitigating CSRF by controlling when the cookie is automatically attached to requests originating from other sites.",
+        "key_concepts": [
+          "HttpOnly",
+          "Secure",
+          "SameSite",
+          "XSS",
+          "CSRF",
+          "cookie security"
+        ],
+        "expected_points": [
+          "HttpOnly blocks JavaScript access to the cookie, mitigating XSS token theft",
+          "Secure restricts the cookie to HTTPS transport",
+          "SameSite controls cross-site cookie inclusion, mitigating CSRF",
+          "Attributes address different, complementary threats"
+        ],
+        "common_mistakes": [
+          "Believing HttpOnly prevents CSRF",
+          "Believing Secure alone prevents XSS",
+          "Treating SameSite=Strict as always the right default regardless of use case"
+        ],
+        "example": "A session cookie set with HttpOnly; Secure; SameSite=Lax cannot be read by an injected script, won't be sent over plain HTTP, and is not sent on most cross-site requests.",
+        "follow_up_questions": [
+          "What's the difference between SameSite=Strict, Lax, and None?",
+          "Why doesn't HttpOnly alone protect against CSRF?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what any attribute does.",
+          "average": "Correctly explains one attribute.",
+          "good": "Correctly explains all three attributes and the threat each addresses.",
+          "excellent": "Correctly explains all three, distinguishes SameSite modes, and clarifies which combined attributes are needed for a fully hardened cookie."
+        },
+        "skills": [
+          "security",
+          "http",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cookies",
+          "security",
+          "csrf",
+          "xss"
+        ]
+      },
+      {
+        "id": "BE-057",
+        "domain": "http_networking",
+        "topic": "CORS",
+        "subtopic": "Same-Origin Policy",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is the same-origin policy, and why does it exist?",
+        "answer": "The same-origin policy is a browser security mechanism that restricts scripts running on one origin, defined by scheme, host, and port, from freely reading responses from a different origin. It exists to prevent a malicious site from silently reading sensitive data, like an authenticated user's bank balance, from another site the user is logged into.",
+        "key_concepts": [
+          "same-origin policy",
+          "origin",
+          "scheme/host/port",
+          "browser security"
+        ],
+        "expected_points": [
+          "Origin is defined by scheme, host, and port",
+          "Scripts on one origin cannot freely read responses from another origin",
+          "Exists to prevent malicious sites from stealing data from other sites",
+          "Enforced by the browser, not the server"
+        ],
+        "common_mistakes": [
+          "Believing same-origin policy blocks all cross-origin requests from being sent",
+          "Confusing same-origin policy with CORS itself rather than the policy CORS relaxes",
+          "Thinking it's a server-side restriction"
+        ],
+        "example": "A script running on evil.com cannot read the JSON response from bank.com/account even if the user is logged into bank.com, because the origins differ.",
+        "follow_up_questions": [
+          "How does CORS relate to relaxing the same-origin policy?",
+          "Does the same-origin policy prevent the request from being sent, or just from being read?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what an origin is or why the policy exists.",
+          "average": "Vaguely describes it as a security feature without explaining origin or its purpose.",
+          "good": "Correctly defines origin and the policy's purpose.",
+          "excellent": "Correctly defines both, and clarifies that requests may still be sent but responses are blocked from being read by the script."
+        },
+        "skills": [
+          "security",
+          "http"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cors",
+          "same_origin_policy",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-058",
+        "domain": "http_networking",
+        "topic": "CORS",
+        "subtopic": "Preflight Requests",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is a CORS preflight request, and when does the browser send one?",
+        "answer": "A preflight request is an automatic OPTIONS request the browser sends before certain cross-origin requests, asking the server whether the actual request is permitted. It's triggered for requests that aren't considered 'simple' — for example, those using methods other than GET/POST/HEAD, custom headers, or content types outside a small allowed set. The server responds with headers like Access-Control-Allow-Methods and Access-Control-Allow-Headers indicating what's permitted, and only if that's satisfied does the browser send the actual request.",
+        "key_concepts": [
+          "CORS preflight",
+          "OPTIONS request",
+          "simple requests",
+          "Access-Control-Allow-* headers"
+        ],
+        "expected_points": [
+          "Preflight is an automatic OPTIONS request sent before certain cross-origin requests",
+          "Triggered by non-simple requests such as custom headers or certain methods/content types",
+          "Server responds with what's allowed via Access-Control-Allow-* headers",
+          "The actual request only proceeds if preflight succeeds"
+        ],
+        "common_mistakes": [
+          "Assuming every cross-origin request triggers a preflight",
+          "Believing the preflight request carries the actual payload",
+          "Forgetting the server must explicitly opt in via CORS headers"
+        ],
+        "example": "A cross-origin PUT request with a custom X-Auth-Token header triggers a preflight OPTIONS request; if the server's Access-Control-Allow-Headers includes X-Auth-Token, the browser proceeds with the actual PUT request.",
+        "follow_up_questions": [
+          "What criteria make a request 'simple' enough to skip preflight?",
+          "How can excessive preflight requests affect API latency, and how might you mitigate that?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what a preflight request is.",
+          "average": "Knows preflight exists but not what triggers it.",
+          "good": "Correctly explains what triggers preflight and the relevant response headers.",
+          "excellent": "Correctly explains triggers, headers, and performance implications, such as caching preflight results via Access-Control-Max-Age."
+        },
+        "skills": [
+          "http",
+          "security",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cors",
+          "preflight"
+        ]
+      },
+      {
+        "id": "BE-059",
+        "domain": "http_networking",
+        "topic": "CORS",
+        "subtopic": "Debugging a CORS Error in Production",
+        "difficulty": "Hard",
+        "question_type": "troubleshooting",
+        "question": "Your frontend, hosted on app.example.com, suddenly starts getting CORS errors calling api.example.com after a backend deployment, even though nothing on the frontend changed. How would you investigate?",
+        "answer": "Since the frontend didn't change, the cause is almost certainly on the backend deployment: check whether the Access-Control-Allow-Origin header or the CORS middleware configuration was altered, removed, or reset to a default that no longer includes app.example.com. Also check whether the deployment changed the API's hostname/port, introduced a new reverse proxy that strips CORS headers, or affected credentials-related settings such as Access-Control-Allow-Credentials if cookies are used. Reproduce the failing request and inspect the actual response headers rather than assuming the cause.",
+        "key_concepts": [
+          "CORS misconfiguration",
+          "Access-Control-Allow-Origin",
+          "deployment regression",
+          "reverse proxy header stripping"
+        ],
+        "expected_points": [
+          "Identifies that the backend deployment is the likely cause since the frontend didn't change",
+          "Proposes checking CORS configuration/middleware for regressions",
+          "Considers infrastructure changes such as a proxy or load balancer stripping CORS headers",
+          "Recommends inspecting actual response headers on the failing request"
+        ],
+        "common_mistakes": [
+          "Assuming the frontend is at fault without checking response headers",
+          "Guessing at a fix without reproducing/inspecting the actual failing response",
+          "Overlooking infrastructure layers, such as proxies or gateways, that could strip or alter headers"
+        ],
+        "example": "The deployment introduced a new API gateway in front of the service; the gateway wasn't configured to forward the Access-Control-Allow-Origin header set by the application, causing the browser to block the response.",
+        "follow_up_questions": [
+          "Why might a request succeed in Postman/curl but fail with a CORS error only in the browser?",
+          "How would you set up automated tests to catch CORS regressions before they reach production?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes generic 'restart the server' style fixes without investigation.",
+          "average": "Suspects CORS config but doesn't reason about what deployment changes could cause it.",
+          "good": "Correctly points to backend/infra as the cause and proposes checking CORS headers and configuration.",
+          "excellent": "Proposes a structured investigation covering app-level config and infra layers, and suggests a regression-prevention measure."
+        },
+        "skills": [
+          "http",
+          "troubleshooting",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cors",
+          "incident_response",
+          "deployment"
+        ]
+      },
+      {
+        "id": "BE-060",
+        "domain": "http_networking",
+        "topic": "TLS/HTTPS",
+        "subtopic": "Purpose of TLS in HTTP",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What problem does TLS solve for HTTP, and what does HTTPS actually mean?",
+        "answer": "Plain HTTP sends data in cleartext, so anyone able to observe network traffic, such as on a shared Wi-Fi network, can read or tamper with it. TLS wraps the HTTP connection in encryption, providing confidentiality so data can't be easily read in transit, integrity so data can't be silently modified, and authentication so the client can verify it's actually talking to the intended server via certificates. HTTPS is simply HTTP running over a TLS-encrypted connection.",
+        "key_concepts": [
+          "TLS",
+          "HTTPS",
+          "confidentiality",
+          "integrity",
+          "server authentication",
+          "certificates"
+        ],
+        "expected_points": [
+          "Plain HTTP is unencrypted and can be intercepted",
+          "TLS provides confidentiality, integrity, and authentication",
+          "HTTPS is HTTP layered over TLS",
+          "Certificates let the client verify the server's identity"
+        ],
+        "common_mistakes": [
+          "Believing HTTPS only encrypts the password/login page",
+          "Thinking TLS only protects confidentiality and not integrity or identity",
+          "Confusing TLS with application-level encryption of the payload itself"
+        ],
+        "example": "On public Wi-Fi, an attacker can read every unencrypted HTTP request; over HTTPS, the same traffic is encrypted so the attacker can only see that a connection to a given host exists, not its contents.",
+        "follow_up_questions": [
+          "What happens during a TLS handshake before any HTTP data is exchanged?",
+          "Why is TLS alone not sufficient to guarantee overall application security?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the difference between HTTP and HTTPS.",
+          "average": "Knows HTTPS is 'more secure' but can't explain the specific guarantees.",
+          "good": "Explains confidentiality, integrity, and authentication as the three guarantees.",
+          "excellent": "Explains all three, describes certificates' role, and notes TLS's limitations, such as not protecting against XSS or SQL injection."
+        },
+        "skills": [
+          "security",
+          "http",
+          "networking"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "tls",
+          "https",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-061",
+        "domain": "http_networking",
+        "topic": "TLS/HTTPS",
+        "subtopic": "TLS Handshake Overview",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "At a high level, what happens during a TLS handshake before an HTTPS request can be sent?",
+        "answer": "The client and server first agree on a TLS version and cipher suite. The server presents its certificate, which the client validates against a trusted certificate authority to confirm the server's identity. The client and server then perform a key exchange, such as Diffie-Hellman, to derive a shared symmetric session key without that key ever being transmitted directly over the network. Once both sides have the shared key, all subsequent HTTP traffic is encrypted using fast symmetric encryption.",
+        "key_concepts": [
+          "TLS handshake",
+          "certificate validation",
+          "key exchange",
+          "symmetric session key",
+          "certificate authority"
+        ],
+        "expected_points": [
+          "Client and server negotiate protocol version/cipher suite",
+          "Server presents a certificate validated against a trusted CA",
+          "Key exchange establishes a shared symmetric session key without transmitting it directly",
+          "Subsequent traffic uses symmetric encryption for performance"
+        ],
+        "common_mistakes": [
+          "Believing the entire session uses asymmetric encryption throughout",
+          "Skipping certificate validation as a step",
+          "Assuming the handshake happens on every individual HTTP request rather than once per connection absent session resumption"
+        ],
+        "example": "A browser connecting to a bank's site validates the server's certificate against a trusted CA, performs a key exchange, and then uses the resulting symmetric key to encrypt the actual HTTP request and response.",
+        "follow_up_questions": [
+          "Why does TLS use asymmetric cryptography for the handshake but symmetric encryption for the actual data transfer?",
+          "What is TLS session resumption, and why does it matter for performance?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe any step of the handshake.",
+          "average": "Mentions certificates or encryption vaguely without describing the sequence.",
+          "good": "Describes negotiation, certificate validation, and key exchange resulting in a shared session key.",
+          "excellent": "Describes the full sequence and explains why asymmetric/symmetric are combined, plus mentions session resumption or handshake latency."
+        },
+        "skills": [
+          "security",
+          "networking",
+          "http"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "tls",
+          "handshake",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-062",
+        "domain": "http_networking",
+        "topic": "TLS/HTTPS",
+        "subtopic": "Certificate Expiry Incident",
+        "difficulty": "Hard",
+        "question_type": "production_incident",
+        "question": "At 2 AM, all clients suddenly start failing to connect to your API over HTTPS with certificate errors, even though nothing was deployed. What's the most likely cause, and how would you both fix it immediately and prevent recurrence?",
+        "answer": "The most likely cause is that the TLS certificate expired. The immediate fix is to obtain and deploy a renewed certificate, or roll back to a still-valid backup certificate if available, as quickly as possible, and restart or reload the affected servers or load balancers. To prevent recurrence, set up automated certificate renewal, such as via Let's Encrypt with ACME auto-renewal, and add proactive monitoring and alerting well before expiry, for example at 30 and 7 days remaining, rather than relying on manual tracking.",
+        "key_concepts": [
+          "certificate expiry",
+          "TLS renewal",
+          "automated renewal (ACME)",
+          "monitoring/alerting"
+        ],
+        "expected_points": [
+          "Identifies certificate expiry as the likely root cause given no deployment occurred",
+          "Proposes immediate renewal/redeployment of a valid certificate",
+          "Proposes automating certificate renewal going forward",
+          "Proposes proactive expiry monitoring/alerting"
+        ],
+        "common_mistakes": [
+          "Jumping to network or DNS issues without checking certificate validity first",
+          "Fixing the immediate outage but not addressing the process gap that caused it",
+          "Assuming this can't happen again without adding monitoring"
+        ],
+        "example": "A team using a manually renewed certificate missed the renewal date; switching to Let's Encrypt with automated 90-day renewal and a 30-days-before-expiry alert would have prevented the outage.",
+        "follow_up_questions": [
+          "How would you verify certificate expiry as the cause versus other TLS handshake failures?",
+          "What monitoring would you add to catch this before it becomes an outage?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Doesn't consider certificate expiry as a cause.",
+          "average": "Identifies certificate expiry but proposes only a manual one-time fix.",
+          "good": "Identifies the cause, fixes it, and proposes automated renewal.",
+          "excellent": "Identifies the cause, fixes it, proposes automated renewal, and adds proactive monitoring/alerting as a systemic prevention measure."
+        },
+        "skills": [
+          "security",
+          "incident_response",
+          "networking"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "tls",
+          "certificates",
+          "production_incident"
+        ]
+      },
+      {
+        "id": "BE-063",
+        "domain": "http_networking",
+        "topic": "Connections",
+        "subtopic": "Keep-Alive vs Connection Close",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between an HTTP connection using Connection: keep-alive versus one that closes after each request, and why does it matter for performance?",
+        "answer": "With Connection: close, the TCP connection is torn down after each request/response pair, requiring a new TCP, and TLS if applicable, handshake for every subsequent request, which adds significant latency and CPU overhead. With keep-alive, the same TCP connection is reused for multiple sequential requests, avoiding repeated handshake costs and improving throughput, especially for clients making many requests to the same host.",
+        "key_concepts": [
+          "keep-alive",
+          "connection reuse",
+          "TCP handshake overhead",
+          "TLS handshake overhead"
+        ],
+        "expected_points": [
+          "Connection: close tears down the TCP connection after each exchange",
+          "keep-alive reuses the same connection for multiple requests",
+          "Reused connections avoid repeated TCP/TLS handshake overhead",
+          "Keep-alive generally improves latency and throughput for multiple requests to the same host"
+        ],
+        "common_mistakes": [
+          "Assuming keep-alive means requests are processed in parallel over the connection",
+          "Believing connection reuse eliminates the need for HTTP/2 multiplexing benefits",
+          "Not recognizing the handshake cost being avoided"
+        ],
+        "example": "A page loading 20 resources from the same host benefits significantly from a persistent keep-alive connection instead of opening and closing 20 separate TCP connections.",
+        "follow_up_questions": [
+          "How does HTTP/1.1's default keep-alive behavior differ from HTTP/1.0?",
+          "What limitation of keep-alive connections does HTTP/2 multiplexing address?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what keep-alive does.",
+          "average": "Knows keep-alive 'reuses connections' but not why that matters for performance.",
+          "good": "Correctly explains the handshake overhead being avoided.",
+          "excellent": "Correctly explains the overhead avoided and connects it to the motivation for HTTP/2 multiplexing."
+        },
+        "skills": [
+          "http",
+          "networking",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "keep_alive",
+          "tcp",
+          "performance"
+        ]
+      },
+      {
+        "id": "BE-064",
+        "domain": "http_networking",
+        "topic": "Connections",
+        "subtopic": "Head-of-Line Blocking in HTTP/1.1",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "What is head-of-line blocking in the context of HTTP/1.1, and how do browsers typically work around it?",
+        "answer": "Over a single HTTP/1.1 connection, requests must generally be completed in order — a slow response at the front of the queue blocks subsequent responses on that same connection from being delivered, even if they're ready. This is head-of-line blocking. Browsers work around it by opening multiple parallel TCP connections to the same host, commonly around six, allowing several requests to proceed concurrently instead of queuing behind one another on a single connection.",
+        "key_concepts": [
+          "head-of-line blocking",
+          "HTTP/1.1 pipelining limitations",
+          "parallel connections"
+        ],
+        "expected_points": [
+          "A slow response blocks subsequent responses on the same connection",
+          "This limitation exists at the connection level, not the server level",
+          "Browsers mitigate it by opening multiple parallel connections per host",
+          "This workaround has its own costs, such as more handshakes and more server resources"
+        ],
+        "common_mistakes": [
+          "Confusing HTTP/1.1 head-of-line blocking with TCP-level head-of-line blocking, which HTTP/2 over TCP still has",
+          "Assuming pipelining fully solved this in practice, since it's rarely used due to implementation issues",
+          "Not knowing how browsers actually work around it via parallel connections"
+        ],
+        "example": "If an HTTP/1.1 connection is waiting on a slow database-backed response, other queued requests on that same connection wait even though they could be served instantly, so the browser opens additional connections to route around it.",
+        "follow_up_questions": [
+          "How does HTTP/2's multiplexing address this problem differently from opening multiple connections?",
+          "Does HTTP/2 fully eliminate head-of-line blocking? Why or why not, considering TCP?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what head-of-line blocking is.",
+          "average": "Describes the symptom but not the connection-level cause.",
+          "good": "Correctly explains the cause and the browser's parallel-connection workaround.",
+          "excellent": "Correctly explains the cause, the workaround, and notes that HTTP/2 over TCP can still suffer from TCP-level head-of-line blocking, solved by HTTP/3/QUIC."
+        },
+        "skills": [
+          "http",
+          "networking",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "http1",
+          "head_of_line_blocking",
+          "performance"
+        ]
+      },
+      {
+        "id": "BE-065",
+        "domain": "http_networking",
+        "topic": "HTTP/2",
+        "subtopic": "Multiplexing over a Single Connection",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "How does HTTP/2 multiplexing improve on HTTP/1.1's connection model?",
+        "answer": "HTTP/2 allows multiple requests and responses to be interleaved as independent 'streams' over a single TCP connection simultaneously, rather than requiring separate connections or strictly ordered responses. Each stream's data is broken into frames that can be interleaved, so a slow response on one stream doesn't block the delivery of a faster response on another stream over the same connection.",
+        "key_concepts": [
+          "HTTP/2",
+          "multiplexing",
+          "streams",
+          "frames",
+          "single connection"
+        ],
+        "expected_points": [
+          "Multiple requests/responses share a single TCP connection concurrently",
+          "Data is divided into streams and frames that can be interleaved",
+          "A slow stream doesn't block other streams on the same connection",
+          "Reduces the need for multiple parallel connections per host"
+        ],
+        "common_mistakes": [
+          "Confusing multiplexing with simply having more parallel TCP connections",
+          "Assuming multiplexing solves TCP-level packet loss ordering issues",
+          "Believing HTTP/2 multiplexing eliminates all forms of head-of-line blocking"
+        ],
+        "example": "Over one HTTP/2 connection, a browser can request a CSS file, a JS file, and an API response concurrently, with their frames interleaved on the wire instead of queued behind each other.",
+        "follow_up_questions": [
+          "Why can HTTP/2 still experience head-of-line blocking at the TCP layer?",
+          "How does server push, a now largely deprecated HTTP/2 feature, relate to multiplexing?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what multiplexing means.",
+          "average": "Says HTTP/2 is 'faster' without explaining the stream/frame mechanism.",
+          "good": "Correctly explains streams and frames being interleaved over one connection.",
+          "excellent": "Correctly explains the mechanism and notes remaining TCP-level head-of-line blocking limitations."
+        },
+        "skills": [
+          "http",
+          "networking",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "http2",
+          "multiplexing",
+          "performance"
+        ]
+      },
+      {
+        "id": "BE-066",
+        "domain": "http_networking",
+        "topic": "HTTP/2 vs HTTP/1.1",
+        "subtopic": "Key Differences",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "Besides multiplexing, what other key differences distinguish HTTP/2 from HTTP/1.1?",
+        "answer": "HTTP/2 uses a binary framing format instead of HTTP/1.1's plain-text format, which is more efficient to parse. It supports header compression via HPACK to reduce overhead from repetitive headers across requests. It typically requires only a single connection per host rather than multiple parallel connections. It also introduced, now largely deprecated, server push, allowing a server to proactively send resources before the client requests them.",
+        "key_concepts": [
+          "binary framing",
+          "HPACK header compression",
+          "single connection",
+          "server push"
+        ],
+        "expected_points": [
+          "HTTP/2 uses binary framing rather than text",
+          "HTTP/2 compresses headers via HPACK",
+          "HTTP/2 typically uses one connection per host instead of many",
+          "Server push allowed proactive resource delivery, now mostly deprecated"
+        ],
+        "common_mistakes": [
+          "Believing HTTP/2 changed HTTP methods or status codes",
+          "Assuming HTTP/2 requires TLS by specification, even though browsers require it in practice",
+          "Forgetting header compression as a distinguishing feature"
+        ],
+        "example": "A page with many small requests benefits from HPACK because repeated headers like User-Agent or cookies aren't retransmitted in full on every request.",
+        "follow_up_questions": [
+          "Why do most browsers only support HTTP/2 over TLS even though the spec doesn't require it?",
+          "Why was server push mostly deprecated despite the potential performance benefit?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Names only multiplexing or nothing at all.",
+          "average": "Names one or two differences vaguely.",
+          "good": "Names binary framing, header compression, and the single-connection model accurately.",
+          "excellent": "Names all major differences plus context on server push's deprecation or the TLS-in-practice requirement."
+        },
+        "skills": [
+          "http",
+          "networking",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "http2",
+          "http1",
+          "performance"
+        ]
+      },
+      {
+        "id": "BE-067",
+        "domain": "http_networking",
+        "topic": "HTTP/3 & QUIC",
+        "subtopic": "Why QUIC Uses UDP",
+        "difficulty": "Expert",
+        "question_type": "conceptual",
+        "question": "Why does HTTP/3 run over QUIC/UDP instead of TCP, and what problem does this solve that HTTP/2 over TCP could not?",
+        "answer": "HTTP/2 still runs over TCP, and TCP enforces strict in-order byte delivery at the transport layer, so if a single packet is lost, the OS-level TCP stack blocks delivery of all subsequently received bytes across all HTTP/2 streams until the lost packet is retransmitted and arrives, even though those bytes may belong to unrelated, unaffected streams. This is TCP-level head-of-line blocking, and it can't be fixed at the HTTP layer alone. QUIC, built on UDP, implements its own reliability and multiplexing where each stream's loss recovery is independent, so a lost packet only blocks the stream it belongs to, not the entire connection. QUIC also integrates TLS 1.3 into its handshake, reducing connection setup latency, and supports connection migration, such as surviving a network change from Wi-Fi to cellular, since connections are identified by a connection ID rather than the IP/port tuple.",
+        "key_concepts": [
+          "QUIC",
+          "UDP",
+          "TCP head-of-line blocking",
+          "independent stream loss recovery",
+          "connection migration",
+          "integrated TLS 1.3"
+        ],
+        "expected_points": [
+          "TCP enforces in-order delivery causing cross-stream head-of-line blocking on packet loss",
+          "This limitation exists below the HTTP layer, so HTTP/2 can't fix it",
+          "QUIC implements independent per-stream loss recovery over UDP",
+          "QUIC integrates the TLS handshake for faster connection setup",
+          "QUIC supports connection migration across network changes"
+        ],
+        "common_mistakes": [
+          "Assuming QUIC just 'skips' reliability since it's built on UDP",
+          "Believing HTTP/2 already solved all head-of-line blocking",
+          "Not connecting the TCP ordering guarantee to why loss on one stream affects others"
+        ],
+        "example": "On HTTP/2 over TCP, a single dropped packet belonging to an image stream can delay delivery of an already-arrived API-response stream's bytes; over QUIC, only the image stream stalls while the API response is delivered immediately.",
+        "follow_up_questions": [
+          "What trade-offs does UDP-based QUIC introduce, such as middlebox/firewall compatibility issues?",
+          "How does connection migration in QUIC benefit mobile clients specifically?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why UDP is used or what problem it solves.",
+          "average": "Mentions 'QUIC is faster' without explaining the TCP head-of-line blocking mechanism.",
+          "good": "Correctly explains TCP-level head-of-line blocking and how QUIC's independent stream recovery solves it.",
+          "excellent": "Correctly explains the core problem and solution, plus mentions integrated TLS handshake and connection migration as additional QUIC benefits."
+        },
+        "skills": [
+          "networking",
+          "http",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "http3",
+          "quic",
+          "networking"
+        ]
+      },
+      {
+        "id": "BE-068",
+        "domain": "http_networking",
+        "topic": "Redirects",
+        "subtopic": "301 vs 302 vs 307",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between a 301, 302, and 307 redirect?",
+        "answer": "301 Moved Permanently indicates the resource has permanently moved to a new URL; clients and search engines should update their references and future requests should go directly to the new location. 302 Found indicates a temporary redirect; the original URL should still be used for future requests. 307 Temporary Redirect behaves like 302 but explicitly guarantees the request method and body are preserved on the redirected request, whereas historically some clients would change a POST to a GET when following a 302.",
+        "key_concepts": [
+          "301 Moved Permanently",
+          "302 Found",
+          "307 Temporary Redirect",
+          "method preservation"
+        ],
+        "expected_points": [
+          "301 signals a permanent move; clients should update references",
+          "302 signals a temporary redirect without changing the canonical URL",
+          "307 is a temporary redirect that preserves the original HTTP method and body",
+          "Historically, 302 had ambiguous method-preservation behavior across clients"
+        ],
+        "common_mistakes": [
+          "Believing 301 and 302 differ only in numeric value with no functional impact",
+          "Using 302 when a permanent redirect (301) is intended, harming SEO caching",
+          "Assuming 307 and 302 are functionally identical"
+        ],
+        "example": "A site permanently moving from /old-page to /new-page should return 301 so search engines update their index, while a temporarily disabled feature redirecting to a maintenance page should return 302 or 307.",
+        "follow_up_questions": [
+          "What SEO implications come from using 302 instead of 301 for a permanent move?",
+          "Why does 307 exist separately from 302 given both are 'temporary'?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish any of the three codes.",
+          "average": "Distinguishes 301 from 302 but not 307's method-preservation nuance.",
+          "good": "Correctly distinguishes all three including method preservation.",
+          "excellent": "Correctly distinguishes all three, and discusses practical implications like SEO and legacy client behavior differences."
+        },
+        "skills": [
+          "http",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "redirects",
+          "status_codes"
+        ]
+      },
+      {
+        "id": "BE-069",
+        "domain": "http_networking",
+        "topic": "Redirects",
+        "subtopic": "Business Impact of the Wrong Redirect Code",
+        "difficulty": "Medium",
+        "question_type": "scenario",
+        "question": "A team permanently retired an old product URL and redirected it to the new URL using a 302 instead of a 301. What could go wrong, and how would you fix it?",
+        "answer": "Because 302 signals a temporary redirect, search engines may continue indexing the old URL as the canonical page and may not fully transfer accumulated ranking or authority to the new URL, potentially hurting search visibility. Some caching layers or clients might also keep re-checking the old URL rather than switching permanently. The fix is to change the redirect to a 301 so search engines and clients treat the move as permanent and consolidate ranking and caching behavior around the new URL.",
+        "key_concepts": [
+          "301 vs 302 SEO impact",
+          "redirect semantics",
+          "search engine indexing"
+        ],
+        "expected_points": [
+          "Recognizes 302 doesn't signal permanence to search engines/clients",
+          "Explains potential SEO/ranking consequences of the wrong code",
+          "Recommends switching to 301 for a genuinely permanent move",
+          "May mention that redirect chains/caching are also affected"
+        ],
+        "common_mistakes": [
+          "Assuming a redirect is a redirect regardless of status code from an SEO perspective",
+          "Not connecting the business symptom, such as lost traffic or ranking, back to the specific status code",
+          "Suggesting unrelated fixes without addressing the status code itself"
+        ],
+        "example": "After switching the redirect from 302 to 301, search engines gradually re-crawl and consolidate ranking signals onto the new URL, recovering lost organic traffic over time.",
+        "follow_up_questions": [
+          "How long might it take for search engines to fully recognize and act on a corrected 301 after previously seeing a 302?",
+          "What other technical SEO signals besides the redirect code affect ranking transfer?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Doesn't connect the redirect code to the business symptom.",
+          "average": "Recognizes the code is wrong but can't explain the mechanism of impact.",
+          "good": "Correctly explains the SEO/ranking consequence and proposes the fix.",
+          "excellent": "Correctly explains the mechanism, proposes the fix, and notes realistic recovery timelines/caveats."
+        },
+        "skills": [
+          "http",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "redirects",
+          "seo",
+          "status_codes"
+        ]
+      },
+      {
+        "id": "BE-070",
+        "domain": "http_networking",
+        "topic": "Content Negotiation",
+        "subtopic": "Accept Headers and Response Format",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is content negotiation in HTTP, and how does a server typically decide what format to return?",
+        "answer": "Content negotiation is the process by which a client and server agree on the best representation of a resource, such as format, language, or encoding, for a given request. The client expresses preferences via headers like Accept for format, Accept-Language for language, and Accept-Encoding for compression. The server inspects these headers and returns the best available match, and includes a Vary header indicating which request headers affected its choice, which is important for correct caching.",
+        "key_concepts": [
+          "content negotiation",
+          "Accept header",
+          "Accept-Language",
+          "Accept-Encoding",
+          "Vary header"
+        ],
+        "expected_points": [
+          "Content negotiation selects the best representation for both parties",
+          "Accept, Accept-Language, and Accept-Encoding express client preferences",
+          "Server picks the best match from what it can produce",
+          "Vary header signals which headers affected the chosen representation, important for caching correctness"
+        ],
+        "common_mistakes": [
+          "Assuming content negotiation only applies to response format, ignoring language/encoding",
+          "Forgetting the Vary header, leading to incorrect cache hits serving the wrong representation to different clients",
+          "Believing the server must satisfy the client's exact preference or fail"
+        ],
+        "example": "A client sends Accept-Language: fr, and the server responds with a French-language version of the page along with Vary: Accept-Language so caches don't serve the French response to an English-preferring client.",
+        "follow_up_questions": [
+          "What happens if the server cannot produce any representation acceptable to the client?",
+          "Why is the Vary header critical for a CDN or shared cache in front of a negotiated response?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what content negotiation is.",
+          "average": "Describes Accept-based format negotiation only.",
+          "good": "Describes multiple negotiation dimensions, such as format, language, and encoding, and the server's role.",
+          "excellent": "Describes multiple negotiation dimensions and explains the Vary header's role in caching correctness."
+        },
+        "skills": [
+          "http",
+          "api_design",
+          "caching"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "content_negotiation",
+          "headers"
+        ]
+      },
+      {
+        "id": "BE-071",
+        "domain": "http_networking",
+        "topic": "Compression",
+        "subtopic": "Gzip/Brotli and Content-Encoding",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "How does HTTP response compression, such as gzip or Brotli, work, and what header signals it?",
+        "answer": "The client advertises supported compression algorithms via the Accept-Encoding request header, such as gzip or br. If the server supports one of them, it compresses the response body and includes a Content-Encoding response header indicating which algorithm was used, so the client knows how to decompress it. This reduces the number of bytes transferred over the network, which is especially beneficial for large, compressible payloads like JSON or text-based assets.",
+        "key_concepts": [
+          "gzip",
+          "Brotli",
+          "Accept-Encoding",
+          "Content-Encoding",
+          "response compression"
+        ],
+        "expected_points": [
+          "Client advertises supported algorithms via Accept-Encoding",
+          "Server compresses the body and signals the algorithm via Content-Encoding",
+          "Compression primarily benefits text-based/compressible payloads",
+          "Reduces bandwidth and can improve perceived latency"
+        ],
+        "common_mistakes": [
+          "Confusing Content-Encoding with Content-Type",
+          "Assuming compression always helps, since compressing already-compressed binary formats like JPEGs provides little benefit",
+          "Forgetting that both client and server must agree on the algorithm"
+        ],
+        "example": "A client sends Accept-Encoding: gzip, br; the server compresses a large JSON response using Brotli and responds with Content-Encoding: br, reducing payload size significantly.",
+        "follow_up_questions": [
+          "Why might compressing an already-compressed file format like a JPEG provide little or no benefit?",
+          "What is the CPU/latency trade-off involved in choosing a stronger compression level?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain how compression negotiation works.",
+          "average": "Knows gzip exists but not the header mechanism.",
+          "good": "Correctly explains Accept-Encoding/Content-Encoding negotiation.",
+          "excellent": "Correctly explains the mechanism and discusses when compression helps or doesn't, plus CPU/latency trade-offs."
+        },
+        "skills": [
+          "http",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "compression",
+          "headers",
+          "performance"
+        ]
+      },
+      {
+        "id": "BE-072",
+        "domain": "http_networking",
+        "topic": "URL Structure",
+        "subtopic": "Path Params vs Query Params vs Request Body",
+        "difficulty": "Easy",
+        "question_type": "comparison",
+        "question": "When designing an API endpoint, how do you decide whether a value should go in the URL path, a query parameter, or the request body?",
+        "answer": "Path parameters typically identify a specific resource in a hierarchical way, such as /users/123. Query parameters are used for optional filtering, sorting, pagination, or search criteria that don't identify a specific resource, such as /users?status=active&page=2. Request bodies carry the actual payload of data being created or updated, and are used with methods like POST, PUT, and PATCH rather than for identifying resources.",
+        "key_concepts": [
+          "path parameters",
+          "query parameters",
+          "request body",
+          "REST resource identification"
+        ],
+        "expected_points": [
+          "Path parameters identify a specific resource",
+          "Query parameters express optional filters, sorting, or pagination",
+          "Request body carries the data payload for create/update operations",
+          "Choice affects cacheability, readability, and REST conventions"
+        ],
+        "common_mistakes": [
+          "Putting sensitive data in query parameters where it's visible in logs/browser history",
+          "Using the request body to identify the resource being acted on instead of the path",
+          "Overloading query parameters to represent hierarchical resource identity"
+        ],
+        "example": "GET /orders/456/items?status=shipped uses the path to identify order 456 and its items, and a query parameter to filter by status.",
+        "follow_up_questions": [
+          "Why is it risky to put sensitive information like an API key in a query parameter?",
+          "How would you design pagination parameters for a large collection endpoint?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the three parameter types.",
+          "average": "Distinguishes path from query but doesn't address the body's role.",
+          "good": "Correctly explains all three uses with a reasonable example.",
+          "excellent": "Correctly explains all three, plus practical considerations like sensitive-data exposure in query strings or caching implications."
+        },
+        "skills": [
+          "api_design",
+          "rest_api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "url_design",
+          "rest",
+          "api_design"
+        ]
+      },
+      {
+        "id": "BE-073",
+        "domain": "http_networking",
+        "topic": "Proxies",
+        "subtopic": "Forward Proxy vs Reverse Proxy",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between a forward proxy and a reverse proxy?",
+        "answer": "A forward proxy sits in front of clients and forwards their requests to the internet on their behalf, often used to hide client identity, enforce access policies, or cache content for a group of internal users. A reverse proxy sits in front of one or more backend servers and forwards client requests to them, often used for load balancing, TLS termination, caching, or hiding backend server details from external clients. The key distinction is which side of the connection the proxy represents — the client's side or the server's side.",
+        "key_concepts": [
+          "forward proxy",
+          "reverse proxy",
+          "load balancing",
+          "TLS termination"
+        ],
+        "expected_points": [
+          "Forward proxy represents/protects clients accessing external resources",
+          "Reverse proxy represents/protects backend servers from external clients",
+          "Reverse proxies commonly handle load balancing, TLS termination, and caching",
+          "The distinguishing factor is which side of the request the proxy sits on"
+        ],
+        "common_mistakes": [
+          "Believing a forward proxy and reverse proxy are functionally identical, just named differently",
+          "Assuming reverse proxies are only used for load balancing",
+          "Confusing which side, client or server, each proxy type protects"
+        ],
+        "example": "A corporate forward proxy filters and logs employees' outbound web traffic, while an Nginx reverse proxy in front of several backend instances distributes incoming client requests among them.",
+        "follow_up_questions": [
+          "Why might TLS termination happen at the reverse proxy rather than the backend application?",
+          "Can a system use both a forward proxy and a reverse proxy in the same request path?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the two proxy types.",
+          "average": "Knows both are 'proxies' but describes their roles incorrectly.",
+          "good": "Correctly distinguishes which side each proxy represents and a common use case.",
+          "excellent": "Correctly distinguishes both and discusses common reverse-proxy responsibilities like TLS termination and load balancing in more depth."
+        },
+        "skills": [
+          "networking",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "proxy",
+          "load_balancing",
+          "networking"
+        ]
+      },
+      {
+        "id": "BE-074",
+        "domain": "http_networking",
+        "topic": "Load Balancers",
+        "subtopic": "Role of a Load Balancer in HTTP Traffic",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What role does a load balancer play in an HTTP-based backend system, and what are common strategies it uses to distribute traffic?",
+        "answer": "A load balancer sits in front of multiple backend server instances and distributes incoming requests among them, improving availability by routing around unhealthy instances and scalability by spreading load so no single server is overwhelmed. Common distribution strategies include round-robin, which cycles through servers in order; least-connections, which favors the server with fewest active connections; and weighted distribution, which favors more capable servers. Load balancers typically also perform health checks to remove unhealthy instances from rotation.",
+        "key_concepts": [
+          "load balancer",
+          "round-robin",
+          "least-connections",
+          "health checks",
+          "availability",
+          "scalability"
+        ],
+        "expected_points": [
+          "Distributes incoming requests across multiple backend instances",
+          "Improves both availability and scalability",
+          "Common strategies include round-robin, least-connections, and weighted",
+          "Performs health checks to avoid routing to unhealthy instances"
+        ],
+        "common_mistakes": [
+          "Assuming a load balancer only exists to 'speed things up' rather than for availability",
+          "Naming only round-robin as if it's the only strategy",
+          "Forgetting the health-check responsibility"
+        ],
+        "example": "Behind a load balancer, if one of three backend instances becomes unresponsive, health checks detect this and traffic is routed only to the two healthy instances.",
+        "follow_up_questions": [
+          "What are the trade-offs of round-robin versus least-connections under uneven request costs?",
+          "How does session affinity, or sticky sessions, interact with load balancing for stateful applications?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what a load balancer does.",
+          "average": "Explains distribution vaguely without naming strategies or health checks.",
+          "good": "Explains distribution, names at least two strategies, and mentions health checks.",
+          "excellent": "Explains distribution, multiple strategies, health checks, and discusses trade-offs like sticky sessions for stateful apps."
+        },
+        "skills": [
+          "distributed_systems",
+          "networking",
+          "backend_fundamentals"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "load_balancing",
+          "scalability",
+          "availability"
+        ]
+      },
+      {
+        "id": "BE-075",
+        "domain": "http_networking",
+        "topic": "CDNs",
+        "subtopic": "How a CDN Reduces Latency",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "How does a Content Delivery Network (CDN) reduce latency for users accessing a web application?",
+        "answer": "A CDN caches content, such as static assets and sometimes API responses, on servers called edge nodes that are distributed geographically close to end users. Instead of every request traveling all the way to the origin server, nearby users are served from a nearby edge node, reducing the physical distance data must travel and therefore reducing round-trip latency, while also offloading traffic from the origin server.",
+        "key_concepts": [
+          "CDN",
+          "edge nodes",
+          "geographic distribution",
+          "origin server",
+          "latency reduction"
+        ],
+        "expected_points": [
+          "CDNs cache content at edge nodes close to users geographically",
+          "Requests are served from the nearest edge node instead of the origin",
+          "Reduces round-trip latency due to shorter physical distance",
+          "Also reduces load on the origin server"
+        ],
+        "common_mistakes": [
+          "Believing a CDN only serves images/static files and never dynamic content",
+          "Assuming a CDN eliminates the need for an origin server entirely",
+          "Not connecting geographic proximity to reduced latency"
+        ],
+        "example": "A user in Singapore accessing a site with an origin server in the US gets the cached homepage from a nearby edge node in Southeast Asia instead of waiting for a round trip across the Pacific.",
+        "follow_up_questions": [
+          "What kinds of content are typically poor candidates for CDN caching, and why?",
+          "How does a CDN handle a cache miss for content it doesn't yet have cached at a given edge node?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain how a CDN reduces latency.",
+          "average": "Knows CDNs 'cache stuff' without connecting it to geographic distribution.",
+          "good": "Correctly explains geographic edge caching and its latency benefit.",
+          "excellent": "Correctly explains the mechanism plus origin offload benefit and cache miss handling."
+        },
+        "skills": [
+          "networking",
+          "caching",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cdn",
+          "caching",
+          "performance"
+        ]
+      },
+      {
+        "id": "BE-076",
+        "domain": "http_networking",
+        "topic": "WebSockets",
+        "subtopic": "WebSockets vs Long Polling vs SSE",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What are the differences between WebSockets, long polling, and Server-Sent Events (SSE) for real-time communication?",
+        "answer": "Long polling simulates real-time updates by having the client repeatedly send HTTP requests that the server holds open until new data is available or a timeout occurs, then immediately reconnects; it works over plain HTTP but has overhead from repeated connection setup. SSE provides a one-way, server-to-client stream of updates over a single long-lived HTTP connection, simpler to implement than WebSockets but limited to server-to-client communication. WebSockets establish a full-duplex, persistent connection allowing both client and server to send messages at any time, ideal for interactive real-time use cases like chat, but require more infrastructure support, such as proxies or load balancers that handle the protocol upgrade.",
+        "key_concepts": [
+          "long polling",
+          "Server-Sent Events",
+          "WebSockets",
+          "full-duplex",
+          "one-way streaming"
+        ],
+        "expected_points": [
+          "Long polling repeatedly reconnects over plain HTTP, with overhead",
+          "SSE provides one-way server-to-client streaming over a single connection",
+          "WebSockets provide full-duplex, bidirectional real-time communication",
+          "Trade-offs exist in simplicity, browser support, and infrastructure requirements"
+        ],
+        "common_mistakes": [
+          "Assuming SSE supports bidirectional communication like WebSockets",
+          "Believing long polling is obsolete and never appropriate",
+          "Overlooking infrastructure/proxy compatibility differences between the three"
+        ],
+        "example": "A stock ticker that only needs to push updates to the browser is a good fit for SSE, while a chat application needing bidirectional messaging is better served by WebSockets.",
+        "follow_up_questions": [
+          "Why might you choose long polling over WebSockets despite its overhead?",
+          "What infrastructure considerations, such as load balancer configuration, are needed to support WebSockets at scale?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the three approaches.",
+          "average": "Distinguishes WebSockets from the other two but confuses long polling and SSE.",
+          "good": "Correctly distinguishes all three and their directionality.",
+          "excellent": "Correctly distinguishes all three and reasons about appropriate use cases and infrastructure trade-offs."
+        },
+        "skills": [
+          "networking",
+          "http",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "websockets",
+          "sse",
+          "real_time"
+        ]
+      },
+      {
+        "id": "BE-077",
+        "domain": "http_networking",
+        "topic": "WebSockets",
+        "subtopic": "When to Choose WebSockets Over REST",
+        "difficulty": "Hard",
+        "question_type": "tradeoff",
+        "question": "You're building a collaborative document editor where multiple users see each other's changes instantly. What are the trade-offs of using WebSockets versus a traditional REST API with polling?",
+        "answer": "WebSockets provide low-latency, bidirectional communication ideal for instantly propagating changes to all connected clients without repeated connection overhead, which fits collaborative editing well. However, WebSockets introduce additional complexity: maintaining persistent connections at scale requires sticky routing or a pub/sub backplane across server instances, reconnection and backoff logic on the client, and different infrastructure considerations, such as load balancer support for long-lived connections, compared to stateless REST calls. REST with polling is simpler to build and scales more easily using standard stateless infrastructure, but introduces latency and unnecessary load from repeated requests, making it a poor fit for a highly interactive collaborative experience.",
+        "key_concepts": [
+          "WebSockets",
+          "REST polling",
+          "real-time collaboration",
+          "connection scaling",
+          "pub/sub backplane"
+        ],
+        "expected_points": [
+          "Recognizes WebSockets fit low-latency bidirectional needs for collaboration",
+          "Identifies added complexity: connection state, scaling, reconnection logic",
+          "Identifies REST/polling's simplicity but higher latency and inefficiency for this use case",
+          "Weighs the trade-off rather than declaring one universally better"
+        ],
+        "common_mistakes": [
+          "Recommending WebSockets without acknowledging the operational complexity",
+          "Recommending polling without acknowledging the latency/UX cost for collaborative editing",
+          "Treating this as a binary choice without discussing hybrid approaches, such as WebSockets with a fallback"
+        ],
+        "example": "A production collaborative editor might use WebSockets for live updates, backed by a pub/sub system like Redis so a change made on one server instance is broadcast to clients connected to other instances.",
+        "follow_up_questions": [
+          "How would you handle a client's WebSocket connection dropping and needing to catch up on missed changes?",
+          "What would a pub/sub backplane need to provide to support WebSockets across multiple horizontally scaled servers?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Recommends one option with no trade-off discussion.",
+          "average": "Mentions both options but doesn't discuss scaling/complexity concerns.",
+          "good": "Correctly weighs latency benefits of WebSockets against operational complexity, and REST's simplicity against poor UX fit.",
+          "excellent": "Weighs both trade-offs and proposes a concrete scaling mechanism like a pub/sub backplane for multi-server WebSocket support."
+        },
+        "skills": [
+          "distributed_systems",
+          "api_design",
+          "networking"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "websockets",
+          "tradeoffs",
+          "real_time",
+          "scalability"
+        ]
+      },
+      {
+        "id": "BE-078",
+        "domain": "http_networking",
+        "topic": "Security",
+        "subtopic": "CSRF and How Cookies Enable It",
+        "difficulty": "Hard",
+        "question_type": "security",
+        "question": "How does Cross-Site Request Forgery (CSRF) work, and why does cookie-based authentication make an application vulnerable to it by default?",
+        "answer": "Browsers automatically attach cookies to requests sent to the cookie's originating domain, regardless of which site initiated the request. In a CSRF attack, a malicious site tricks a logged-in user's browser into sending a request, such as a form submission, to a target site; because the browser automatically includes the user's authentication cookie, the target site processes the request as if the legitimate user intentionally made it, even though they didn't. This is possible because cookie-based auth relies on the browser's automatic, origin-agnostic cookie attachment rather than an explicit action by the user or script.",
+        "key_concepts": [
+          "CSRF",
+          "cookie-based authentication",
+          "automatic cookie attachment",
+          "cross-site requests"
+        ],
+        "expected_points": [
+          "Browsers automatically attach cookies to requests to their origin domain regardless of the request's source",
+          "A malicious site can trigger requests that carry the victim's cookies without their intent",
+          "The target server can't distinguish a forged request from a legitimate one using cookies alone",
+          "Token-based auth stored outside cookies, such as in memory and sent via header, isn't automatically attached, reducing this specific risk"
+        ],
+        "common_mistakes": [
+          "Confusing CSRF with XSS, which are different attack classes with different mechanisms",
+          "Believing HttpOnly cookies prevent CSRF, when HttpOnly prevents JS from reading cookies, not the browser from sending them",
+          "Assuming CSRF requires stealing the user's credentials directly"
+        ],
+        "example": "A user logged into their bank visits a malicious page containing a hidden auto-submitting form pointed at the bank's transfer endpoint; the browser automatically attaches the bank's session cookie, and the transfer may succeed unless the bank has CSRF protections.",
+        "follow_up_questions": [
+          "What is a CSRF token, and how does it prevent this attack?",
+          "How does SameSite=Strict/Lax help mitigate CSRF, and what are its limitations?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the CSRF mechanism.",
+          "average": "Knows CSRF is an attack involving cookies but can't explain why the browser's behavior enables it.",
+          "good": "Correctly explains automatic cookie attachment as the root cause enabling CSRF.",
+          "excellent": "Correctly explains the mechanism and describes at least one mitigation, such as CSRF tokens or SameSite, with its limitations."
+        },
+        "skills": [
+          "security",
+          "http",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "csrf",
+          "cookies",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-079",
+        "domain": "http_networking",
+        "topic": "DNS",
+        "subtopic": "DNS Resolution Steps Before an HTTP Request",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What steps typically happen to resolve a domain name before a browser can even send an HTTP request to a server?",
+        "answer": "The browser first checks its local cache for a recent resolution of the domain. If not cached, it queries a DNS resolver, often provided by the OS or ISP, which may check its own cache, then queries a chain of DNS servers, starting from root servers, then top-level domain servers, then the domain's authoritative name server, to obtain the IP address associated with the domain. Once the browser has the IP address, it can establish a TCP, and TLS if HTTPS, connection to that address before sending the actual HTTP request.",
+        "key_concepts": [
+          "DNS resolution",
+          "recursive resolver",
+          "root servers",
+          "TLD servers",
+          "authoritative name server",
+          "DNS caching"
+        ],
+        "expected_points": [
+          "Browser/OS may serve the answer from a local DNS cache first",
+          "A recursive resolver queries the DNS hierarchy if not cached",
+          "Resolution traverses root, then TLD, then authoritative name servers",
+          "Only after obtaining an IP address can a TCP/TLS connection and HTTP request proceed"
+        ],
+        "common_mistakes": [
+          "Assuming DNS resolution happens after the TCP connection is already established",
+          "Skipping mention of caching at multiple layers, such as browser, OS, and resolver",
+          "Confusing the DNS hierarchy order, such as placing TLD servers before root servers"
+        ],
+        "example": "Resolving api.example.com might hit a cached entry in the OS resolver; if not cached, the resolver queries a root server for .com's TLD servers, then queries example.com's authoritative server for the specific A record.",
+        "follow_up_questions": [
+          "How does DNS caching via TTL affect how quickly clients see an updated IP address after a DNS change?",
+          "What is the performance impact of DNS resolution on the overall latency of a first-time request to a new host?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe DNS resolution at all.",
+          "average": "Mentions DNS translates domain names to IPs without describing the hierarchy or caching.",
+          "good": "Correctly describes the resolver hierarchy and that resolution precedes the TCP/TLS connection.",
+          "excellent": "Correctly describes the hierarchy, caching layers, and connects DNS latency to overall request latency, especially for first-time lookups."
+        },
+        "skills": [
+          "networking",
+          "http"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "dns",
+          "networking"
+        ]
+      },
+      {
+        "id": "BE-080",
+        "domain": "http_networking",
+        "topic": "Production Incident",
+        "subtopic": "Diagnosing a Sudden Latency Spike Across HTTP Requests",
+        "difficulty": "Expert",
+        "question_type": "production_incident",
+        "question": "Your API's overall latency suddenly triples across all endpoints during a traffic spike, but CPU and memory on your application servers look normal. Walk through how you'd systematically diagnose the bottleneck, considering the full HTTP request path.",
+        "answer": "Since application server CPU and memory look normal, the bottleneck is likely somewhere else along the request path rather than in application compute. A systematic approach: first check DNS resolution times in case a DNS provider is degraded; then check TCP/TLS connection establishment times and connection pool exhaustion at the load balancer or reverse proxy; then check the load balancer or API gateway itself for saturation, such as connection limits or worker thread exhaustion, even if backend servers are fine; then check downstream dependencies such as databases, caches, and third-party APIs for increased latency or connection pool exhaustion, since backend servers might be idle-looking while actually blocked waiting on I/O; and finally check network-level issues between components, such as increased packet loss or a saturated network link, using latency and throughput metrics at each hop. The key insight is to trace the request end-to-end across every hop rather than assuming the bottleneck is wherever CPU metrics are highest.",
+        "key_concepts": [
+          "request path tracing",
+          "connection pool exhaustion",
+          "downstream dependency latency",
+          "load balancer saturation",
+          "end-to-end diagnosis"
+        ],
+        "expected_points": [
+          "Recognizes normal app-server CPU/memory doesn't rule out other bottlenecks",
+          "Considers DNS, TCP/TLS handshake, and load balancer/gateway layers",
+          "Considers downstream dependencies, such as databases and caches, as a likely culprit since app servers can be I/O-blocked, not CPU-bound",
+          "Proposes a systematic, end-to-end tracing approach rather than guessing",
+          "May mention distributed tracing tools to pinpoint where latency accumulates"
+        ],
+        "common_mistakes": [
+          "Assuming normal CPU/memory means the application servers are definitely not involved",
+          "Jumping to a single guess, such as 'it's the database', without a systematic elimination process",
+          "Ignoring the load balancer/gateway and network layers as potential bottlenecks"
+        ],
+        "example": "Investigation reveals the application servers are mostly idle but blocked waiting on a downstream database whose connection pool became saturated under the traffic spike, causing requests to queue even though CPU usage stayed low.",
+        "follow_up_questions": [
+          "How would distributed tracing help pinpoint exactly which hop is responsible for the added latency?",
+          "Why can a service look 'idle' on CPU metrics while still being the actual bottleneck?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes a single guess without a systematic approach.",
+          "average": "Checks a couple of layers but misses key candidates like connection pools or downstream dependencies.",
+          "good": "Proposes a reasonably systematic path covering multiple layers including downstream dependencies.",
+          "excellent": "Proposes a full systematic end-to-end path covering DNS, connection handling, gateway, downstream dependencies, and network, explicitly explaining why low CPU doesn't rule out I/O-bound bottlenecks, and mentions tracing tools."
+        },
+        "skills": [
+          "distributed_systems",
+          "troubleshooting",
+          "performance",
+          "networking"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "latency",
+          "incident_response",
+          "distributed_systems"
+        ]
+      }
+    ]
+  }
+}

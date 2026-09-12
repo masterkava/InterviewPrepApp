@@ -1,0 +1,771 @@
+{
+  "question_bank": {
+    "id": "backend-engineering-500",
+    "title": "Backend Engineering Interview Question Bank — SQL & Relational Databases — Batch 1",
+    "description": "SQL and relational database interview questions for backend engineering.",
+    "language": "Technology-neutral SQL",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "domain": "sql_relational_databases",
+    "question_count": 15,
+    "batch": {
+      "batch_number": 1,
+      "batch_size": 15,
+      "domain_target": 45,
+      "question_id_range": [
+        "BE-161",
+        "BE-175"
+      ]
+    },
+    "intended_use": [
+      "preparation",
+      "mock_interview",
+      "ai_evaluation",
+      "adaptive_follow_up"
+    ],
+    "roles": [
+      "backend_developer",
+      "software_developer",
+      "full_stack_developer"
+    ],
+    "questions": [
+      {
+        "id": "BE-161",
+        "domain": "sql_relational_databases",
+        "topic": "SQL Fundamentals",
+        "subtopic": "SQL and Relational Databases",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What is SQL, and how is it different from a general-purpose programming language?",
+        "answer": "SQL is a declarative language for defining, querying, manipulating, and controlling data in relational databases. It describes the desired result rather than prescribing every execution step, allowing the database optimizer to choose an execution plan. General-purpose languages provide broader control over program flow and application logic.",
+        "key_concepts": [
+          "Declarative language",
+          "relational database",
+          "set-oriented processing",
+          "query optimizer"
+        ],
+        "expected_points": [
+          "Accurately explains declarative language",
+          "Accurately explains relational database",
+          "Accurately explains set-oriented processing"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies declarative language"
+        ],
+        "example": "SQL is a declarative language for defining, querying, manipulating, and controlling data in relational databases.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "declarative_language",
+          "relational_database",
+          "set-oriented_processing"
+        ]
+      },
+      {
+        "id": "BE-162",
+        "domain": "sql_relational_databases",
+        "topic": "SQL Fundamentals",
+        "subtopic": "WHERE vs HAVING",
+        "difficulty": "Easy",
+        "question_type": "comparison",
+        "question": "What is the difference between WHERE and HAVING in SQL?",
+        "answer": "WHERE filters individual rows before grouping and aggregation. HAVING filters groups after GROUP BY and aggregation, so it is appropriate for conditions involving COUNT, SUM, AVG, and similar aggregates.",
+        "key_concepts": [
+          "WHERE",
+          "HAVING",
+          "GROUP BY",
+          "aggregation"
+        ],
+        "expected_points": [
+          "Accurately explains where",
+          "Accurately explains having",
+          "Accurately explains group by"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies where"
+        ],
+        "example": "WHERE filters individual rows before grouping and aggregation.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "where",
+          "having",
+          "group_by"
+        ]
+      },
+      {
+        "id": "BE-163",
+        "domain": "sql_relational_databases",
+        "topic": "SELECT, Filtering & Sorting",
+        "subtopic": "NULL and Three-Valued Logic",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What does NULL mean in a relational database, and why does comparing a column directly with NULL using '=' not work as expected?",
+        "answer": "NULL represents an unknown, missing, or inapplicable value rather than an ordinary value such as zero. SQL uses three-valued logic, so column = NULL evaluates to UNKNOWN rather than TRUE. Use IS NULL or IS NOT NULL to test for NULL.",
+        "key_concepts": [
+          "NULL",
+          "three-valued logic",
+          "UNKNOWN",
+          "IS NULL"
+        ],
+        "expected_points": [
+          "Accurately explains null",
+          "Accurately explains three-valued logic",
+          "Accurately explains unknown"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies null"
+        ],
+        "example": "NULL represents an unknown, missing, or inapplicable value rather than an ordinary value such as zero.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "null",
+          "three-valued_logic",
+          "unknown"
+        ]
+      },
+      {
+        "id": "BE-164",
+        "domain": "sql_relational_databases",
+        "topic": "SELECT, Filtering & Sorting",
+        "subtopic": "DISTINCT",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What does DISTINCT do in a SELECT query, and what trade-offs should you consider when using it?",
+        "answer": "DISTINCT removes duplicate result rows based on the complete selected column combination. It can require sorting or hashing and therefore consume CPU and memory. It should not be used blindly to hide duplicate rows caused by an incorrect join.",
+        "key_concepts": [
+          "DISTINCT",
+          "duplicate elimination",
+          "sorting",
+          "hashing"
+        ],
+        "expected_points": [
+          "Accurately explains distinct",
+          "Accurately explains duplicate elimination",
+          "Accurately explains sorting"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies distinct"
+        ],
+        "example": "DISTINCT removes duplicate result rows based on the complete selected column combination.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "distinct",
+          "duplicate_elimination",
+          "sorting"
+        ]
+      },
+      {
+        "id": "BE-165",
+        "domain": "sql_relational_databases",
+        "topic": "SELECT, Filtering & Sorting",
+        "subtopic": "ORDER BY and Deterministic Results",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "If a SQL query does not contain an ORDER BY clause, is the database required to return rows in a particular order?",
+        "answer": "No. Without ORDER BY, result ordering is not guaranteed. Observed order can change with query plans, indexes, statistics, data changes, or database versions. Applications requiring deterministic ordering should specify ORDER BY and, where needed, a unique tie-breaker.",
+        "key_concepts": [
+          "ORDER BY",
+          "determinism",
+          "query plan",
+          "tie-breaker"
+        ],
+        "expected_points": [
+          "Accurately explains order by",
+          "Accurately explains determinism",
+          "Accurately explains query plan"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies order by"
+        ],
+        "example": "No.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "order_by",
+          "determinism",
+          "query_plan"
+        ]
+      },
+      {
+        "id": "BE-166",
+        "domain": "sql_relational_databases",
+        "topic": "Joins",
+        "subtopic": "INNER JOIN vs LEFT JOIN",
+        "difficulty": "Easy",
+        "question_type": "comparison",
+        "question": "What is the difference between an INNER JOIN and a LEFT JOIN, and when would you use each?",
+        "answer": "INNER JOIN returns only rows with a matching row on both sides. LEFT JOIN preserves every row from the left table and supplies NULLs for right-side columns when no match exists. Use LEFT JOIN when unmatched left-side entities must remain in the result.",
+        "key_concepts": [
+          "INNER JOIN",
+          "LEFT JOIN",
+          "unmatched rows",
+          "NULL"
+        ],
+        "expected_points": [
+          "Accurately explains inner join",
+          "Accurately explains left join",
+          "Accurately explains unmatched rows"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies inner join"
+        ],
+        "example": "INNER JOIN returns only rows with a matching row on both sides.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "inner_join",
+          "left_join",
+          "unmatched_rows"
+        ]
+      },
+      {
+        "id": "BE-167",
+        "domain": "sql_relational_databases",
+        "topic": "Joins",
+        "subtopic": "One-to-Many Join Multiplication",
+        "difficulty": "Medium",
+        "question_type": "debugging",
+        "question": "A query joins customers to orders and then calculates SUM(order_amount), but the total becomes too large after another one-to-many table is joined. What is likely happening?",
+        "answer": "The additional one-to-many join is multiplying rows before aggregation. A customer with three orders and four related rows can produce twelve intermediate rows, causing order amounts to be counted repeatedly. Diagnose row counts and relationship cardinality after each join, then pre-aggregate independent child datasets or otherwise query at the correct grain.",
+        "key_concepts": [
+          "join cardinality",
+          "row multiplication",
+          "aggregation grain",
+          "pre-aggregation"
+        ],
+        "expected_points": [
+          "Accurately explains join cardinality",
+          "Accurately explains row multiplication",
+          "Accurately explains aggregation grain"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies join cardinality"
+        ],
+        "example": "The additional one-to-many join is multiplying rows before aggregation.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "join_cardinality",
+          "row_multiplication",
+          "aggregation_grain"
+        ]
+      },
+      {
+        "id": "BE-168",
+        "domain": "sql_relational_databases",
+        "topic": "Joins",
+        "subtopic": "Self Join",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "What is a self join, and give a practical example of when you would use one?",
+        "answer": "A self join joins a table to itself using different aliases for its logical roles. A common example is employees(manager_id), where one employee references another employee in the same table. The join can return each employee together with the manager's name.",
+        "key_concepts": [
+          "self join",
+          "aliases",
+          "hierarchical relationship",
+          "foreign key"
+        ],
+        "expected_points": [
+          "Accurately explains self join",
+          "Accurately explains aliases",
+          "Accurately explains hierarchical relationship"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies self join"
+        ],
+        "example": "A self join joins a table to itself using different aliases for its logical roles.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "self_join",
+          "aliases",
+          "hierarchical_relationship"
+        ]
+      },
+      {
+        "id": "BE-169",
+        "domain": "sql_relational_databases",
+        "topic": "Joins",
+        "subtopic": "Many-to-Many Relationships",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "How is a many-to-many relationship normally represented in a relational database?",
+        "answer": "A many-to-many relationship is normally represented with a junction table containing foreign keys to both entities. For example, student_courses(student_id, course_id) represents student-to-course enrollment. A composite primary key or unique constraint can prevent duplicate associations.",
+        "key_concepts": [
+          "many-to-many",
+          "junction table",
+          "foreign keys",
+          "composite key"
+        ],
+        "expected_points": [
+          "Accurately explains many-to-many",
+          "Accurately explains junction table",
+          "Accurately explains foreign keys"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies many-to-many"
+        ],
+        "example": "A many-to-many relationship is normally represented with a junction table containing foreign keys to both entities.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "many-to-many",
+          "junction_table",
+          "foreign_keys"
+        ]
+      },
+      {
+        "id": "BE-170",
+        "domain": "sql_relational_databases",
+        "topic": "Aggregation & Grouping",
+        "subtopic": "COUNT(*) vs COUNT(column)",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between COUNT(*) and COUNT(column) when NULL values are present?",
+        "answer": "COUNT(*) counts rows, while COUNT(column) counts only rows where that column is non-NULL. This matters with LEFT JOINs: COUNT(*) can count the preserved parent row even when there is no child, whereas COUNT(child.id) can return zero for that parent.",
+        "key_concepts": [
+          "COUNT(*)",
+          "COUNT(column)",
+          "NULL",
+          "LEFT JOIN"
+        ],
+        "expected_points": [
+          "Accurately explains count(*)",
+          "Accurately explains count(column)",
+          "Accurately explains null"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies count(*)"
+        ],
+        "example": "COUNT(*) counts rows, while COUNT(column) counts only rows where that column is non-NULL.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "count(*)",
+          "count(column)",
+          "null"
+        ]
+      },
+      {
+        "id": "BE-171",
+        "domain": "sql_relational_databases",
+        "topic": "Aggregation & Grouping",
+        "subtopic": "GROUP BY and Result Granularity",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Why does SQL require non-aggregated selected columns to be included in GROUP BY in many SQL dialects?",
+        "answer": "GROUP BY defines the granularity of the result: each output row represents one group. An ungrouped, non-aggregated column can have multiple possible values within a group, creating ambiguity. Strict SQL behavior prevents that ambiguity, although dialects can differ when functional dependencies are recognized.",
+        "key_concepts": [
+          "GROUP BY",
+          "aggregation",
+          "granularity",
+          "functional dependency"
+        ],
+        "expected_points": [
+          "Accurately explains group by",
+          "Accurately explains aggregation",
+          "Accurately explains granularity"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies group by"
+        ],
+        "example": "GROUP BY defines the granularity of the result: each output row represents one group.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "group_by",
+          "aggregation",
+          "granularity"
+        ]
+      },
+      {
+        "id": "BE-172",
+        "domain": "sql_relational_databases",
+        "topic": "Aggregation & Grouping",
+        "subtopic": "HAVING with Aggregate Conditions",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "Write a SQL query that returns customers who have placed at least five orders, along with their total order value.",
+        "answer": "Use SELECT customer_id, COUNT(*) AS order_count, SUM(amount) AS total_value FROM orders GROUP BY customer_id HAVING COUNT(*) >= 5. GROUP BY creates one row per customer and HAVING filters the aggregated groups.",
+        "key_concepts": [
+          "GROUP BY",
+          "COUNT",
+          "SUM",
+          "HAVING"
+        ],
+        "expected_points": [
+          "Accurately explains group by",
+          "Accurately explains count",
+          "Accurately explains sum"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies group by"
+        ],
+        "example": "Use SELECT customer_id, COUNT(*) AS order_count, SUM(amount) AS total_value FROM orders GROUP BY customer_id HAVING COUNT(*) >= 5.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "group_by",
+          "count",
+          "sum"
+        ]
+      },
+      {
+        "id": "BE-173",
+        "domain": "sql_relational_databases",
+        "topic": "Joins",
+        "subtopic": "JOIN Predicate Placement",
+        "difficulty": "Hard",
+        "question_type": "debugging",
+        "question": "A LEFT JOIN is supposed to return all customers and their paid orders, but adding WHERE orders.status = 'paid' makes customers without orders disappear. Why?",
+        "answer": "For customers without orders, the LEFT JOIN produces NULL order columns. WHERE orders.status = 'paid' therefore evaluates to UNKNOWN and removes those rows. If all customers must remain while only paid orders are joined, put the status condition in the JOIN's ON clause.",
+        "key_concepts": [
+          "LEFT JOIN",
+          "ON predicate",
+          "WHERE predicate",
+          "NULL"
+        ],
+        "expected_points": [
+          "Accurately explains left join",
+          "Accurately explains on predicate",
+          "Accurately explains where predicate"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies left join"
+        ],
+        "example": "For customers without orders, the LEFT JOIN produces NULL order columns.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "left_join",
+          "on_predicate",
+          "where_predicate"
+        ]
+      },
+      {
+        "id": "BE-174",
+        "domain": "sql_relational_databases",
+        "topic": "SELECT, Filtering & Sorting",
+        "subtopic": "Keyset vs Offset Pagination",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "For a large orders table, compare OFFSET/LIMIT pagination with keyset pagination. What problems can OFFSET pagination cause as the page number becomes large?",
+        "answer": "Large OFFSET values can require the database to process and skip many preceding rows, making deep pages increasingly expensive. Inserts and deletes can also cause pages to shift between requests. Keyset pagination uses the previous page's ordering key to seek directly to the next range and usually scales better when supported by an appropriate index and deterministic ordering.",
+        "key_concepts": [
+          "OFFSET",
+          "keyset pagination",
+          "index seek",
+          "deep pagination",
+          "deterministic ordering"
+        ],
+        "expected_points": [
+          "Accurately explains offset",
+          "Accurately explains keyset pagination",
+          "Accurately explains index seek"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies offset"
+        ],
+        "example": "Large OFFSET values can require the database to process and skip many preceding rows, making deep pages increasingly expensive.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "offset",
+          "keyset_pagination",
+          "index_seek"
+        ]
+      },
+      {
+        "id": "BE-175",
+        "domain": "sql_relational_databases",
+        "topic": "Joins",
+        "subtopic": "EXISTS vs JOIN for Existence Checks",
+        "difficulty": "Expert",
+        "question_type": "optimization",
+        "question": "You need to return customers who have at least one order in the last 30 days. Would you use JOIN or EXISTS, and what should you consider?",
+        "answer": "EXISTS directly expresses an existence test and can allow the database to stop searching for a customer after finding a qualifying row, depending on the optimizer. A JOIN can multiply customer rows when multiple orders match, requiring DISTINCT or aggregation. Neither is universally faster; semantics, indexes, statistics, and the actual execution plan should guide the choice.",
+        "key_concepts": [
+          "EXISTS",
+          "JOIN",
+          "semi-join",
+          "execution plan",
+          "indexing"
+        ],
+        "expected_points": [
+          "Accurately explains exists",
+          "Accurately explains join",
+          "Accurately explains semi-join"
+        ],
+        "common_mistakes": [
+          "Confuses or misapplies exists"
+        ],
+        "example": "EXISTS directly expresses an existence test and can allow the database to stop searching for a customer after finding a qualifying row, depending on the optimizer.",
+        "follow_up_questions": [
+          "How would you troubleshoot or optimize this concept in a production database?",
+          "What trade-off should a backend engineer consider here?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Gives an incorrect, vague, or materially incomplete explanation.",
+          "average": "Explains the basic concept but misses important edge cases or trade-offs.",
+          "good": "Correctly explains the concept and applies it to a realistic backend scenario.",
+          "excellent": "Provides a precise explanation, handles edge cases, and reasons about correctness, performance, and production trade-offs."
+        },
+        "skills": [
+          "sql",
+          "relational_databases"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "exists",
+          "join",
+          "semi-join"
+        ]
+      }
+    ]
+  }
+}

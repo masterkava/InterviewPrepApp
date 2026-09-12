@@ -1,0 +1,792 @@
+{
+  "question_bank": {
+    "id": "distributed-systems-batch-01",
+    "title": "Distributed Systems Interview Question Bank — Batch 1",
+    "description": "Backend Engineering Distributed Systems questions BE-311 through BE-324.",
+    "language": "Technology-neutral backend/distributed systems",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "question_count": 14,
+    "difficulty_distribution": {
+      "Easy": 2,
+      "Medium": 8,
+      "Hard": 4,
+      "Expert": 0
+    },
+    "questions": [
+      {
+        "id": "BE-311",
+        "domain": "distributed_systems_fundamentals",
+        "topic": "Distributed Systems Fundamentals & Failure Models",
+        "subtopic": "Distributed system characteristics",
+        "difficulty": "Easy",
+        "question_type": "conceptual",
+        "question": "What makes a system distributed, and why is building a distributed system fundamentally harder than building a single-process application?",
+        "answer": "A distributed system consists of multiple independent computing nodes that cooperate over a network to provide a unified service. The main difficulty is that communication is no longer instantaneous or perfectly reliable: messages can be delayed, lost, duplicated, or reordered, and nodes can fail independently. The system therefore has to reason about partial failure, concurrency, network partitions, and inconsistent views of state. A design that is correct on one machine may fail when coordination happens over a network.",
+        "key_concepts": [
+          "independent nodes",
+          "network communication",
+          "partial failure",
+          "concurrency",
+          "coordination"
+        ],
+        "expected_points": [
+          "Multiple nodes cooperate to provide one logical service.",
+          "Network communication introduces latency and failure modes.",
+          "One node can fail while others continue operating, creating partial failure.",
+          "Concurrent operations can observe and modify distributed state differently.",
+          "Correctness requires explicit coordination and failure-handling strategies."
+        ],
+        "common_mistakes": [
+          "Defining a distributed system simply as any application with multiple servers.",
+          "Assuming network calls behave like local function calls.",
+          "Ignoring partial failures because the overall system remains reachable."
+        ],
+        "example": "A web service running on ten application servers behind a load balancer is distributed because requests and shared state are handled by independent machines communicating over a network.",
+        "follow_up_questions": [
+          "What is partial failure, and why is it especially important in distributed systems?",
+          "Why should a network call be treated differently from a local function call?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Defines distributed systems only as multiple servers and misses network and failure implications.",
+          "average": "Identifies multiple nodes and network communication but gives limited explanation of partial failure and concurrency.",
+          "good": "Explains independent nodes, network uncertainty, partial failure, and coordination with a concrete example.",
+          "excellent": "Clearly explains why distributed systems change the correctness model, including partial failure, concurrency, communication uncertainty, and the need for explicit coordination."
+        },
+        "skills": [
+          "distributed_systems",
+          "backend_architecture",
+          "failure_analysis"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "distributed-systems",
+          "fundamentals",
+          "partial-failure"
+        ]
+      },
+      {
+        "id": "BE-312",
+        "domain": "distributed_systems_fundamentals",
+        "topic": "Distributed Systems Fundamentals & Failure Models",
+        "subtopic": "Partial failure",
+        "difficulty": "Easy",
+        "question_type": "scenario_based",
+        "question": "A service calls three downstream services. Two respond successfully, but the third becomes unreachable while the network itself remains available. What type of failure is this, and why is it different from a complete system failure?",
+        "answer": "This is a partial failure: one component or communication path has failed while other components continue operating. Distributed systems are difficult partly because there may be no single global indication that the whole system is down. Some nodes can still accept traffic and return successful results while others are unavailable or unreachable. The caller therefore needs explicit timeouts, failure handling, and a policy for deciding whether the overall operation can safely continue.",
+        "key_concepts": [
+          "partial failure",
+          "independent component failure",
+          "timeouts",
+          "failure detection",
+          "degraded operation"
+        ],
+        "expected_points": [
+          "Only part of the distributed system has failed.",
+          "Other components can continue processing normally.",
+          "The caller may not immediately know whether the dependency is slow, unreachable, or failed.",
+          "Timeouts and failure-handling policies are required.",
+          "The system may need to fail fast or provide a degraded response depending on business requirements."
+        ],
+        "common_mistakes": [
+          "Treating any downstream failure as proof that the entire system is unavailable.",
+          "Using unlimited retries instead of bounded timeouts.",
+          "Assuming an unresponsive service is definitely crashed."
+        ],
+        "example": "A checkout service can reach inventory and pricing services but cannot reach the tax service. Checkout may need to fail safely rather than assume the tax calculation succeeded.",
+        "follow_up_questions": [
+          "How would you choose a timeout for the unavailable dependency?",
+          "When is degraded operation safer than returning an error?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Calls the situation a complete outage or gives no meaningful failure classification.",
+          "average": "Recognizes partial failure but does not explain why failure detection is uncertain.",
+          "good": "Explains independent failure, timeouts, and the need for a business-specific degradation policy.",
+          "excellent": "Distinguishes crash, network, and slow-response possibilities and explains safe failure, bounded timeouts, and business-level degradation decisions."
+        },
+        "skills": [
+          "distributed_systems",
+          "fault_tolerance",
+          "resilience"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "partial-failure",
+          "timeouts",
+          "fault-models"
+        ]
+      },
+      {
+        "id": "BE-313",
+        "domain": "distributed_systems_fundamentals",
+        "topic": "Distributed Systems Fundamentals & Failure Models",
+        "subtopic": "Failure models",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "Compare crash failure, network failure, and slow failure in a distributed system. Why can a slow node be harder to handle than a node that has clearly crashed?",
+        "answer": "A crash failure means a process or node stops functioning, while a network failure prevents messages from reaching a destination or responses from returning. A slow failure occurs when a node is still running but responds much later than expected. Slow failures are particularly difficult because the caller cannot immediately distinguish a slow node from a failed node using only the absence of a response. This can cause duplicate work, unnecessary retries, resource exhaustion, or conflicting decisions if the original operation eventually completes.",
+        "key_concepts": [
+          "crash failure",
+          "network failure",
+          "slow failure",
+          "failure detection",
+          "timeouts"
+        ],
+        "expected_points": [
+          "Crash failure stops processing at the affected node.",
+          "Network failure disrupts communication rather than necessarily stopping the node.",
+          "Slow failure leaves the node operational but outside expected latency bounds.",
+          "A timeout cannot prove whether a node crashed or is merely slow.",
+          "Aggressive retries can amplify load and create secondary failures."
+        ],
+        "common_mistakes": [
+          "Assuming a timeout proves the remote process crashed.",
+          "Treating network failure and process failure as identical.",
+          "Retrying immediately without considering duplicate side effects or load amplification."
+        ],
+        "example": "A payment request times out after three seconds, but the payment service completes the charge at four seconds. Retrying without idempotency could create a duplicate charge.",
+        "follow_up_questions": [
+          "What protections would you add around a slow dependency?",
+          "Why can retries make a slow dependency's condition worse?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the failure types or claims a timeout proves a crash.",
+          "average": "Defines crash and network failures but gives a weak explanation of slow failure.",
+          "good": "Correctly distinguishes all three and explains ambiguity, retries, and duplicate effects.",
+          "excellent": "Explains slow failure as an indistinguishable failure mode under incomplete information and connects it to timeouts, retry amplification, resource exhaustion, and idempotent side effects."
+        },
+        "skills": [
+          "distributed_systems",
+          "failure_detection",
+          "resilience"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "failure-models",
+          "slow-failure",
+          "retry-amplification"
+        ]
+      },
+      {
+        "id": "BE-314",
+        "domain": "distributed_systems_fundamentals",
+        "topic": "Distributed Systems Fundamentals & Failure Models",
+        "subtopic": "Network partitions",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is a network partition, and what makes it fundamentally different from a single server failure?",
+        "answer": "A network partition occurs when communication between groups of otherwise functioning nodes is disrupted. The nodes may continue running and processing requests, but they cannot reliably exchange state or coordinate with the other side. Unlike a single server failure, both sides of a partition can remain active and may make decisions based on incomplete information. This creates the risk of conflicting state or split-brain behavior and forces the system to choose how consistency and availability should behave during the partition.",
+        "key_concepts": [
+          "network partition",
+          "communication loss",
+          "independent progress",
+          "split brain",
+          "consistency versus availability"
+        ],
+        "expected_points": [
+          "Nodes may remain healthy while communication between them fails.",
+          "Each partition can have a different view of distributed state.",
+          "Both sides may continue accepting work unless prevented.",
+          "Conflicting decisions can occur without coordination.",
+          "The system needs an explicit partition-handling policy."
+        ],
+        "common_mistakes": [
+          "Assuming a partition means the servers themselves are powered off.",
+          "Assuming only one node can be affected.",
+          "Claiming that retries automatically solve a partition."
+        ],
+        "example": "Two replicas in different regions remain healthy, but a routing failure prevents them from communicating. If both accept conflicting updates, reconciliation becomes necessary after connectivity returns.",
+        "follow_up_questions": [
+          "What is split brain, and how can a system prevent it?",
+          "Why can't a distributed system simply assume the partition will be very short?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Describes a partition as a server crash.",
+          "average": "Recognizes communication loss but misses the possibility of both sides continuing to operate.",
+          "good": "Explains independent operation, inconsistent views, and split-brain risk.",
+          "excellent": "Explains partition semantics precisely and connects them to coordination, conflicting writes, consistency guarantees, and explicit failure policies."
+        },
+        "skills": [
+          "distributed_systems",
+          "consistency",
+          "fault_tolerance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "network-partition",
+          "split-brain",
+          "CAP"
+        ]
+      },
+      {
+        "id": "BE-315",
+        "domain": "distributed_systems_fundamentals",
+        "topic": "Distributed Systems Fundamentals & Failure Models",
+        "subtopic": "Failure handling strategy",
+        "difficulty": "Medium",
+        "question_type": "scenario_based",
+        "question": "A distributed API occasionally receives a response after its client-side timeout has already expired. How should the system be designed so late responses do not corrupt state?",
+        "answer": "The system should treat timeout as uncertainty rather than proof that the operation did not happen. Side effects should use idempotency keys or another durable operation identifier so that repeated or late processing maps to the same logical operation. The server should validate operation state before applying transitions, and clients should use bounded retries with backoff rather than assuming every timeout is safe to retry. Where asynchronous completion is possible, the system can expose an operation status that clients can query instead of blindly repeating the request.",
+        "key_concepts": [
+          "timeout uncertainty",
+          "idempotency keys",
+          "durable operation state",
+          "bounded retries",
+          "operation status"
+        ],
+        "expected_points": [
+          "A timeout does not establish that the server did not process the request.",
+          "Side effects need an idempotent operation identity.",
+          "State transitions should be validated before applying them.",
+          "Retries should be bounded and use backoff.",
+          "An asynchronous status endpoint can resolve uncertainty for long-running operations."
+        ],
+        "common_mistakes": [
+          "Automatically retrying every timed-out request without an idempotency mechanism.",
+          "Deleting server-side state immediately after a client timeout.",
+          "Assuming the client can determine whether the original operation completed."
+        ],
+        "example": "A client times out while creating an order. Retrying with the same idempotency key lets the server return the existing order rather than creating a second one.",
+        "follow_up_questions": [
+          "Where should an idempotency key be stored to survive a retry?",
+          "How would you handle an idempotency record that expires before a very late retry arrives?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests simply retrying or ignoring late responses.",
+          "average": "Mentions idempotency but does not connect it to durable state and timeout uncertainty.",
+          "good": "Uses idempotency, bounded retries, and state validation to prevent duplicate side effects.",
+          "excellent": "Designs a complete uncertainty-handling approach using durable operation identity, state-machine validation, retry backoff, and asynchronous status reconciliation."
+        },
+        "skills": [
+          "distributed_systems",
+          "idempotency",
+          "api_design",
+          "fault_tolerance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "timeouts",
+          "late-response",
+          "idempotency"
+        ]
+      },
+      {
+        "id": "BE-316",
+        "domain": "distributed_systems_consistency",
+        "topic": "Consistency Models & Linearizability",
+        "subtopic": "Consistency fundamentals",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What does consistency mean in a distributed system, and why is it not the same thing as availability or durability?",
+        "answer": "Consistency describes the guarantees about what values or operation results clients can observe when data is replicated or concurrently accessed. Availability concerns whether the system can return a response, while durability concerns whether committed data survives failures. A system can be highly available but allow clients to observe stale or divergent values, and it can provide strong consistency without guaranteeing that every accepted write is permanently durable unless persistence requirements are also met. These properties must therefore be specified separately.",
+        "key_concepts": [
+          "consistency",
+          "availability",
+          "durability",
+          "replication",
+          "client-visible guarantees"
+        ],
+        "expected_points": [
+          "Consistency defines rules for observable data and operation ordering.",
+          "Availability concerns successful responses during failures.",
+          "Durability concerns persistence across failures.",
+          "These properties are independent dimensions.",
+          "A system's guarantees should be stated explicitly rather than described simply as 'consistent'."
+        ],
+        "common_mistakes": [
+          "Using consistency as a synonym for data persistence.",
+          "Claiming that a highly available system must be strongly consistent.",
+          "Assuming a successful response automatically means durable storage."
+        ],
+        "example": "A replicated profile service might remain available during a replica delay while temporarily returning an older profile value from one replica.",
+        "follow_up_questions": [
+          "What is the difference between strong and eventual consistency?",
+          "Can a system provide strong consistency and high availability in the absence of partitions?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Equates consistency with durability or availability.",
+          "average": "Defines consistency broadly but cannot separate the three properties.",
+          "good": "Clearly distinguishes consistency, availability, and durability with a practical example.",
+          "excellent": "Frames consistency as a client-visible ordering/value guarantee and accurately separates it from response availability and persistence semantics."
+        },
+        "skills": [
+          "distributed_systems",
+          "consistency",
+          "database_concepts"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "consistency",
+          "availability",
+          "durability"
+        ]
+      },
+      {
+        "id": "BE-317",
+        "domain": "distributed_systems_consistency",
+        "topic": "Consistency Models & Linearizability",
+        "subtopic": "Strong consistency",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is linearizability? Give an example of an operation that should often be linearizable and explain why.",
+        "answer": "Linearizability is a single-operation consistency guarantee in which each operation appears to take effect atomically at some point between its invocation and response, while respecting real-time ordering between non-overlapping operations. It makes a distributed object behave as though there were one authoritative copy for that operation. For example, a system enforcing a strict account balance or a single-use reservation may require linearizable updates so two concurrent clients cannot both observe and consume the same available resource.",
+        "key_concepts": [
+          "linearizability",
+          "atomic operation",
+          "real-time ordering",
+          "single-copy illusion",
+          "concurrent operations"
+        ],
+        "expected_points": [
+          "Each operation appears to have one logical point of effect.",
+          "The point occurs between invocation and response.",
+          "Non-overlapping operations preserve real-time order.",
+          "Concurrent operations receive one valid ordering.",
+          "It is useful when correctness depends on a single authoritative state transition."
+        ],
+        "common_mistakes": [
+          "Defining linearizability as simply 'all replicas eventually agree'.",
+          "Ignoring real-time ordering.",
+          "Assuming linearizability means every multi-step business workflow is automatically atomic."
+        ],
+        "example": "If one seat remains for an event, two concurrent reservation requests should not both successfully claim it under a linearizable reservation operation.",
+        "follow_up_questions": [
+          "How is linearizability different from serializability?",
+          "Why can linearizable reads and writes increase coordination or latency?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Confuses linearizability with eventual consistency or replication.",
+          "average": "Recognizes strong consistency but cannot explain real-time ordering.",
+          "good": "Explains atomic visibility and real-time ordering with a suitable example.",
+          "excellent": "Precisely explains the single-copy illusion, linearization point, overlapping versus non-overlapping operations, and the trade-off in distributed coordination."
+        },
+        "skills": [
+          "distributed_systems",
+          "consistency_models",
+          "concurrency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "linearizability",
+          "strong-consistency",
+          "concurrency"
+        ]
+      },
+      {
+        "id": "BE-318",
+        "domain": "distributed_systems_consistency",
+        "topic": "Consistency Models & Linearizability",
+        "subtopic": "Eventual consistency",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is eventual consistency, and when is it a reasonable choice instead of strong consistency?",
+        "answer": "Eventual consistency means that if updates stop and communication continues normally, replicas will eventually converge to the same value, but clients may temporarily observe stale or different data. It is useful when availability, geographic distribution, write throughput, or lower coordination overhead is more important than immediate global agreement. Suitable examples include some social activity feeds, analytics views, and non-critical metadata where temporary staleness is acceptable. It should not be used merely because it is faster; the business consequences of stale reads must be understood.",
+        "key_concepts": [
+          "eventual consistency",
+          "replica convergence",
+          "stale reads",
+          "availability",
+          "coordination trade-off"
+        ],
+        "expected_points": [
+          "Replicas may temporarily expose different values.",
+          "Convergence is expected if updates cease and communication recovers.",
+          "It can reduce coordination requirements and improve availability or geographic performance.",
+          "The application must tolerate bounded or acceptable staleness.",
+          "Critical invariants may still require stronger guarantees."
+        ],
+        "common_mistakes": [
+          "Saying eventual consistency means data is permanently inconsistent.",
+          "Assuming eventual consistency guarantees a specific convergence time without defining one.",
+          "Using it for critical invariants without analyzing stale-read consequences."
+        ],
+        "example": "A follower count displayed on a social profile can temporarily lag behind the authoritative count without breaking the core business operation.",
+        "follow_up_questions": [
+          "How would you communicate or measure acceptable staleness to product stakeholders?",
+          "How can an application provide a stronger read guarantee on top of eventually replicated data?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Claims eventual consistency means replicas never agree.",
+          "average": "Understands delayed convergence but provides weak use-case reasoning.",
+          "good": "Explains convergence, stale reads, and appropriate non-critical use cases.",
+          "excellent": "Connects eventual consistency to coordination cost, availability, geographic scale, measurable staleness requirements, and business invariants."
+        },
+        "skills": [
+          "distributed_systems",
+          "consistency_models",
+          "architecture_tradeoffs"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "eventual-consistency",
+          "stale-reads",
+          "trade-offs"
+        ]
+      },
+      {
+        "id": "BE-319",
+        "domain": "distributed_systems_consistency",
+        "topic": "Consistency Models & Linearizability",
+        "subtopic": "Read-your-writes consistency",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A user updates their profile successfully and is immediately redirected to a page that reads the profile from another replica. Sometimes the old profile appears. What consistency guarantee is missing, and how could you fix the user experience?",
+        "answer": "The system lacks a read-your-writes guarantee: after a client successfully performs a write, subsequent reads by that client should observe that write or a newer version. A practical fix is to route the immediate read to the authoritative or primary replica, use session or version-aware routing, or attach a version token to the write and require subsequent reads to meet that version. The right choice depends on architecture and latency requirements. The goal is to prevent a successful user action from appearing to have been lost because of replica lag.",
+        "key_concepts": [
+          "read-your-writes",
+          "replica lag",
+          "session consistency",
+          "version token",
+          "user experience"
+        ],
+        "expected_points": [
+          "The problem is stale read after a successful write.",
+          "Read-your-writes is a client-centric consistency guarantee.",
+          "Immediate reads can be routed to a primary or sufficiently fresh replica.",
+          "Version tokens can make freshness explicit.",
+          "The solution should balance consistency requirements against read latency and load."
+        ],
+        "common_mistakes": [
+          "Forcing every read globally to the primary without assessing scale.",
+          "Assuming replication is synchronous when it is asynchronous.",
+          "Adding an arbitrary sleep after the write and calling the problem solved."
+        ],
+        "example": "After changing an email address, the confirmation page can read from the primary or require a replica to be at least at the write's returned version before serving the profile.",
+        "follow_up_questions": [
+          "How could a version token be used to enforce this guarantee?",
+          "What are the scalability consequences of routing post-write reads to the primary?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Does not identify stale replica reads or proposes an arbitrary delay.",
+          "average": "Recognizes replica lag but cannot name the consistency guarantee.",
+          "good": "Identifies read-your-writes and proposes primary routing or version-aware reads.",
+          "excellent": "Explains the client-centric guarantee and presents multiple implementation strategies with explicit trade-offs in latency, load, and correctness."
+        },
+        "skills": [
+          "distributed_systems",
+          "consistency_models",
+          "replication"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "read-your-writes",
+          "replica-lag",
+          "session-consistency"
+        ]
+      },
+      {
+        "id": "BE-320",
+        "domain": "distributed_systems_consistency",
+        "topic": "Consistency Models & Linearizability",
+        "subtopic": "Monotonic reads",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A user refreshes a page several times and sees a newer version of an object followed by an older version. What consistency property is being violated, and what are practical ways to prevent it?",
+        "answer": "This violates monotonic reads: once a client has observed a particular version of data, later reads should not return an older version. The issue commonly occurs when requests are routed to replicas with different replication lag. Solutions include sticky routing to a replica, tracking the minimum version observed by the client and routing reads to a replica that has caught up, or reading from a stronger consistency source for affected operations. Sticky sessions are simple but can create uneven load, while version-aware routing gives more explicit consistency control.",
+        "key_concepts": [
+          "monotonic reads",
+          "replica lag",
+          "sticky routing",
+          "version tracking",
+          "client-centric consistency"
+        ],
+        "expected_points": [
+          "The observed sequence moves backward in version.",
+          "This violates monotonic reads.",
+          "Replica selection can be made sticky or version-aware.",
+          "A client can carry the minimum version it has observed.",
+          "The solution should account for load balancing and failover behavior."
+        ],
+        "common_mistakes": [
+          "Calling the issue a write loss without evidence.",
+          "Using a fixed delay instead of tracking actual replica state.",
+          "Ignoring what happens when the sticky replica fails."
+        ],
+        "example": "A product page initially reads version 12 from replica A, then the load balancer sends the refresh to replica B at version 10. Version-aware routing can prevent the second response from going backward.",
+        "follow_up_questions": [
+          "How would you preserve monotonic reads if the user's preferred replica fails?",
+          "What is the difference between monotonic reads and read-your-writes?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Does not recognize that the client observed versions going backward.",
+          "average": "Identifies replica lag but not the monotonic-read property.",
+          "good": "Explains monotonic reads and practical replica-routing strategies.",
+          "excellent": "Distinguishes monotonic reads from read-your-writes and designs a version-aware approach that also considers failover and load distribution."
+        },
+        "skills": [
+          "distributed_systems",
+          "consistency_models",
+          "replication"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "monotonic-reads",
+          "replica-lag",
+          "client-consistency"
+        ]
+      },
+      {
+        "id": "BE-321",
+        "domain": "distributed_systems_replication",
+        "topic": "Replication & Failover",
+        "subtopic": "Replication models",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "Compare synchronous and asynchronous replication. What are the main trade-offs for latency, durability, and failover?",
+        "answer": "With synchronous replication, a write is not considered complete until the required replica or replicas acknowledge it, which can provide stronger durability and consistency guarantees but increases write latency and makes availability more sensitive to replica failures or network delays. With asynchronous replication, the primary can acknowledge before replicas catch up, improving latency and availability but creating a replication lag window in which a failure can lose acknowledged data or expose stale reads. The appropriate model depends on the business tolerance for data loss and latency.",
+        "key_concepts": [
+          "synchronous replication",
+          "asynchronous replication",
+          "replication lag",
+          "write latency",
+          "durability"
+        ],
+        "expected_points": [
+          "Synchronous replication waits for defined replica acknowledgements.",
+          "Asynchronous replication allows acknowledgement before replicas necessarily catch up.",
+          "Synchronous replication generally increases coordination latency.",
+          "Asynchronous replication creates a window of potential data loss after primary failure.",
+          "Failover correctness depends on which replicas have confirmed the write."
+        ],
+        "common_mistakes": [
+          "Claiming synchronous replication has zero latency impact.",
+          "Claiming asynchronous replication always loses data.",
+          "Ignoring the number and placement of synchronous replicas."
+        ],
+        "example": "For a critical ledger, a write might require acknowledgement from another failure domain before success. For an analytics event stream, asynchronous replication may be acceptable.",
+        "follow_up_questions": [
+          "What happens if a synchronous replica becomes unavailable?",
+          "How would you choose the replication acknowledgement policy for a critical financial operation?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the two replication modes.",
+          "average": "Understands that synchronous is safer but does not explain why.",
+          "good": "Correctly compares latency, durability, lag, and failover implications.",
+          "excellent": "Explains acknowledgement semantics, failure-domain placement, data-loss windows, and how business RPO/RTO requirements influence the choice."
+        },
+        "skills": [
+          "distributed_systems",
+          "replication",
+          "fault_tolerance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "replication",
+          "sync-replication",
+          "async-replication"
+        ]
+      },
+      {
+        "id": "BE-322",
+        "domain": "distributed_systems_replication",
+        "topic": "Replication & Failover",
+        "subtopic": "Leader-follower replication",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "In a leader-follower replication model, why are writes commonly sent to the leader while reads may be served by followers? What problems does this create?",
+        "answer": "Sending writes to a leader gives the system a single coordination point for ordering updates, while followers can serve reads and distribute read load. The trade-off is that followers may lag behind the leader, so read-after-write behavior can be inconsistent if a client writes through the leader and immediately reads from a stale follower. Failover also becomes a correctness concern because the system must determine which follower has the latest valid state before promoting it. The design therefore trades simpler write ordering for replication and failover complexity.",
+        "key_concepts": [
+          "leader-follower replication",
+          "write ordering",
+          "read scaling",
+          "replica lag",
+          "failover"
+        ],
+        "expected_points": [
+          "The leader can establish a consistent order for writes.",
+          "Followers distribute read traffic.",
+          "Asynchronous followers may return stale data.",
+          "Clients may need stronger read routing after writes.",
+          "Failover requires careful selection and promotion of a valid replica."
+        ],
+        "common_mistakes": [
+          "Assuming followers are always fully synchronized.",
+          "Assuming any follower can be promoted safely without checking state.",
+          "Ignoring read-after-write consistency."
+        ],
+        "example": "An application sends order updates to the leader but reads order history from followers. Immediately after an update, a follower may not yet contain the new status.",
+        "follow_up_questions": [
+          "How can read-after-write consistency be maintained with followers?",
+          "What criteria should be used to select a follower for promotion?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Describes leader-follower only as one primary and many backups.",
+          "average": "Understands read scaling but misses replica lag or failover state.",
+          "good": "Explains write ordering, stale reads, and promotion concerns.",
+          "excellent": "Explains the architectural rationale and analyzes read consistency, replica freshness, and safe failover selection."
+        },
+        "skills": [
+          "distributed_systems",
+          "replication",
+          "consistency_models"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "leader-follower",
+          "replica-lag",
+          "failover"
+        ]
+      },
+      {
+        "id": "BE-323",
+        "domain": "distributed_systems_replication",
+        "topic": "Replication & Failover",
+        "subtopic": "Failover correctness",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A primary database fails during a period of asynchronous replication. Two replicas are available, but one is slightly behind the other. What factors should determine which replica becomes the new primary?",
+        "answer": "The safest candidate is normally the replica with the most complete and trustworthy committed state, not simply the one with the lowest latency or highest availability. The system should consider replication position or log sequence, confirmation that writes are committed, health of the replica, and whether it is in an appropriate failure domain. It also needs a mechanism to prevent the old primary from later rejoining and accepting writes, which can create split brain. Any acknowledged writes missing from the promoted replica define the potential recovery point and data-loss window.",
+        "key_concepts": [
+          "replication position",
+          "failover",
+          "split brain",
+          "committed state",
+          "recovery point"
+        ],
+        "expected_points": [
+          "Choose based on authoritative replication state rather than arbitrary replica preference.",
+          "Compare replication/log positions to identify the most complete state.",
+          "Ensure the promoted node is healthy and suitable for leadership.",
+          "Prevent the old primary from serving writes after recovery.",
+          "Quantify potential acknowledged-write loss under asynchronous replication."
+        ],
+        "common_mistakes": [
+          "Promoting the geographically closest replica without checking freshness.",
+          "Allowing the old primary to continue accepting writes.",
+          "Assuming asynchronous replication guarantees zero data loss."
+        ],
+        "example": "Replica A has applied log position 10500 while Replica B has applied 10300. If both are otherwise healthy, A is generally the stronger promotion candidate, subject to the replication system's commit semantics.",
+        "follow_up_questions": [
+          "How can a system prevent the old primary from becoming active after a network partition?",
+          "What is the relationship between this failure mode and RPO?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Chooses a replica arbitrarily or ignores data freshness.",
+          "average": "Chooses the most up-to-date replica but misses split-brain prevention.",
+          "good": "Considers replication position, committed state, and fencing of the old primary.",
+          "excellent": "Provides a complete failover decision covering state freshness, commit semantics, failure domains, fencing, split brain, and the resulting RPO."
+        },
+        "skills": [
+          "distributed_systems",
+          "replication",
+          "failover",
+          "fault_tolerance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "failover",
+          "split-brain",
+          "RPO"
+        ]
+      },
+      {
+        "id": "BE-324",
+        "domain": "distributed_systems_replication",
+        "topic": "Replication & Failover",
+        "subtopic": "Replication lag",
+        "difficulty": "Hard",
+        "question_type": "production_scenario",
+        "question": "Your production system normally has 100 ms of replica lag, but during a traffic spike it grows to 30 seconds. Reads from replicas now show stale data. How would you investigate and mitigate the problem?",
+        "answer": "First, measure where the lag is accumulating: replication transport, log shipping, network bandwidth, replica CPU or disk I/O, lock contention, or insufficient apply throughput. Compare primary write rate with replica apply rate and inspect queue or log backlog, resource saturation, and slow queries on the replica. Short-term mitigation can include routing freshness-sensitive reads to the leader, reducing nonessential replica workload, adding capacity, or temporarily reducing write pressure if the business allows it. The long-term fix should address the bottleneck and establish lag monitoring and alert thresholds rather than relying on a fixed assumption that replicas are always current.",
+        "key_concepts": [
+          "replication lag",
+          "throughput mismatch",
+          "resource saturation",
+          "read routing",
+          "observability"
+        ],
+        "expected_points": [
+          "Measure replication backlog and identify whether transport or apply is the bottleneck.",
+          "Compare primary write throughput with follower apply throughput.",
+          "Check CPU, memory, disk I/O, network, locks, and slow queries.",
+          "Route freshness-sensitive reads away from stale replicas as an immediate mitigation.",
+          "Add lag metrics, alerts, capacity planning, and workload controls."
+        ],
+        "common_mistakes": [
+          "Immediately adding replicas without finding the bottleneck.",
+          "Assuming network bandwidth is always the cause.",
+          "Continuing to serve all reads from lagging replicas despite known freshness requirements."
+        ],
+        "example": "If the primary generates 50,000 log records/sec but a follower can apply only 30,000/sec because of disk saturation, the backlog will continuously grow during the spike.",
+        "follow_up_questions": [
+          "How would you decide whether adding another replica will help or make the primary's workload worse?",
+          "What SLO would you define for replication lag on a user-facing system?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests restarting replicas or simply adding more machines without diagnosis.",
+          "average": "Identifies lag and suggests monitoring but gives limited root-cause analysis.",
+          "good": "Systematically investigates transport, apply throughput, and resources and proposes safe mitigation.",
+          "excellent": "Builds a production troubleshooting plan based on backlog growth and bottleneck identification, with immediate consistency-aware routing and long-term SLO/capacity controls."
+        },
+        "skills": [
+          "distributed_systems",
+          "replication",
+          "observability",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "replication-lag",
+          "production-incident",
+          "capacity"
+        ]
+      }
+    ]
+  }
+}

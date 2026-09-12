@@ -1,0 +1,676 @@
+{
+  "question_bank": {
+    "id": "backend-messaging-async-35",
+    "title": "Messaging & Asynchronous Processing Interview Question Bank",
+    "description": "Production-oriented interview questions covering messaging fundamentals, queues, pub-sub, delivery semantics, producer/consumer reliability, and asynchronous backend processing.",
+    "language": "Backend Engineering",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "question_count": 12,
+    "difficulty_distribution": {
+      "Easy": 0,
+      "Medium": 0,
+      "Hard": 7,
+      "Expert": 5
+    },
+    "questions": [
+      {
+        "id": "BE-299",
+        "domain": "messaging_async_processing",
+        "topic": "Ordering, Deduplication & Idempotency",
+        "subtopic": "Message Reordering",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A consumer receives two events for the same order, but a later event is processed before an earlier one. How would you determine whether the system needs ordering guarantees and how would you handle out-of-order messages?",
+        "answer": "First determine whether the business invariant actually depends on event order. If it does, the producer and messaging design should define an ordering key and route related events through an ordered processing path. If out-of-order delivery can occur, the consumer can use sequence numbers, versions, or event timestamps where appropriate to detect stale events and either defer, reject, or reconcile them. Ordering should be enforced only where required because global ordering reduces parallelism.",
+        "key_concepts": [
+          "out-of-order messages",
+          "ordering key",
+          "sequence number",
+          "event versioning",
+          "business invariants"
+        ],
+        "expected_points": [
+          "Establish whether business correctness actually requires ordering.",
+          "Use a stable per-entity ordering key when ordered processing is required.",
+          "Sequence numbers or versions can help detect stale or out-of-order events.",
+          "The consumer needs an explicit policy for deferred, rejected, or reconciled events."
+        ],
+        "common_mistakes": [
+          "Assuming timestamps alone guarantee correct event order.",
+          "Forcing global ordering when only per-entity ordering is required.",
+          "Ignoring late or stale events after adding an ordering mechanism."
+        ],
+        "example": "An OrderStatusChanged stream may include sequence numbers 10, 11, and 12. If sequence 12 arrives before 11, the consumer can defer 12 until 11 arrives or use the version to determine whether 12 supersedes the earlier state.",
+        "follow_up_questions": [
+          "How would you handle an event that arrives permanently late?",
+          "When is event versioning preferable to strict ordered consumption?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why out-of-order processing could matter or proposes a single global queue without analysis.",
+          "average": "Recognizes ordering issues but gives no concrete mechanism for detecting or handling stale events.",
+          "good": "Connects business invariants to per-key ordering and sequence/version checks.",
+          "excellent": "Analyzes ordering scope, partitions, late events, sequence gaps, reconciliation, and the trade-off between strict ordering and parallelism."
+        },
+        "skills": [
+          "message_ordering",
+          "distributed_systems",
+          "event_driven_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "ordering",
+          "sequence",
+          "event-versioning"
+        ]
+      },
+      {
+        "id": "BE-300",
+        "domain": "messaging_async_processing",
+        "topic": "Reliability & Failure Handling",
+        "subtopic": "Consumer Rebalancing",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "What is consumer rebalancing in a partitioned messaging system, and what operational problems can it create?",
+        "answer": "Consumer rebalancing is the process of redistributing partitions or work assignments among consumers when the membership or available capacity of a consumer group changes. It enables the group to recover from consumer failures and adapt to scaling changes, but rebalances can temporarily pause or reduce processing and may cause in-flight work to be interrupted or replayed depending on the system. Frequent rebalances can therefore increase latency and duplicate processing and should be monitored.",
+        "key_concepts": [
+          "consumer group",
+          "partition assignment",
+          "rebalancing",
+          "consumer failure",
+          "processing interruption"
+        ],
+        "expected_points": [
+          "Assignments change when consumers join, leave, fail, or membership changes.",
+          "Rebalancing allows work to be redistributed and supports fault tolerance.",
+          "A rebalance can temporarily affect throughput and increase processing latency.",
+          "In-flight work and acknowledgement/offset handling must be designed to tolerate interruption and possible replay."
+        ],
+        "common_mistakes": [
+          "Describing rebalancing as only a performance optimization.",
+          "Assuming rebalancing never interrupts processing.",
+          "Assuming a reassigned message can never be processed twice."
+        ],
+        "example": "A consumer group has six workers processing partitions. One worker crashes, so its partitions are reassigned to surviving workers. During the transition, processing may pause briefly and an uncommitted message may be processed again.",
+        "follow_up_questions": [
+          "How can long-running message processing interact badly with consumer rebalancing?",
+          "What metrics would you monitor to detect excessive rebalancing?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what is being redistributed or why it happens.",
+          "average": "Knows consumers can be reassigned but misses the impact on in-flight work.",
+          "good": "Explains partition reassignment, fault recovery, temporary throughput impact, and duplicate-processing risk.",
+          "excellent": "Connects membership changes, partition ownership, heartbeats/timeouts, long processing, acknowledgement state, replay, and operational monitoring."
+        },
+        "skills": [
+          "consumer_scaling",
+          "distributed_systems",
+          "message_reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "rebalancing",
+          "consumer-group",
+          "partitions"
+        ]
+      },
+      {
+        "id": "BE-301",
+        "domain": "messaging_async_processing",
+        "topic": "Producers, Consumers & Processing",
+        "subtopic": "Consumer Concurrency",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A consumer service can process 500 messages per second when running 20 workers, but increasing it to 100 workers does not improve throughput and causes database latency to rise. What is likely happening?",
+        "answer": "The consumer is likely no longer limited by its own worker count; another resource, such as database connections, CPU, I/O, locks, network capacity, or downstream service throughput, has become the bottleneck. Increasing concurrency beyond that point adds contention and can increase queueing inside the dependency without increasing useful throughput. The correct response is to identify the bottleneck with metrics and profiling, then tune concurrency to the sustainable capacity of the full processing path.",
+        "key_concepts": [
+          "concurrency limit",
+          "bottleneck",
+          "contention",
+          "downstream capacity",
+          "throughput saturation"
+        ],
+        "expected_points": [
+          "Throughput saturation indicates another resource has become the limiting factor.",
+          "Excess concurrency can increase contention, latency, and resource consumption.",
+          "Database connection pools, locks, CPU, I/O, and downstream limits are common bottlenecks.",
+          "Concurrency should be tuned using measurements rather than simply increased."
+        ],
+        "common_mistakes": [
+          "Assuming more workers always means more throughput.",
+          "Looking only at consumer CPU utilization.",
+          "Ignoring database connection pools and downstream saturation."
+        ],
+        "example": "At 20 workers, the database is already using most available connections. Increasing to 100 workers creates connection contention and lock waits, so message throughput stays flat while database latency increases.",
+        "follow_up_questions": [
+          "How would you identify whether the database or the consumer is the actual bottleneck?",
+          "How should a consumer's concurrency limit relate to a database connection pool?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Recommends adding even more workers without investigating the bottleneck.",
+          "average": "Recognizes saturation but cannot identify likely limiting resources.",
+          "good": "Explains downstream bottlenecks and the negative effect of excessive concurrency.",
+          "excellent": "Performs end-to-end capacity reasoning across worker pools, connection pools, CPU, I/O, locks, latency, throughput, and sustainable concurrency."
+        },
+        "skills": [
+          "performance",
+          "capacity_planning",
+          "consumer_scaling"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "concurrency",
+          "bottleneck",
+          "throughput"
+        ]
+      },
+      {
+        "id": "BE-302",
+        "domain": "messaging_async_processing",
+        "topic": "Reliability & Failure Handling",
+        "subtopic": "Retry Topic Design",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "How would you design delayed retries for messages without repeatedly blocking the main consumer path?",
+        "answer": "A common design is to separate immediate processing from delayed retry scheduling. Failed transient messages can be published to a retry destination with metadata such as attempt count and next eligible processing time, then returned to the main processing path only when their delay expires. Multiple retry tiers can represent increasing delays, while a final dead-letter destination handles exhausted retries. The design should preserve message identity, cap retry attempts, and prevent retry traffic from starving fresh work.",
+        "key_concepts": [
+          "delayed retry",
+          "retry scheduling",
+          "retry tiers",
+          "retry metadata",
+          "failure isolation"
+        ],
+        "expected_points": [
+          "Delayed retries should not block healthy messages in the main processing path.",
+          "Retry state should include attempt information and an eligibility time or equivalent scheduling mechanism.",
+          "Increasing delay can reduce pressure on an unhealthy dependency.",
+          "Exhausted messages need a controlled terminal path such as a DLQ."
+        ],
+        "common_mistakes": [
+          "Sleeping inside the main consumer while holding a message assignment.",
+          "Immediately retrying every failure.",
+          "Allowing retries to consume all processing capacity ahead of fresh messages."
+        ],
+        "example": "A transient 503 sends a message to a 30-second retry tier. If it fails again, it moves to a five-minute tier, then a 30-minute tier, and finally a DLQ after the retry budget is exhausted.",
+        "follow_up_questions": [
+          "How would you prevent retry messages from starving newly arrived messages?",
+          "What metadata should travel with a message through multiple retry attempts?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests continuously sleeping and retrying inside the primary consumer.",
+          "average": "Understands delayed retries but does not address isolation or retry starvation.",
+          "good": "Designs separate retry handling with delay, retry metadata, bounded attempts, and a DLQ.",
+          "excellent": "Designs retry scheduling with fair prioritization, retry budgets, observability, message identity, and protection of the healthy processing path."
+        },
+        "skills": [
+          "reliability",
+          "failure_handling",
+          "messaging_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "delayed-retry",
+          "retry-queue",
+          "failure-isolation"
+        ]
+      },
+      {
+        "id": "BE-303",
+        "domain": "messaging_async_processing",
+        "topic": "Reliability & Failure Handling",
+        "subtopic": "Message Expiration",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A message becomes useless if it is processed more than 10 minutes after creation. How should the messaging system and consumer handle such time-sensitive work?",
+        "answer": "The message contract should define an expiration or business deadline, and the consumer should check that deadline before performing the side effect. Expired work should be discarded, cancelled, or routed to an appropriate failure or audit path according to business requirements. Retry delays and backlog management must respect the deadline so the system does not spend resources processing work that can no longer provide value.",
+        "key_concepts": [
+          "message expiration",
+          "business deadline",
+          "stale work",
+          "retry policy",
+          "time-sensitive processing"
+        ],
+        "expected_points": [
+          "The expiration requirement belongs in the business/message contract.",
+          "Consumers should validate freshness before performing irreversible side effects.",
+          "Retry schedules should not continue beyond the useful processing window.",
+          "Expired messages need an explicit policy such as discard, cancellation, or audit handling."
+        ],
+        "common_mistakes": [
+          "Retrying expired messages indefinitely.",
+          "Relying only on broker retention without checking business freshness.",
+          "Performing irreversible side effects before validating the deadline."
+        ],
+        "example": "A flash-sale reservation request expires after 10 minutes. If a consumer receives it after the deadline, it should not reserve inventory and should instead record the expiration according to the business workflow.",
+        "follow_up_questions": [
+          "How is message retention different from business-level expiration?",
+          "What should happen when a message expires while it is already being processed?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Treats retention time as equivalent to business expiration.",
+          "average": "Recognizes stale messages but gives no clear consumer policy.",
+          "good": "Explains explicit deadlines, freshness checks, retry limits, and expired-message handling.",
+          "excellent": "Integrates business deadlines with broker retention, retries, backlog recovery, in-flight work, auditability, and irreversible side effects."
+        },
+        "skills": [
+          "message_contracts",
+          "reliability",
+          "business_logic"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "expiration",
+          "TTL",
+          "stale-messages"
+        ]
+      },
+      {
+        "id": "BE-304",
+        "domain": "messaging_async_processing",
+        "topic": "Producers, Consumers & Processing",
+        "subtopic": "Message Schema Evolution",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "A producer needs to add fields to a message while several older consumers are still running. How would you evolve the message contract safely?",
+        "answer": "Message schemas should evolve in a backward- or forward-compatible way according to the consumer population and serialization format. Adding optional fields with safe defaults is generally safer than changing or removing existing fields that older consumers depend on. Producers and consumers should be versioned and tested against compatibility rules, and breaking changes should use an explicit versioning or migration strategy rather than silently changing the meaning of existing fields.",
+        "key_concepts": [
+          "schema evolution",
+          "backward compatibility",
+          "forward compatibility",
+          "optional fields",
+          "versioning"
+        ],
+        "expected_points": [
+          "Existing consumers must continue interpreting messages correctly during rollout.",
+          "Additive optional changes are usually safer than breaking changes.",
+          "Compatibility should be tested as part of producer and consumer deployment.",
+          "Breaking semantic or structural changes need an explicit migration/versioning strategy."
+        ],
+        "common_mistakes": [
+          "Renaming or removing fields without coordinating consumers.",
+          "Assuming serialization compatibility guarantees semantic compatibility.",
+          "Deploying a producer change before understanding all active consumers."
+        ],
+        "example": "A producer adds an optional currency field while older consumers ignore unknown fields. Later, a breaking change requiring a new representation can be introduced as a new message version with a planned consumer migration.",
+        "follow_up_questions": [
+          "How would you deprecate a field safely when many consumers still use it?",
+          "What is the difference between schema compatibility and semantic compatibility?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests changing the message format directly without considering existing consumers.",
+          "average": "Understands backward compatibility but cannot explain rollout or breaking changes.",
+          "good": "Explains additive changes, compatibility testing, versioning, and coordinated migration.",
+          "excellent": "Analyzes consumer diversity, compatibility direction, semantic contracts, deprecation, rollout sequencing, and migration strategy."
+        },
+        "skills": [
+          "message_contracts",
+          "event_driven_architecture",
+          "api_design"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "schema-evolution",
+          "versioning",
+          "compatibility"
+        ]
+      },
+      {
+        "id": "BE-305",
+        "domain": "messaging_async_processing",
+        "topic": "Reliability & Failure Handling",
+        "subtopic": "Message Observability",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "How would you make an asynchronous workflow observable end-to-end when a user request produces several messages and multiple consumers process them?",
+        "answer": "The system should propagate a stable correlation or trace identifier across the request, published messages, consumer logs, metrics, and downstream calls. Each message should expose useful metadata such as message ID, event type, timestamps, attempt count, and processing outcome without logging sensitive payloads unnecessarily. Operational metrics should cover throughput, queue depth, message age, processing latency, retry rates, DLQ volume, and consumer failures, while distributed tracing can connect asynchronous spans across service boundaries.",
+        "key_concepts": [
+          "correlation ID",
+          "distributed tracing",
+          "message metadata",
+          "queue metrics",
+          "end-to-end observability"
+        ],
+        "expected_points": [
+          "Propagate correlation or trace context across asynchronous boundaries.",
+          "Track message identity, event type, timestamps, attempts, and outcomes.",
+          "Monitor backlog, age, throughput, processing latency, retries, and DLQ volume.",
+          "Use structured logs and tracing while avoiding unnecessary sensitive payload logging."
+        ],
+        "common_mistakes": [
+          "Logging only the producer request ID and not propagating it.",
+          "Monitoring queue depth without message age or processing latency.",
+          "Logging entire message payloads indiscriminately."
+        ],
+        "example": "A checkout request receives trace_id=abc123. The OrderCreated event and downstream payment and notification processing carry the same trace context, allowing an engineer to trace the request from API acceptance through asynchronous completion.",
+        "follow_up_questions": [
+          "How would you measure end-to-end latency when asynchronous processing has several stages?",
+          "What information should you avoid putting into message logs?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Mentions logs only and cannot connect producer and consumer activity.",
+          "average": "Uses correlation IDs but misses operational metrics or tracing.",
+          "good": "Designs correlation, structured metadata, metrics, and distributed tracing across the workflow.",
+          "excellent": "Builds an observability model covering trace propagation, message age, stage latency, retries, DLQs, sampling, privacy, and operational alerting."
+        },
+        "skills": [
+          "observability",
+          "distributed_tracing",
+          "messaging_operations"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "observability",
+          "tracing",
+          "correlation-id"
+        ]
+      },
+      {
+        "id": "BE-306",
+        "domain": "messaging_async_processing",
+        "topic": "Reliability & Failure Handling",
+        "subtopic": "Exactly-Once Business Effects",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "A message consumer updates a database and calls an external payment provider. The consumer can crash at any point. How would you design the workflow so retries do not create duplicate payments or inconsistent database state?",
+        "answer": "The design should treat the database update and external payment call as separate failure domains because a single local transaction cannot atomically commit both. The payment operation should use a stable idempotency key supported by the provider, while the consumer records durable processing state and business outcomes in its database transaction. A state machine or transactional workflow can reconcile uncertain outcomes after crashes, and the message can be retried safely because repeated attempts use the same payment identity rather than issuing an unrelated charge.",
+        "key_concepts": [
+          "external side effect",
+          "idempotency key",
+          "transaction boundary",
+          "state machine",
+          "failure reconciliation"
+        ],
+        "expected_points": [
+          "A local database transaction cannot automatically make an external payment API atomic.",
+          "Use a stable idempotency key for the payment operation.",
+          "Persist durable state describing requested, completed, failed, or uncertain processing.",
+          "Design recovery for the crash window between the external call and database commit."
+        ],
+        "common_mistakes": [
+          "Wrapping the database transaction around the API call and assuming it provides distributed atomicity.",
+          "Generating a new payment request ID on every retry.",
+          "Assuming a timeout means the external payment definitely failed."
+        ],
+        "example": "The consumer creates payment_attempt=pay-8472 and calls the payment provider with that idempotency key. If the network times out after the provider accepted the payment, a retry with the same key returns the original result rather than charging the customer again.",
+        "follow_up_questions": [
+          "How would you reconcile a payment whose final provider outcome is temporarily unknown?",
+          "When would a saga or compensating action be preferable to trying to achieve distributed atomicity?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests a simple retry or database transaction without addressing the external payment boundary.",
+          "average": "Mentions idempotency but does not explain uncertain outcomes or durable state.",
+          "good": "Uses stable payment idempotency, durable state, and explicit recovery for crash windows.",
+          "excellent": "Designs an end-to-end failure-safe workflow covering external idempotency, transactional state transitions, uncertain outcomes, reconciliation, retries, and compensation."
+        },
+        "skills": [
+          "distributed_transactions",
+          "idempotency",
+          "reliability",
+          "payments_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "exactly-once",
+          "external-side-effect",
+          "payment"
+        ]
+      },
+      {
+        "id": "BE-307",
+        "domain": "messaging_async_processing",
+        "topic": "Production Architecture & System Design",
+        "subtopic": "Priority Processing",
+        "difficulty": "Expert",
+        "question_type": "architecture",
+        "question": "A messaging system handles both urgent security alerts and large volumes of low-priority analytics events. How would you prevent analytics traffic from delaying urgent alerts?",
+        "answer": "The system should make priority an explicit architectural concern rather than relying on arrival order. High-priority work can use a separate queue or isolated processing lane with reserved consumer capacity, while lower-priority traffic receives its own capacity limits. The design should define fairness and starvation controls so urgent work receives low latency without allowing a sustained alert stream to completely prevent lower-priority processing. Monitoring should track latency and backlog separately by priority.",
+        "key_concepts": [
+          "priority queues",
+          "workload isolation",
+          "reserved capacity",
+          "fairness",
+          "starvation"
+        ],
+        "expected_points": [
+          "Separate or explicitly prioritize workloads with different latency requirements.",
+          "Reserve capacity for urgent work so low-priority traffic cannot consume all workers.",
+          "Define fairness controls to avoid starvation of lower-priority work.",
+          "Measure latency and backlog independently for each priority class."
+        ],
+        "common_mistakes": [
+          "Putting all traffic into one queue and assuming FIFO is sufficient.",
+          "Giving urgent traffic unlimited capacity without protecting other workloads.",
+          "Using priority as a field without changing scheduling or capacity behavior."
+        ],
+        "example": "Security alerts use a dedicated high-priority queue with reserved workers, while analytics events use a separate queue with autoscaled consumers and a controlled maximum concurrency.",
+        "follow_up_questions": [
+          "How would you prevent a flood of high-priority messages from starving normal traffic?",
+          "When would separate queues be preferable to a single priority-aware queue?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests simply adding a priority field to existing messages.",
+          "average": "Understands priority processing but misses capacity isolation or starvation.",
+          "good": "Designs separate or priority-aware processing with reserved capacity and fairness.",
+          "excellent": "Balances urgent latency, workload isolation, starvation prevention, autoscaling, admission control, and operational observability."
+        },
+        "skills": [
+          "messaging_architecture",
+          "capacity_planning",
+          "reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "priority",
+          "workload-isolation",
+          "fairness"
+        ]
+      },
+      {
+        "id": "BE-308",
+        "domain": "messaging_async_processing",
+        "topic": "Production Architecture & System Design",
+        "subtopic": "Event Replay",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "An analytics consumer had a bug that produced incorrect results for the last six hours. The source events are retained. How would you safely replay the affected events after fixing the consumer?",
+        "answer": "First identify the affected time or event range and determine whether the consumer's processing is idempotent or whether a rebuild strategy is safer. Deploy and validate the corrected consumer in an isolated or controlled replay path, then replay only the required events while controlling throughput so downstream systems are not overloaded. Track replay progress separately from live traffic, prevent duplicate business effects where necessary, and compare corrected results with expected invariants before declaring recovery complete.",
+        "key_concepts": [
+          "event replay",
+          "retention",
+          "idempotent processing",
+          "reprocessing isolation",
+          "recovery validation"
+        ],
+        "expected_points": [
+          "Identify the precise affected event range before replaying.",
+          "Use a controlled replay path or consumer version to avoid disturbing live processing.",
+          "Ensure reprocessing is idempotent or isolate the rebuilt output from live state.",
+          "Throttle replay and validate results using metrics and business invariants."
+        ],
+        "common_mistakes": [
+          "Replaying the entire event history without scope.",
+          "Running replay at maximum speed against production dependencies.",
+          "Assuming retained events automatically make replay safe."
+        ],
+        "example": "Events from 12:00–18:00 are replayed through version 2 of the analytics consumer into a rebuilt reporting dataset. Replay runs at a controlled rate and results are compared against known totals before replacing the incorrect dataset.",
+        "follow_up_questions": [
+          "How would you replay events while live consumers continue processing new events?",
+          "What changes if the consumer has non-idempotent external side effects?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests simply reading all retained messages again.",
+          "average": "Understands replay but lacks isolation, throttling, or validation.",
+          "good": "Defines a scoped, controlled replay with corrected consumer logic and idempotency/rebuild considerations.",
+          "excellent": "Designs a production-safe replay process covering versioning, live traffic coordination, rate control, state isolation, correctness validation, and non-idempotent side effects."
+        },
+        "skills": [
+          "event_replay",
+          "reliability",
+          "event_driven_architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "replay",
+          "reprocessing",
+          "recovery"
+        ]
+      },
+      {
+        "id": "BE-309",
+        "domain": "messaging_async_processing",
+        "topic": "Production Architecture & System Design",
+        "subtopic": "Event-Driven Workflow",
+        "difficulty": "Expert",
+        "question_type": "system_design",
+        "question": "Design an asynchronous order-processing workflow where an order request triggers payment, inventory reservation, notification, and analytics without making the order API wait for all downstream work.",
+        "answer": "The order service should synchronously validate the request and persist the order, then publish an OrderCreated event through a reliable publication mechanism such as a transactional outbox. Independent consumers can handle payment, inventory, notifications, and analytics through separate subscriptions or processing groups. Each consumer should have explicit retry, idempotency, and failure-handling policies, while business-critical steps should expose state transitions and compensation or reconciliation when operations fail. The architecture should provide correlation IDs, metrics, tracing, and clear ownership of event contracts.",
+        "key_concepts": [
+          "event-driven architecture",
+          "transactional outbox",
+          "independent consumers",
+          "idempotency",
+          "saga/compensation",
+          "observability"
+        ],
+        "expected_points": [
+          "Keep the initial API bounded to work required to accept and persist the order.",
+          "Reliably publish the order event after the order transaction.",
+          "Allow downstream capabilities to process independently and scale separately.",
+          "Use idempotency, retries, DLQs, and explicit business state for failures.",
+          "Provide observability and reconciliation for multi-step workflows."
+        ],
+        "common_mistakes": [
+          "Making the API synchronously call every downstream service.",
+          "Publishing the event with an unreliable database-then-publish sequence.",
+          "Treating all downstream operations as equally critical without defining business state and compensation."
+        ],
+        "example": "The order API stores an order as CREATED and an outbox event in one transaction. Payment and inventory consumers update their respective states independently; notification and analytics react to the resulting events, while a workflow component reconciles failures according to business rules.",
+        "follow_up_questions": [
+          "How would you handle the case where payment succeeds but inventory reservation fails?",
+          "Which parts of this workflow should be strongly consistent and which can be eventually consistent?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Designs a synchronous chain of service calls and does not address failure handling.",
+          "average": "Uses events for decoupling but lacks reliable publication, idempotency, or business recovery.",
+          "good": "Designs an event-driven workflow with an outbox, independent consumers, retries, idempotency, and explicit failure handling.",
+          "excellent": "Produces a complete production architecture with clear consistency boundaries, workflow state, compensation/reconciliation, event contracts, scaling, observability, and failure isolation."
+        },
+        "skills": [
+          "event_driven_architecture",
+          "system_design",
+          "distributed_transactions",
+          "reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "order-processing",
+          "event-driven",
+          "saga",
+          "outbox"
+        ]
+      },
+      {
+        "id": "BE-310",
+        "domain": "messaging_async_processing",
+        "topic": "Production Architecture & System Design",
+        "subtopic": "High-Scale Messaging System",
+        "difficulty": "Expert",
+        "question_type": "system_design",
+        "question": "Design a messaging architecture for a platform that receives millions of events per minute, needs durable processing, supports multiple independent consumers, and must remain available during consumer or broker failures.",
+        "answer": "The architecture should partition the event stream to distribute load while preserving ordering only within required keys, replicate durable message data according to the availability requirements, and use consumer groups so independent applications can process the same event stream separately. Producers and consumers need bounded retries, idempotent processing, controlled backpressure, and dead-letter handling. Capacity planning should cover partition throughput, consumer parallelism, storage retention, network bandwidth, and downstream dependencies. Observability should track lag, message age, throughput, errors, retries, rebalances, and broker health, with failure recovery and replay tested as operational capabilities rather than afterthoughts.",
+        "key_concepts": [
+          "partitioning",
+          "durability",
+          "consumer groups",
+          "horizontal scaling",
+          "backpressure",
+          "fault tolerance"
+        ],
+        "expected_points": [
+          "Partition the stream to achieve scalable parallel processing while preserving required per-key ordering.",
+          "Use replication and durable storage appropriate to the failure model.",
+          "Use consumer groups to scale processing and independent subscriptions for different workloads.",
+          "Design idempotency, retries, DLQs, backpressure, and recovery for failures.",
+          "Monitor lag, message age, throughput, rebalances, storage, and dependency health."
+        ],
+        "common_mistakes": [
+          "Scaling only the number of consumers without considering partition or downstream limits.",
+          "Assuming broker replication alone guarantees end-to-end business correctness.",
+          "Ignoring retention, replay, backpressure, and operational recovery."
+        ],
+        "example": "A platform partitions events by customer_id, allowing many consumers to process partitions concurrently while preserving per-customer ordering. Separate consumer groups feed billing, analytics, search, and fraud systems, each with independent lag and recovery behavior.",
+        "follow_up_questions": [
+          "How would you calculate the number of partitions and consumers needed as traffic grows?",
+          "What would you do if one partition became a persistent hot partition?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Provides only a generic queue with more servers and no failure or scaling model.",
+          "average": "Mentions partitions and consumers but misses durability, backpressure, or recovery.",
+          "good": "Designs a scalable durable architecture with partitioning, consumer groups, retries, idempotency, and monitoring.",
+          "excellent": "Provides end-to-end capacity and failure reasoning covering partition strategy, replication, consumer parallelism, hot partitions, retention, replay, backpressure, downstream limits, and operational resilience."
+        },
+        "skills": [
+          "system_design",
+          "distributed_systems",
+          "messaging_architecture",
+          "capacity_planning"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "high-scale",
+          "partitioning",
+          "durability",
+          "system-design"
+        ]
+      }
+    ]
+  }
+}

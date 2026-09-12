@@ -71,11 +71,15 @@ class SeedQuestion(BaseModel):
     skill_id: Mapped[uuid.UUID] = mapped_column(
         GUID(), ForeignKey("skills.id", ondelete="CASCADE"), nullable=False
     )
+    source_id: Mapped[str | None] = mapped_column(String(20), nullable=True, index=True)
+    domain: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    subtopic: Mapped[str | None] = mapped_column(String(200), nullable=True)
     question_text: Mapped[str] = mapped_column(Text, nullable=False)
     difficulty: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")
     question_type: Mapped[str] = mapped_column(String(20), nullable=False, default="standard")
     expected_concepts: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
     reference_answer: Mapped[str | None] = mapped_column(Text, nullable=True)
+    extra_data: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
     time_limit_seconds: Mapped[int] = mapped_column(Integer, nullable=False, default=90)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 

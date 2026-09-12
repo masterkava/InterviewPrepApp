@@ -1,0 +1,2130 @@
+{
+  "question_bank": {
+    "id": "backend-engineering-500",
+    "title": "Backend Engineering Interview Question Bank — 500 Questions",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "domain": "authentication_authorization",
+    "question_count": 40,
+    "questions": [
+      {
+        "id": "BE-121",
+        "domain": "authentication_authorization",
+        "topic": "Authentication Fundamentals",
+        "subtopic": "Authentication vs Authorization",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is the difference between authentication and authorization?",
+        "answer": "Authentication is the process of verifying who a user or system is, confirming their claimed identity, typically via credentials like a password, token, or biometric. Authorization is the process of determining what an authenticated identity is allowed to do, which resources or actions it has permission to access. Authentication answers 'who are you?'; authorization answers 'what are you allowed to do?'",
+        "key_concepts": [
+          "authentication",
+          "authorization",
+          "identity verification",
+          "access control"
+        ],
+        "expected_points": [
+          "Authentication verifies identity",
+          "Authorization determines permissions/access",
+          "Authentication typically precedes authorization",
+          "They are distinct, complementary concerns"
+        ],
+        "common_mistakes": [
+          "Using the terms interchangeably",
+          "Believing successful authentication implies full authorization",
+          "Conflating login with permission checking"
+        ],
+        "example": "A user logs in with a password, which is authentication, then attempts to delete another user's post; the server checks whether they have admin permissions, which is authorization, before allowing it.",
+        "follow_up_questions": [
+          "Can a system authorize an anonymous, unauthenticated user for certain actions?",
+          "What HTTP status codes typically correspond to authentication versus authorization failures?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish the two concepts.",
+          "average": "Defines one correctly but not the other.",
+          "good": "Correctly defines both with an example.",
+          "excellent": "Correctly defines both, gives an example, and connects to status codes, such as 401 versus 403."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "authentication",
+          "authorization",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-122",
+        "domain": "authentication_authorization",
+        "topic": "Password Storage",
+        "subtopic": "Hashing vs Encrypting Passwords",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "Why should passwords be hashed rather than encrypted when stored in a database?",
+        "answer": "Encryption is reversible: anyone with the decryption key can recover the original plaintext password, meaning a compromised key or insider exposes every user's actual password. Hashing is a one-way transformation designed to be computationally infeasible to reverse; the server stores only the hash and verifies login attempts by hashing the submitted password and comparing hashes, never storing or needing the original password at all. This means even a full database breach doesn't directly reveal user passwords.",
+        "key_concepts": [
+          "password hashing",
+          "encryption reversibility",
+          "one-way functions"
+        ],
+        "expected_points": [
+          "Encryption is reversible with a key; hashing is designed to be one-way",
+          "Storing encrypted passwords risks exposing plaintext if the key is compromised",
+          "Hashing lets the server verify without ever storing the plaintext",
+          "A database breach of hashes doesn't directly reveal passwords"
+        ],
+        "common_mistakes": [
+          "Believing encryption and hashing are interchangeable terms",
+          "Assuming encrypted passwords are just as safe as hashed ones",
+          "Not explaining why one-wayness matters for password storage specifically"
+        ],
+        "example": "Instead of storing an encrypted password that could be decrypted with a stolen key, the server stores a bcrypt hash and, on login, hashes the submitted password and compares it to the stored hash.",
+        "follow_up_questions": [
+          "Why is a fast, general-purpose hash function like MD5 or SHA-256 a poor choice for password hashing specifically?",
+          "What would you need to do to actually recover a user's password if it were only ever hashed and never stored?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish hashing from encryption.",
+          "average": "Knows hashing is 'preferred' without explaining the reversibility distinction.",
+          "good": "Correctly explains the reversibility distinction and its security implication.",
+          "excellent": "Correctly explains the distinction, implication, and previews why generic fast hashes are still inadequate."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "password_storage",
+          "hashing",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-123",
+        "domain": "authentication_authorization",
+        "topic": "Password Storage",
+        "subtopic": "Salting and Why It's Necessary",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is password salting, and what attack does it protect against?",
+        "answer": "A salt is random data generated uniquely per user and combined with their password before hashing, with the salt stored alongside the resulting hash. It protects against precomputed lookup-table attacks, such as rainbow tables, and against the fact that identical passwords would otherwise produce identical hashes across different users, which would let an attacker who cracks one hash instantly know every other user sharing that password. With unique salts, an attacker must crack each hash individually rather than reusing a single precomputed table across the whole database.",
+        "key_concepts": [
+          "salt",
+          "rainbow table attacks",
+          "unique per-user salting",
+          "hash uniqueness"
+        ],
+        "expected_points": [
+          "Salt is random, unique-per-user data combined with the password before hashing",
+          "Protects against precomputed/rainbow table attacks",
+          "Prevents identical passwords from producing identical hashes across users",
+          "Forces attackers to crack each hash individually rather than reuse precomputed work"
+        ],
+        "common_mistakes": [
+          "Using the same salt for every user, defeating much of the purpose",
+          "Believing salting alone makes a fast hash function acceptable for passwords",
+          "Confusing salting with peppering, a secret, application-wide additional value"
+        ],
+        "example": "Two users with the identical password 'password123' end up with completely different stored hashes because each has a unique random salt, so cracking one doesn't reveal the other.",
+        "follow_up_questions": [
+          "What is a 'pepper', and how does it differ from a salt?",
+          "Does salting alone make a fast hash function like SHA-256 safe for password storage?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what a salt is.",
+          "average": "Knows salting is used but not the specific attack it prevents.",
+          "good": "Correctly explains salting and the rainbow-table/cross-user attack it prevents.",
+          "excellent": "Correctly explains it, the attack, and clarifies salting alone doesn't make a fast hash safe."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "password_storage",
+          "salting",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-124",
+        "domain": "authentication_authorization",
+        "topic": "Password Storage",
+        "subtopic": "Choosing bcrypt/Argon2 vs Fast Hashes",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "Why are algorithms like bcrypt or Argon2 preferred over general-purpose fast hash functions like SHA-256 for password storage?",
+        "answer": "General-purpose hash functions like SHA-256 are deliberately designed to be extremely fast, which is exactly the wrong property for password hashing: it allows an attacker with stolen hashes to attempt billions of guesses per second using modern GPUs or ASICs. Algorithms like bcrypt and Argon2 are deliberately slow and configurable via a work or cost factor, and Argon2 additionally requires significant memory, making large-scale parallel cracking on GPUs/ASICs far more expensive. This dramatically raises the cost and time required for brute-force or dictionary attacks against stolen password hashes, even though it adds a small, acceptable delay to legitimate logins.",
+        "key_concepts": [
+          "bcrypt",
+          "Argon2",
+          "deliberately slow hashing",
+          "work factor",
+          "memory-hard functions",
+          "GPU/ASIC resistance"
+        ],
+        "expected_points": [
+          "General-purpose hashes such as SHA-256 or MD5 are designed to be fast, which favors attackers",
+          "bcrypt/Argon2 are deliberately slow and configurable via a cost/work factor",
+          "Argon2 is memory-hard, further resisting GPU/ASIC-based parallel cracking",
+          "The added latency is a worthwhile trade-off since login happens rarely per user, but cracking must happen billions of times"
+        ],
+        "common_mistakes": [
+          "Believing SHA-256 with a salt is sufficient for password storage",
+          "Not explaining the deliberate slowness/memory-hardness as the key property",
+          "Assuming the added computational cost is a meaningful problem for legitimate use"
+        ],
+        "example": "Cracking a SHA-256-hashed password database might allow billions of guesses per second on commodity GPUs, while the same hardware might only manage a few hundred or thousand guesses per second against a properly configured bcrypt hash.",
+        "follow_up_questions": [
+          "How would you choose an appropriate work factor for bcrypt, and what's the trade-off of setting it too high or too low?",
+          "What's the difference between Argon2's memory-hardness and bcrypt's approach, and why might that matter against specialized cracking hardware?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why fast hashes are unsuitable for passwords.",
+          "average": "Knows bcrypt/Argon2 are 'more secure' without explaining the deliberate slowness mechanism.",
+          "good": "Correctly explains the deliberate slowness/cost-factor mechanism and its effect on brute-force cost.",
+          "excellent": "Correctly explains the mechanism, Argon2's memory-hardness advantage against specialized hardware, and the acceptable trade-off for legitimate logins."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "password_storage",
+          "bcrypt",
+          "argon2",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-125",
+        "domain": "authentication_authorization",
+        "topic": "OAuth 2.0",
+        "subtopic": "Roles: Resource Owner, Client, Auth Server, Resource Server",
+        "difficulty": "Medium",
+        "question_type": "definition",
+        "question": "In OAuth 2.0, what are the roles of the Resource Owner, Client, Authorization Server, and Resource Server?",
+        "answer": "The Resource Owner is typically the end user who owns the protected data and can grant access to it. The Client is the application requesting access to the resource on the resource owner's behalf, such as a third-party app. The Authorization Server authenticates the resource owner and issues access tokens to the client after obtaining consent. The Resource Server hosts the protected resources or APIs and accepts access tokens to authorize requests, validating them before returning data.",
+        "key_concepts": [
+          "Resource Owner",
+          "Client",
+          "Authorization Server",
+          "Resource Server",
+          "OAuth 2.0 roles"
+        ],
+        "expected_points": [
+          "Resource Owner: typically the end user granting access",
+          "Client: the application requesting access on the user's behalf",
+          "Authorization Server: authenticates the user and issues tokens after consent",
+          "Resource Server: hosts protected data and validates tokens on incoming requests"
+        ],
+        "common_mistakes": [
+          "Confusing the Client with the Resource Server",
+          "Assuming the Authorization Server and Resource Server must always be the same system",
+          "Not recognizing the Resource Owner is often, but not always, a human end user"
+        ],
+        "example": "A user, the Resource Owner, grants a third-party app, the Client, permission via Google's login screen, the Authorization Server, to read their calendar data hosted by Google's calendar API, the Resource Server.",
+        "follow_up_questions": [
+          "Can the Authorization Server and Resource Server be the same system? What are the trade-offs either way?",
+          "In a machine-to-machine scenario, who or what plays the role of the Resource Owner?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot name or describe any of the four roles correctly.",
+          "average": "Describes one or two roles correctly.",
+          "good": "Describes three or four roles correctly with minor imprecision.",
+          "excellent": "Correctly describes all four roles with an accurate example."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "oauth",
+          "oauth_roles",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-126",
+        "domain": "authentication_authorization",
+        "topic": "OAuth 2.0",
+        "subtopic": "Authorization Code Flow Walkthrough",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "Walk through the steps of the OAuth 2.0 Authorization Code flow, and explain why the access token exchange happens server-to-server rather than through the browser.",
+        "answer": "The client redirects the user's browser to the authorization server's login/consent screen; after the user authenticates and consents, the authorization server redirects back to the client with a short-lived authorization code in the URL. The client's backend then makes a direct, server-to-server request to the authorization server, exchanging that code along with its client secret for an access token, and often a refresh token. This exchange happens server-to-server, rather than returning the access token directly to the browser, because the browser-facing redirect step is exposed to the URL, browser history, referrer headers, and potentially malicious browser extensions, making it a much less trustworthy channel than a direct, authenticated backend-to-backend request; the authorization code alone is far less dangerous if intercepted since it must be paired with the client secret to be exchanged for a token.",
+        "key_concepts": [
+          "Authorization Code flow",
+          "redirect-based consent",
+          "authorization code",
+          "server-to-server token exchange",
+          "client secret"
+        ],
+        "expected_points": [
+          "Client redirects the browser to the authorization server for login/consent",
+          "Authorization server redirects back with a short-lived authorization code",
+          "Client's backend exchanges the code plus client secret for an access token via a direct server-to-server call",
+          "Explains why the token exchange itself happens server-side: the browser-facing redirect is a less trusted channel"
+        ],
+        "common_mistakes": [
+          "Describing the access token as being returned directly in the browser redirect",
+          "Not mentioning the client secret's role in the exchange step",
+          "Confusing the Authorization Code flow with the deprecated Implicit flow"
+        ],
+        "example": "After a user approves access on the authorization server's consent screen, their browser is redirected to the client's callback URL with a code parameter; the client's server then sends that code plus its client secret to the token endpoint to receive the actual access token, a step never visible to the browser.",
+        "follow_up_questions": [
+          "Why is the authorization code short-lived and single-use?",
+          "How does this flow change for a public client, like a mobile app, that can't safely hold a client secret?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot describe the flow's basic steps.",
+          "average": "Describes the redirect and code issuance but not the server-side exchange or its rationale.",
+          "good": "Describes the full flow including the server-to-server exchange.",
+          "excellent": "Describes the full flow and clearly explains why the exchange must happen server-side rather than through the browser."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "oauth",
+          "authorization_code_flow",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-127",
+        "domain": "authentication_authorization",
+        "topic": "OAuth 2.0",
+        "subtopic": "Why PKCE Was Added to the Authorization Code Flow",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "What problem does PKCE (Proof Key for Code Exchange) solve, and why was it added to the OAuth 2.0 Authorization Code flow?",
+        "answer": "PKCE addresses a vulnerability in the Authorization Code flow for public clients that can't securely store a client secret, such as mobile apps and single-page apps: without PKCE, if an attacker intercepts the authorization code, for example via a malicious app registering the same custom URL scheme, they could exchange it for an access token themselves, since public clients often have no secret to prove they're the legitimate requester. With PKCE, the client generates a random secret, a code verifier, before starting the flow, sends a hashed version of it, a code challenge, with the initial authorization request, and then must present the original code verifier when exchanging the authorization code for a token; the authorization server verifies the hash matches, ensuring only the party that initiated the flow can complete the exchange, even without a traditional client secret.",
+        "key_concepts": [
+          "PKCE",
+          "code verifier",
+          "code challenge",
+          "public clients",
+          "authorization code interception"
+        ],
+        "expected_points": [
+          "Addresses authorization code interception risk for public clients without a client secret",
+          "Client generates a code verifier and derives a code challenge sent with the initial request",
+          "Client must present the original code verifier during token exchange",
+          "Authorization server verifies the hash match, binding the exchange to the original requester"
+        ],
+        "common_mistakes": [
+          "Believing PKCE is only relevant for confidential (server-side) clients that already have a secret",
+          "Not explaining the interception scenario PKCE actually protects against",
+          "Confusing the code verifier and code challenge's roles, such as which is generated first and which is sent when"
+        ],
+        "example": "A mobile app generates a random code verifier, sends its hash as the code challenge when starting the login flow, and later must include the original code verifier when exchanging the authorization code, so even if a malicious app intercepts the authorization code, it can't complete the exchange without the original verifier.",
+        "follow_up_questions": [
+          "Why is PKCE now recommended even for confidential clients that do have a client secret?",
+          "What specific interception vector, such as custom URL scheme hijacking, originally motivated PKCE for mobile apps?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what PKCE does.",
+          "average": "Knows PKCE adds 'extra security' without explaining the verifier/challenge mechanism or the specific threat.",
+          "good": "Correctly explains the verifier/challenge mechanism and the public-client interception threat it addresses.",
+          "excellent": "Correctly explains the mechanism, the threat, and notes PKCE's now-broader recommended use even for confidential clients."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "oauth",
+          "pkce",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-128",
+        "domain": "authentication_authorization",
+        "topic": "OAuth 2.0",
+        "subtopic": "Client Credentials Flow for Service-to-Service Auth",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "When is the OAuth 2.0 Client Credentials flow appropriate, and how does it differ from the Authorization Code flow?",
+        "answer": "The Client Credentials flow is used for service-to-service, machine-to-machine authentication where there's no end user involved and no delegation of a user's specific permissions, since the client is authenticating and authorizing as itself, not on behalf of a resource owner. The client authenticates directly to the authorization server using its own client ID and secret and receives an access token representing the client's own permissions, without any browser redirect, login screen, or user consent step, unlike the Authorization Code flow, which exists specifically to let a client act on behalf of a human resource owner.",
+        "key_concepts": [
+          "Client Credentials flow",
+          "machine-to-machine authentication",
+          "no resource owner involved",
+          "service identity"
+        ],
+        "expected_points": [
+          "Used for service-to-service/machine-to-machine scenarios with no end user",
+          "Client authenticates directly with its own client ID and secret",
+          "No browser redirect, login screen, or user consent involved",
+          "Contrasts with Authorization Code flow's purpose of acting on behalf of a human resource owner"
+        ],
+        "common_mistakes": [
+          "Using Client Credentials flow when a user's specific permissions actually need to be represented",
+          "Believing this flow still involves some form of user login",
+          "Not recognizing the token represents the client's own identity/permissions, not a delegated user's"
+        ],
+        "example": "A backend billing service authenticating to an internal payments API uses the Client Credentials flow with its own service credentials, with no human user or browser involved anywhere in the exchange.",
+        "follow_up_questions": [
+          "What scopes would typically be granted to a Client Credentials token versus a user-delegated token?",
+          "How would you rotate the client secret used in this flow without causing a service outage?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what the Client Credentials flow is for.",
+          "average": "Knows it's for 'machine to machine' but can't explain the mechanism or contrast with Authorization Code.",
+          "good": "Correctly explains the mechanism and the no-user-involved distinction.",
+          "excellent": "Correctly explains the mechanism, the distinction, and gives an accurate real-world example."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "oauth",
+          "client_credentials_flow",
+          "service_to_service"
+        ]
+      },
+      {
+        "id": "BE-129",
+        "domain": "authentication_authorization",
+        "topic": "OAuth 2.0",
+        "subtopic": "Why the Implicit Flow Is Deprecated",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "Why is the OAuth 2.0 Implicit flow now discouraged in favor of the Authorization Code flow with PKCE, even for browser-based single-page applications?",
+        "answer": "The Implicit flow returns the access token directly in the browser's URL fragment after the redirect, with no intermediate authorization code or exchange step. This exposes the access token to a variety of risks the Authorization Code flow avoids: the token can leak via browser history, referrer headers if a script navigates elsewhere, or logging on any intermediate proxy; it also can't be renewed via a refresh token without repeating the entire visible redirect flow, since the Implicit flow doesn't support refresh tokens for public clients, encouraging longer-lived, riskier access tokens. Since PKCE now allows even public clients like SPAs to safely use the Authorization Code flow without needing a client secret, there's no remaining upside to accepting the Implicit flow's token-exposure risks.",
+        "key_concepts": [
+          "Implicit flow",
+          "URL fragment token exposure",
+          "no refresh token support",
+          "PKCE as the modern alternative"
+        ],
+        "expected_points": [
+          "Implicit flow returns the access token directly in the browser URL fragment",
+          "This exposes the token to browser history, referrer leakage, and logging risks",
+          "Implicit flow doesn't support refresh tokens for public clients, encouraging longer-lived tokens",
+          "PKCE now lets public clients use the safer Authorization Code flow instead, removing the Implicit flow's rationale"
+        ],
+        "common_mistakes": [
+          "Not identifying the specific token-exposure risk, such as URL fragment, history, or referrer",
+          "Believing the Implicit flow is still the recommended approach for SPAs",
+          "Not connecting PKCE as the reason the Implicit flow's original justification no longer applies"
+        ],
+        "example": "An access token appearing directly in a browser's URL bar after login can end up recorded in browser history or leaked via a Referer header to a subsequent third-party resource the page loads, neither of which happens with the Authorization Code flow's server-side exchange.",
+        "follow_up_questions": [
+          "What specific browser behavior makes URL fragments, versus query parameters, somewhat safer, though still not ideal, for exposing sensitive values?",
+          "How would an SPA using the Authorization Code flow with PKCE actually complete the token exchange without a traditional backend?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain any problem with the Implicit flow.",
+          "average": "Knows it's 'less secure' without explaining the specific token-exposure mechanism.",
+          "good": "Correctly explains the token-exposure risk and lack of refresh token support.",
+          "excellent": "Correctly explains the risks and connects PKCE as removing the original rationale for the Implicit flow's existence."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "oauth",
+          "implicit_flow",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-130",
+        "domain": "authentication_authorization",
+        "topic": "OAuth 2.0",
+        "subtopic": "Refresh Tokens and Access Token Expiry",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Why do OAuth 2.0 systems typically use short-lived access tokens paired with longer-lived refresh tokens, rather than just issuing a single long-lived access token?",
+        "answer": "A short-lived access token limits the damage window if it's ever leaked or intercepted, since it naturally expires soon regardless of whether the breach is detected. Using it alone, however, would force the user to re-authenticate, re-entering credentials and going through the full login flow, every time it expires, which is poor for user experience. A refresh token, which is longer-lived but only usable at the authorization server's token endpoint rather than directly against resource servers, lets the client silently obtain a new access token without user interaction, balancing security, a short access token lifetime, with usability, no repeated logins, while the refresh token itself can be revoked server-side if needed.",
+        "key_concepts": [
+          "short-lived access tokens",
+          "long-lived refresh tokens",
+          "silent token renewal",
+          "damage window limitation"
+        ],
+        "expected_points": [
+          "Short-lived access tokens limit exposure/damage window if leaked",
+          "A single long-lived access token alone would be riskier if compromised",
+          "Refresh tokens let the client silently renew access without forcing re-login",
+          "Refresh tokens are usable only against the authorization server, not directly against resource servers"
+        ],
+        "common_mistakes": [
+          "Believing a long-lived access token alone would be simpler and just as safe",
+          "Not explaining the specific mechanism by which refresh tokens are used, against the auth server, not resource server",
+          "Assuming refresh tokens can't be revoked or are equally risky as access tokens"
+        ],
+        "example": "An access token might expire after 15 minutes, but the client silently uses a refresh token, valid for 30 days, to obtain a fresh access token every 15 minutes without ever prompting the user to log in again.",
+        "follow_up_questions": [
+          "What happens from the user's perspective if the refresh token itself expires or is revoked while they're actively using the application?",
+          "Where should a client securely store a refresh token, given it's more sensitive/long-lived than the access token?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the purpose of pairing short-lived access tokens with refresh tokens.",
+          "average": "Knows refresh tokens 'renew access' but not the security/usability trade-off rationale.",
+          "good": "Correctly explains the damage-window and usability trade-off.",
+          "excellent": "Correctly explains the trade-off and the mechanism detail that refresh tokens are used only against the authorization server."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "oauth",
+          "refresh_tokens",
+          "access_tokens"
+        ]
+      },
+      {
+        "id": "BE-131",
+        "domain": "authentication_authorization",
+        "topic": "OAuth 2.0",
+        "subtopic": "Refresh Token Rotation and Reuse Detection",
+        "difficulty": "Expert",
+        "question_type": "architecture",
+        "question": "What is refresh token rotation, and how does 'reuse detection' help mitigate the impact of a stolen refresh token?",
+        "answer": "With refresh token rotation, every time a refresh token is used to obtain a new access token, the authorization server also issues a brand-new refresh token and immediately invalidates the old one, rather than letting the same refresh token be reused indefinitely until its natural expiry. Reuse detection builds on this: if the authorization server ever sees an already-invalidated, previously rotated-out, refresh token being presented again, it treats this as a strong signal that the token was stolen and is being used by both the legitimate client and an attacker in a race, since in normal operation a rotated-out token should never be presented again. On detecting reuse, the server can revoke the entire token family, all descendant tokens from that refresh chain, forcing full re-authentication and cutting off the attacker's access as well as the legitimate session, trading some user disruption for containing the breach.",
+        "key_concepts": [
+          "refresh token rotation",
+          "reuse detection",
+          "token family revocation",
+          "stolen token mitigation"
+        ],
+        "expected_points": [
+          "Every refresh exchange issues a new refresh token and invalidates the old one",
+          "Presenting an already-invalidated refresh token signals likely theft, reuse detection",
+          "On detected reuse, the server revokes the entire token family/chain, not just the one token",
+          "This limits how long a stolen refresh token remains useful to an attacker, compared to a static, long-lived refresh token"
+        ],
+        "common_mistakes": [
+          "Describing rotation without explaining reuse detection as the security payoff",
+          "Not explaining why presenting an old, rotated-out token is a meaningful signal of compromise",
+          "Proposing to revoke only the single reused token rather than the entire token family"
+        ],
+        "example": "If an attacker steals a refresh token and uses it before the legitimate client does, the legitimate client's next refresh attempt with the now-rotated-out token triggers reuse detection, and the authorization server revokes the whole token chain, logging out both the attacker and the legitimate user, who must then re-authenticate.",
+        "follow_up_questions": [
+          "What are the operational trade-offs of forcing full re-authentication on detected reuse versus a more surgical response?",
+          "How would you design storage for tracking the 'token family' relationships needed to support this revocation?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what refresh token rotation is.",
+          "average": "Explains rotation but not reuse detection or its security value.",
+          "good": "Correctly explains both rotation and reuse detection as a compromise signal.",
+          "excellent": "Correctly explains both, plus the token-family revocation response and its user-disruption trade-off."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "oauth",
+          "refresh_tokens",
+          "token_rotation",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-132",
+        "domain": "authentication_authorization",
+        "topic": "OpenID Connect",
+        "subtopic": "OIDC vs OAuth 2.0",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the relationship between OpenID Connect (OIDC) and OAuth 2.0, and what problem does OIDC add on top of plain OAuth 2.0?",
+        "answer": "OpenID Connect is an identity layer built on top of OAuth 2.0. OAuth 2.0 itself is fundamentally an authorization protocol, about granting a client access to resources, and was never formally designed to convey verified identity information about the user to the client. OIDC standardizes this by adding an ID token, a signed JWT containing identity claims like the user's subject identifier, name, and email, alongside the OAuth access token, plus a standardized UserInfo endpoint, giving clients a reliable, standardized way to know who the user actually is, not just what they're authorized to access.",
+        "key_concepts": [
+          "OpenID Connect",
+          "identity layer",
+          "ID token",
+          "UserInfo endpoint",
+          "OAuth as authorization, not authentication"
+        ],
+        "expected_points": [
+          "OAuth 2.0 is fundamentally about authorization, not verified identity",
+          "OIDC adds a standardized identity layer on top of OAuth 2.0",
+          "OIDC introduces the ID token, a signed JWT with identity claims",
+          "OIDC also standardizes a UserInfo endpoint for additional profile data"
+        ],
+        "common_mistakes": [
+          "Treating OAuth 2.0 alone as sufficient for 'login with X' style authentication",
+          "Not identifying the ID token as OIDC's key addition",
+          "Believing OIDC is a completely separate protocol unrelated to OAuth 2.0"
+        ],
+        "example": "A 'Sign in with Google' integration uses OIDC: alongside an OAuth access token for API access, it returns a signed ID token confirming exactly who the authenticated user is, which plain OAuth 2.0 alone doesn't standardize.",
+        "follow_up_questions": [
+          "What claims are typically found in an OIDC ID token, and how would a client validate it?",
+          "Why is it risky to use a plain OAuth access token as a proxy for 'proof of identity' without OIDC's ID token?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the relationship between OAuth and OIDC.",
+          "average": "Knows OIDC is 'related to login' without explaining the ID token or the authorization-vs-authentication distinction.",
+          "good": "Correctly explains OIDC as an identity layer on OAuth and names the ID token.",
+          "excellent": "Correctly explains the relationship, the ID token, and the UserInfo endpoint, plus the authorization-vs-authentication distinction."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "oidc",
+          "oauth",
+          "authentication"
+        ]
+      },
+      {
+        "id": "BE-133",
+        "domain": "authentication_authorization",
+        "topic": "JWT",
+        "subtopic": "Structure of a JWT (Header, Payload, Signature)",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What are the three parts of a JWT (JSON Web Token), and what does each contain?",
+        "answer": "A JWT consists of three base64url-encoded segments separated by dots: the header, which specifies the token type and the signing algorithm used; the payload, which contains the claims, the actual data such as the subject or user ID, expiration time, and any custom claims; and the signature, which is computed over the header and payload using a secret or private key, allowing the recipient to verify the token hasn't been tampered with and, for asymmetric algorithms, that it was issued by a party holding the corresponding private key.",
+        "key_concepts": [
+          "JWT structure",
+          "header",
+          "payload/claims",
+          "signature",
+          "base64url encoding"
+        ],
+        "expected_points": [
+          "JWT has three dot-separated, base64url-encoded parts",
+          "Header specifies token type and signing algorithm",
+          "Payload contains claims like subject, expiration, and custom data",
+          "Signature verifies integrity and, depending on algorithm, authenticity of the issuer"
+        ],
+        "common_mistakes": [
+          "Believing the payload is encrypted rather than just base64-encoded and thus readable by anyone",
+          "Not naming all three parts correctly",
+          "Confusing the signature's purpose with encryption of the payload's contents"
+        ],
+        "example": "A JWT decodes into a header specifying the algorithm used, such as HS256, a payload containing the user's subject ID and expiration, and a signature validating both.",
+        "follow_up_questions": [
+          "Since the payload is just base64-encoded and not encrypted, what does that imply about storing sensitive data in JWT claims?",
+          "What happens if someone modifies the payload of a JWT without re-signing it?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot name the three parts of a JWT.",
+          "average": "Names the parts but describes their contents inaccurately.",
+          "good": "Correctly names and describes all three parts.",
+          "excellent": "Correctly names and describes all three parts and notes the payload is readable, not encrypted, by anyone who has the token."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "jwt",
+          "authentication"
+        ]
+      },
+      {
+        "id": "BE-134",
+        "domain": "authentication_authorization",
+        "topic": "JWT",
+        "subtopic": "Why JWTs Are Signed, Not Encrypted, By Default",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "Why are JWTs typically signed rather than encrypted by default, and what does this imply about what data is safe to put in a JWT's claims?",
+        "answer": "Signing provides integrity and, with asymmetric algorithms, authenticity, proof the token hasn't been altered and was issued by a trusted party, without requiring every party that needs to read the claims to also have a decryption key, which fits the common use case of a resource server needing to read claims like user ID or scopes without necessarily being able to decrypt anything. Since the payload of a signed but not encrypted JWT is just base64url-encoded, not encrypted, it implies that anyone who has the token, including the end user's own browser, can trivially read its contents, so sensitive data like passwords, secrets, or private personal information should never be placed in JWT claims unless the token is separately encrypted using the related JWE standard.",
+        "key_concepts": [
+          "JWT signing vs encryption",
+          "integrity and authenticity",
+          "readable claims",
+          "JWE for encryption"
+        ],
+        "expected_points": [
+          "Signing provides integrity/authenticity without requiring readers to have a decryption key",
+          "This fits the common case of resource servers needing to read claims without decrypting",
+          "Because signed-only JWTs aren't encrypted, their payload is readable by anyone holding the token",
+          "Sensitive data shouldn't be placed in JWT claims unless separately encrypted via JWE"
+        ],
+        "common_mistakes": [
+          "Believing a signed JWT's contents are hidden from the token holder",
+          "Not explaining why signing, rather than encryption, fits the typical use case",
+          "Not knowing JWE exists as the encryption counterpart to JWS"
+        ],
+        "example": "A JWT containing a user's role and expiration can be read by anyone with the token just by base64-decoding it, even though they can't forge a valid signature for a modified version without the signing key.",
+        "follow_up_questions": [
+          "What is JWE, and when would you use it alongside or instead of a signed JWT?",
+          "What's a concrete example of sensitive data that has mistakenly ended up in JWT claims in real-world incidents?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the distinction between signing and encryption for JWTs.",
+          "average": "Knows JWTs are 'readable' without explaining why signing was chosen as the default mechanism.",
+          "good": "Correctly explains the integrity/authenticity rationale and the readability implication.",
+          "excellent": "Correctly explains the rationale, the implication, and mentions JWE as the encryption alternative."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "jwt",
+          "security",
+          "jws"
+        ]
+      },
+      {
+        "id": "BE-135",
+        "domain": "authentication_authorization",
+        "topic": "JWT",
+        "subtopic": "The 'alg: none' Vulnerability",
+        "difficulty": "Hard",
+        "question_type": "security",
+        "question": "What was the 'alg: none' JWT vulnerability, and how does it allow an attacker to forge a valid-looking token?",
+        "answer": "The JWT specification allows the header to declare an algorithm of 'none', signifying an unsigned token with an empty signature segment, originally intended for scenarios where integrity was guaranteed by other means. Some poorly implemented JWT libraries would honor whatever algorithm was specified in the untrusted token's own header, including 'none', and would therefore accept a token with no signature at all as valid if an attacker crafted one, effectively letting the attacker forge any claims they wanted, such as claiming to be an admin, without needing to know any secret key. Correct implementations avoid this by having the verifying server explicitly whitelist and enforce the expected algorithm or algorithms server-side, never trusting the algorithm specified in the token's own header.",
+        "key_concepts": [
+          "alg: none vulnerability",
+          "algorithm confusion",
+          "server-side algorithm whitelisting",
+          "JWT forgery"
+        ],
+        "expected_points": [
+          "'alg: none' in the JWT header signifies an unsigned token",
+          "Vulnerable libraries would honor this and accept any unsigned, attacker-crafted token as valid",
+          "This lets an attacker forge arbitrary claims, such as an elevated role, with no valid signature at all",
+          "The fix is server-side algorithm whitelisting, never trusting the algorithm declared in the incoming token"
+        ],
+        "common_mistakes": [
+          "Not explaining the mechanism by which an attacker crafts the malicious token",
+          "Believing this is a flaw in JWT as a concept rather than in specific vulnerable library implementations",
+          "Not identifying server-side algorithm whitelisting as the correct fix"
+        ],
+        "example": "An attacker takes a legitimate JWT, changes its header to specify no algorithm, removes the signature segment entirely, and modifies the payload to claim admin privileges; a vulnerable verifier that trusts the token's own declared algorithm accepts this forged token as valid.",
+        "follow_up_questions": [
+          "What is the related 'algorithm confusion' attack where an RS256 token is presented but a library treats it as HS256?",
+          "What server-side configuration prevents both the 'alg: none' and algorithm confusion attacks?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the vulnerability's mechanism.",
+          "average": "Knows it's 'a JWT vulnerability' without explaining the forgery mechanism or the fix.",
+          "good": "Correctly explains the forgery mechanism and the general risk.",
+          "excellent": "Correctly explains the mechanism, an example forgery, and the specific server-side algorithm-whitelisting fix."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "jwt",
+          "security",
+          "vulnerability"
+        ]
+      },
+      {
+        "id": "BE-136",
+        "domain": "authentication_authorization",
+        "topic": "JWT",
+        "subtopic": "Validating Claims (aud, iss, exp, nbf)",
+        "difficulty": "Medium",
+        "question_type": "implementation",
+        "question": "Beyond verifying a JWT's signature, what claims should a resource server validate before trusting the token, and why?",
+        "answer": "The server should check exp, expiration, to reject expired tokens, and nbf, not before, to reject tokens presented before they're valid. It should validate iss, issuer, to ensure the token was actually issued by the expected authorization server, and aud, audience, to ensure the token was intended for this specific resource server, not issued for some other service, which prevents a token legitimately issued for one API from being replayed against a different one. A valid signature alone only proves the token wasn't tampered with and came from a holder of the signing key; it says nothing about whether the token has expired, is meant for this service, or was actually issued by the trusted authorization server, which is why these claims must be explicitly checked too.",
+        "key_concepts": [
+          "exp claim",
+          "nbf claim",
+          "iss claim",
+          "aud claim",
+          "claims validation beyond signature"
+        ],
+        "expected_points": [
+          "exp must be checked to reject expired tokens",
+          "nbf must be checked to reject not-yet-valid tokens",
+          "iss must be validated to confirm the expected issuer",
+          "aud must be validated to prevent a token for one service being replayed against another"
+        ],
+        "common_mistakes": [
+          "Assuming signature validation alone is sufficient to trust a token",
+          "Skipping aud validation, enabling cross-service token replay",
+          "Not knowing what nbf or iss represent"
+        ],
+        "example": "A token correctly signed by the trusted authorization server but with an aud claim for a different service should still be rejected if presented to a service it wasn't intended for, even though the signature itself is valid.",
+        "follow_up_questions": [
+          "What could go wrong if a resource server validates the signature but forgets to check the aud claim?",
+          "How would you handle clock skew between the token issuer and the resource server when checking exp and nbf?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Believes signature validation alone is sufficient.",
+          "average": "Names one or two relevant claims to check.",
+          "good": "Names most of exp, nbf, iss, and aud with roughly correct explanations.",
+          "excellent": "Names and correctly explains all four claims, including the specific replay risk aud prevents."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "jwt",
+          "claims_validation",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-137",
+        "domain": "authentication_authorization",
+        "topic": "JWT",
+        "subtopic": "Revoking a JWT Before Its Natural Expiry",
+        "difficulty": "Hard",
+        "question_type": "tradeoff",
+        "question": "JWTs are stateless and self-contained by design, so how would you revoke one before its natural expiry, such as when a user's account is compromised and you need to immediately invalidate their active sessions?",
+        "answer": "Since a resource server validating a JWT purely by its signature has no way to know it's been revoked, true immediate revocation requires reintroducing some server-side state, which trades away some of JWT's statelessness benefit. Common approaches include maintaining a denylist of revoked token IDs, using the jti claim, that resource servers check on every request, which reintroduces a lookup but can be made fast via a cache like Redis; keeping access token lifetimes very short so any unrevoked window is naturally small, combined with revoking the associated refresh token so no new access tokens can be minted; or maintaining a per-user 'token valid since' timestamp checked against the token's issued-at claim, invalidating all tokens issued before a given revocation point without tracking individual token IDs.",
+        "key_concepts": [
+          "JWT revocation",
+          "denylist/blocklist",
+          "short-lived access tokens",
+          "iat-based invalidation",
+          "statelessness trade-off"
+        ],
+        "expected_points": [
+          "Recognizes pure JWT validation can't detect revocation without added server-side state",
+          "Proposes a denylist/blocklist of revoked token IDs, jti, checked on each request",
+          "Proposes short-lived access tokens plus refresh token revocation to bound the exposure window",
+          "May propose a per-user valid-since timestamp checked against iat as an alternative to per-token tracking"
+        ],
+        "common_mistakes": [
+          "Claiming JWTs can simply be revoked without reintroducing any server-side state",
+          "Proposing only very short token lifetimes without acknowledging some exposure window still exists",
+          "Not acknowledging this trades away some of JWT's original statelessness benefit"
+        ],
+        "example": "On detecting a compromised account, the system adds the user's currently active token IDs to a fast-lookup Redis denylist and revokes their refresh token, so any already-issued access tokens are rejected on their next use even before their natural expiry.",
+        "follow_up_questions": [
+          "What are the performance implications of checking a denylist on every single request in a high-throughput system?",
+          "How would the 'valid since' timestamp approach compare in terms of implementation complexity versus a per-token denylist?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Claims JWTs can be revoked with no added mechanism, or gives no workable approach.",
+          "average": "Proposes one workable mechanism, such as a denylist, without discussing trade-offs.",
+          "good": "Proposes a workable mechanism and acknowledges it reintroduces server-side state, trading away pure statelessness.",
+          "excellent": "Proposes multiple workable mechanisms, compares their trade-offs, and clearly explains the statelessness trade-off."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "jwt",
+          "revocation",
+          "tradeoffs"
+        ]
+      },
+      {
+        "id": "BE-138",
+        "domain": "authentication_authorization",
+        "topic": "Token Storage",
+        "subtopic": "Storing Tokens Client-Side: Cookie vs localStorage",
+        "difficulty": "Hard",
+        "question_type": "security",
+        "question": "What are the security trade-offs of storing an authentication token in an HttpOnly cookie versus in browser localStorage?",
+        "answer": "Storing a token in localStorage makes it directly accessible to any JavaScript running on the page, which means it's fully exposed to XSS attacks: if an attacker manages to inject a script, they can trivially read and exfiltrate the token. An HttpOnly cookie is inaccessible to JavaScript entirely, since the HttpOnly flag prevents client-side script access, which significantly mitigates the impact of XSS on token theft specifically. However, cookies are automatically attached by the browser to matching requests regardless of origin, which introduces CSRF risk that must be separately mitigated, such as via SameSite attributes or CSRF tokens, a risk that localStorage-based tokens don't have since they must be manually attached by application code to each request. Neither option is a strict 'more secure' choice in isolation: HttpOnly cookies trade XSS-token-theft resistance for CSRF exposure, while localStorage trades CSRF immunity for XSS-token-theft exposure.",
+        "key_concepts": [
+          "HttpOnly cookies",
+          "localStorage",
+          "XSS token theft",
+          "CSRF exposure",
+          "storage trade-offs"
+        ],
+        "expected_points": [
+          "localStorage is directly readable by any JavaScript, fully exposing tokens to XSS",
+          "HttpOnly cookies are inaccessible to JavaScript, mitigating XSS-based token theft",
+          "Cookies are automatically attached to requests, introducing CSRF risk that must be separately mitigated",
+          "localStorage doesn't have CSRF risk since tokens must be manually attached to requests"
+        ],
+        "common_mistakes": [
+          "Declaring one storage mechanism unambiguously 'more secure' without discussing the trade-off it introduces",
+          "Not explaining the specific mechanism, JS-readability vs automatic attachment, behind each risk",
+          "Believing SameSite cookies eliminate CSRF risk entirely on their own"
+        ],
+        "example": "An XSS vulnerability on a site storing its token in localStorage lets an attacker's injected script directly read and exfiltrate it, whereas the same XSS vulnerability against an HttpOnly-cookie-stored token can't read the cookie's value directly, though the attacker's script could still trigger authenticated requests using it.",
+        "follow_up_questions": [
+          "Even with an HttpOnly cookie, how could an XSS vulnerability still cause harm despite not being able to read the token directly?",
+          "What combination of cookie attributes and other defenses would you use to mitigate both XSS and CSRF risk together?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Recommends one storage mechanism as simply 'more secure' with no trade-off discussion.",
+          "average": "Identifies one risk, XSS or CSRF, correctly but not the other.",
+          "good": "Correctly identifies both the XSS risk of localStorage and the CSRF risk of cookies.",
+          "excellent": "Correctly identifies both risks, explains the underlying mechanisms, and notes that XSS can still cause harm via cookie-based auth even without reading the cookie directly."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization",
+          "http"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "token_storage",
+          "xss",
+          "csrf",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-139",
+        "domain": "authentication_authorization",
+        "topic": "Multi-Factor Authentication",
+        "subtopic": "TOTP Mechanics",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "How does Time-based One-Time Password (TOTP) two-factor authentication work?",
+        "answer": "During setup, the server and the user's authenticator app both establish a shared secret key, typically exchanged via a QR code. From that point on, both the server and the app independently compute a one-time code by combining the shared secret with the current time, rounded to a fixed interval commonly 30 seconds, using a standardized algorithm, HMAC-based per RFC 6238, producing the same short numeric code on both sides without any network communication being required at verification time. When logging in, the user enters the current code shown in their app, and the server independently computes what the code should be for the current time window and compares it, accepting a small window of adjacent time steps to tolerate minor clock drift.",
+        "key_concepts": [
+          "TOTP",
+          "shared secret",
+          "time-based code generation",
+          "RFC 6238",
+          "clock drift tolerance"
+        ],
+        "expected_points": [
+          "Server and authenticator app share a secret established at setup, often via QR code",
+          "Both sides independently compute a time-based code from the shared secret and current time",
+          "No network communication is needed between the app and server at verification time",
+          "Server tolerates a small window of adjacent time steps for clock drift"
+        ],
+        "common_mistakes": [
+          "Believing the authenticator app communicates with the server in real time to get each code",
+          "Not explaining that both sides compute the code independently from the same shared secret",
+          "Not mentioning any tolerance for clock drift, implying perfectly synchronized clocks are required"
+        ],
+        "example": "After scanning a QR code containing the shared secret, an authenticator app displays a new 6-digit code every 30 seconds; the server independently computes the same code for that time window to verify a login attempt.",
+        "follow_up_questions": [
+          "What happens if the user's device clock drifts significantly out of sync with the server's clock?",
+          "How should the shared secret be stored securely on the server, given its sensitivity?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain how TOTP codes are generated or verified.",
+          "average": "Knows a 'shared secret' is involved but not the time-based, independent-computation mechanism.",
+          "good": "Correctly explains the shared secret and time-based independent computation.",
+          "excellent": "Correctly explains the mechanism and mentions clock drift tolerance as a practical consideration."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "mfa",
+          "totp",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-140",
+        "domain": "authentication_authorization",
+        "topic": "Multi-Factor Authentication",
+        "subtopic": "Step-Up Authentication for Sensitive Actions",
+        "difficulty": "Hard",
+        "question_type": "scenario",
+        "question": "A user is logged into their account with a standard session, but now wants to change their account's email address and payment method. Should this require anything beyond their existing session, and how would you design it?",
+        "answer": "Yes; sensitive actions like changing account recovery details or payment information warrant step-up authentication, requiring the user to re-prove their identity, for example by re-entering their password or completing an MFA challenge, immediately before performing the sensitive action, even though they're already logged in with a valid session. This protects against scenarios where the session itself has been compromised, such as a stolen session cookie or the user leaving their device unlocked, since a stolen session alone wouldn't be enough to change security-critical settings without also passing the step-up challenge. This is typically implemented by tracking a separate, shorter-lived 'recently re-authenticated' flag or timestamp on the session, requiring re-authentication if the sensitive action is attempted outside that recent window.",
+        "key_concepts": [
+          "step-up authentication",
+          "sensitive action protection",
+          "session compromise mitigation",
+          "re-authentication window"
+        ],
+        "expected_points": [
+          "Recognizes sensitive actions warrant additional verification beyond a valid session",
+          "Proposes requiring re-authentication, password or MFA, immediately before the sensitive action",
+          "Explains this protects against session compromise scenarios",
+          "Proposes a mechanism like a recent re-authentication timestamp/flag to avoid demanding this on every single request"
+        ],
+        "common_mistakes": [
+          "Assuming a valid logged-in session is sufficient authorization for any account action",
+          "Proposing to require full re-login, destroying the session, rather than a lightweight step-up challenge",
+          "Not proposing any concrete mechanism for tracking 'recent' re-authentication"
+        ],
+        "example": "Even though the user is logged in, attempting to change their payment method triggers a prompt to re-enter their password or complete an MFA challenge; the server tracks a re-authenticated-at timestamp and only requires the challenge again if it's been more than 15 minutes since the last one.",
+        "follow_up_questions": [
+          "What other account actions, beyond email and payment changes, typically warrant step-up authentication?",
+          "How would you design step-up authentication for an API-driven client, like a mobile app, versus a traditional web session?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Doesn't recognize the need for anything beyond the existing session.",
+          "average": "Recognizes the need for extra verification but proposes no concrete mechanism.",
+          "good": "Proposes requiring re-authentication for the sensitive action with a reasonable mechanism.",
+          "excellent": "Proposes the mechanism, explains the session-compromise rationale, and proposes a practical recent-reauth window to avoid excessive friction."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "mfa",
+          "step_up_auth",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-141",
+        "domain": "authentication_authorization",
+        "topic": "Passwordless Auth",
+        "subtopic": "Magic Links: Design and Risks",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "How do 'magic link' passwordless login flows work, and what security risks do they introduce that a traditional password login doesn't have?",
+        "answer": "The user enters their email address, and the server generates a unique, single-use, time-limited token, embeds it in a URL, and emails it to the user; clicking the link authenticates the user by presenting that token to the server, which validates it and establishes a session. This avoids the need for a password entirely, but introduces new risks: since the credential is now transmitted and validated via email, the security of the login effectively becomes dependent on the security of the user's email account and any intermediary, like an email client that prefetches or scans links, potentially consuming the single-use token before the user clicks it, or shared/forwarded mail. Links must be single-use and short-lived to limit the window an intercepted or forwarded link remains exploitable.",
+        "key_concepts": [
+          "magic links",
+          "passwordless authentication",
+          "single-use token",
+          "email account as a security dependency",
+          "link prefetching risk"
+        ],
+        "expected_points": [
+          "Server generates a unique, single-use, time-limited token embedded in an emailed URL",
+          "Clicking the link authenticates the user by validating that token",
+          "Security now depends on the security of the user's email account",
+          "Risk of automated email scanners/prefetchers consuming the single-use link before the user clicks it"
+        ],
+        "common_mistakes": [
+          "Not identifying the email-account-dependency risk as the core new attack surface",
+          "Believing magic links have no downsides compared to passwords",
+          "Not mentioning the link-prefetching consumption risk as a practical implementation concern"
+        ],
+        "example": "A corporate email security scanner that automatically visits links in incoming emails to check for malware can inadvertently consume a single-use magic link before the actual user clicks it, causing a confusing 'link already used' error for a legitimate login attempt.",
+        "follow_up_questions": [
+          "How would you design the magic link flow to be resilient against automated link-scanning/prefetching?",
+          "What's the appropriate expiration window for a magic link, and what trade-offs does that involve?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain how magic links work.",
+          "average": "Describes the general mechanism but no security risk beyond 'it's email-based'.",
+          "good": "Correctly explains the mechanism and the email-account-dependency risk.",
+          "excellent": "Correctly explains the mechanism, the dependency risk, and the link-prefetching consumption risk."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "passwordless_auth",
+          "magic_links",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-142",
+        "domain": "authentication_authorization",
+        "topic": "Passwordless Auth",
+        "subtopic": "WebAuthn/Passkeys Overview",
+        "difficulty": "Expert",
+        "question_type": "conceptual",
+        "question": "How does WebAuthn (the basis for passkeys) achieve phishing-resistant authentication, and what makes it fundamentally different from password- or OTP-based authentication?",
+        "answer": "WebAuthn uses public-key cryptography: during registration, the user's authenticator, such as a device's biometric-protected secure hardware or a security key, generates a unique public/private key pair for that specific site; the private key never leaves the authenticator, and only the public key is sent to and stored by the server. On login, the server sends a challenge, and the authenticator signs it with the private key after verifying the user's presence or biometric locally, and the server verifies the signature using the stored public key. This is phishing-resistant because the browser cryptographically binds each key pair to a specific origin, the domain, during registration; an authenticator will simply refuse to produce a valid signature for a phishing site pretending to be the real one, since it doesn't hold a key pair associated with that origin, unlike a password or OTP, which a user can be tricked into typing into any site regardless of its actual domain.",
+        "key_concepts": [
+          "WebAuthn",
+          "public-key cryptography",
+          "origin binding",
+          "phishing resistance",
+          "authenticator hardware"
+        ],
+        "expected_points": [
+          "Uses per-site public/private key pairs generated by the authenticator",
+          "Private key never leaves the authenticator/device; only the public key is shared with the server",
+          "Server issues a challenge signed by the private key, verified using the stored public key",
+          "Origin binding makes it phishing-resistant: the authenticator won't sign for the wrong domain, unlike passwords/OTPs which users can be tricked into entering anywhere"
+        ],
+        "common_mistakes": [
+          "Describing WebAuthn as just 'biometric login' without explaining the underlying public-key mechanism",
+          "Not explaining the origin-binding property that specifically provides phishing resistance",
+          "Confusing WebAuthn's phishing resistance with simply being 'harder to guess' the way a strong password might be"
+        ],
+        "example": "A phishing site perfectly cloning a bank's login page cannot obtain a valid WebAuthn signature from the user's authenticator, because the authenticator only produces signatures for the real bank's registered origin, whereas the same user could still be tricked into typing a password or OTP into the fake site.",
+        "follow_up_questions": [
+          "How does WebAuthn handle the loss of a user's only registered authenticator device?",
+          "What's the difference between a 'passkey' synced across a user's devices via a platform account and a hardware security key bound to a single device?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the underlying mechanism of WebAuthn.",
+          "average": "Knows it involves biometrics/hardware without explaining the public-key or origin-binding mechanism.",
+          "good": "Correctly explains the public-key mechanism and the origin-binding phishing resistance.",
+          "excellent": "Correctly explains the full mechanism, origin binding, and contrasts it clearly with why passwords/OTPs remain phishable."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "webauthn",
+          "passkeys",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-143",
+        "domain": "authentication_authorization",
+        "topic": "Session Security",
+        "subtopic": "Session Fixation Attacks",
+        "difficulty": "Hard",
+        "question_type": "security",
+        "question": "What is a session fixation attack, and how does it differ from session hijacking?",
+        "answer": "In a session fixation attack, an attacker tricks a victim into using a session identifier the attacker already knows, for example by sending the victim a link containing a pre-set session ID, or exploiting an application that accepts a session ID from a URL or cookie before the user even logs in, and then, once the victim authenticates using that same session ID, the attacker's copy of that same session ID also becomes authenticated as the victim, since the application never issued a fresh session ID after login. This differs from session hijacking, where the attacker steals an already-active, legitimately-issued session ID belonging to the victim, for example via XSS or network interception, rather than pre-planting a known ID before authentication occurs. The standard defense against fixation is to always issue a brand-new session ID immediately upon successful authentication, invalidating whatever session ID, if any, existed before login.",
+        "key_concepts": [
+          "session fixation",
+          "session hijacking",
+          "pre-authentication session ID",
+          "regenerating session ID on login"
+        ],
+        "expected_points": [
+          "Attacker plants a known session ID on the victim before they authenticate",
+          "Once the victim logs in using that ID, the attacker's copy becomes authenticated too",
+          "Differs from hijacking, where an attacker steals an already-active authenticated session",
+          "Defense: regenerate the session ID immediately upon successful login"
+        ],
+        "common_mistakes": [
+          "Conflating session fixation with session hijacking as the same attack",
+          "Not explaining how the attacker gets the victim to use the known session ID in the first place",
+          "Not identifying session ID regeneration on login as the standard defense"
+        ],
+        "example": "An attacker sends a victim a link containing a pre-set session ID; if the victim logs in and the application keeps using that same session ID afterward, the attacker can use the same ID themselves and be treated as the now-authenticated victim.",
+        "follow_up_questions": [
+          "Why is it important to regenerate the session ID specifically on privilege changes, like login, and not just on initial session creation?",
+          "What application behaviors, like accepting session IDs via URL parameters, make fixation attacks easier to execute?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the mechanism of session fixation.",
+          "average": "Describes fixation vaguely but doesn't distinguish it from hijacking.",
+          "good": "Correctly explains the fixation mechanism and distinguishes it from hijacking.",
+          "excellent": "Correctly explains the mechanism, the distinction, and the standard session-ID-regeneration defense."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization",
+          "http"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "session_fixation",
+          "session_hijacking",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-144",
+        "domain": "authentication_authorization",
+        "topic": "Session Security",
+        "subtopic": "Designing Session Invalidation on Logout (Everywhere)",
+        "difficulty": "Hard",
+        "question_type": "scenario",
+        "question": "A user reports their account may have been compromised and wants to be logged out of all devices immediately, not just the one they're currently using. How would you design 'logout everywhere' functionality?",
+        "answer": "This requires the ability to invalidate sessions server-side across all of a user's active sessions or devices at once, which is naturally straightforward with server-side session storage, such as a database or Redis keyed by user, by simply deleting or marking invalid all session records associated with that user ID. If tokens are stateless, such as JWTs, this same functionality needs an added mechanism, since a valid signature alone can't reflect revocation: commonly, maintaining a per-user 'sessions valid since' timestamp that's checked against each token's issued-at claim, so any token issued before the reset point is rejected, effectively invalidating all previously issued tokens for that user without needing to track each one individually. Either way, this action should also force revocation of any associated refresh tokens so no new access tokens can be silently minted afterward.",
+        "key_concepts": [
+          "logout everywhere",
+          "server-side session invalidation",
+          "per-user valid-since mechanism for stateless tokens",
+          "refresh token revocation"
+        ],
+        "expected_points": [
+          "For server-side sessions, invalidate/delete all session records tied to the user ID",
+          "For stateless tokens, JWTs, proposes a mechanism like a per-user valid-since timestamp checked against iat",
+          "Recognizes stateless tokens can't be directly revoked without an added mechanism",
+          "Also revokes associated refresh tokens to prevent silently minting new valid access tokens afterward"
+        ],
+        "common_mistakes": [
+          "Proposing only to log out the current device/session rather than all of them",
+          "Assuming stateless JWTs can be revoked immediately with no added mechanism",
+          "Forgetting to also revoke refresh tokens, leaving a path to mint new access tokens post-logout"
+        ],
+        "example": "On the user's request, the server deletes all of the user's session records in the shared session store and updates their sessions-valid-since timestamp; any still-outstanding JWT with an issued-at time before that timestamp is rejected on its next use, and all refresh tokens for that user are revoked.",
+        "follow_up_questions": [
+          "How would you communicate this state change to already-connected clients, such as an open WebSocket connection, in near real time rather than waiting for their next HTTP request?",
+          "What's the performance cost of checking a per-user valid-since timestamp on every request, and how would you mitigate it?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes only logging out the current session.",
+          "average": "Proposes invalidating server-side sessions but doesn't address stateless tokens or refresh tokens.",
+          "good": "Proposes a workable mechanism for both server-side sessions and stateless tokens.",
+          "excellent": "Proposes a workable mechanism for both, and explicitly addresses refresh token revocation to fully close the loop."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security",
+          "backend_fundamentals"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "session_management",
+          "logout",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-145",
+        "domain": "authentication_authorization",
+        "topic": "Brute Force Protection",
+        "subtopic": "Account Lockout vs Rate Limiting on Login",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "For protecting a login endpoint against repeated failed attempts, what's the difference between account lockout and rate limiting, and what risk does account lockout introduce?",
+        "answer": "Rate limiting restricts how many login attempts can be made in a given time window, typically per IP address or per account, temporarily slowing down an attacker without necessarily blocking legitimate access entirely. Account lockout goes further by disabling the account itself after a threshold of failed attempts, requiring an explicit unlock action, like an email confirmation or admin intervention, before the legitimate user can log in again. The key risk account lockout introduces is a denial-of-service vector: an attacker who doesn't even care about breaking in can deliberately trigger repeated failed logins against a victim's known username or email to lock them out of their own account, which rate limiting alone, which slows attempts without disabling the account, doesn't create.",
+        "key_concepts": [
+          "account lockout",
+          "rate limiting",
+          "denial-of-service via lockout",
+          "login endpoint protection"
+        ],
+        "expected_points": [
+          "Rate limiting slows down attempts without disabling the account",
+          "Account lockout disables the account after a threshold, requiring explicit unlock",
+          "Account lockout introduces a DoS risk: an attacker can deliberately lock out a known victim",
+          "Rate limiting doesn't create this specific DoS vector since it doesn't fully disable access"
+        ],
+        "common_mistakes": [
+          "Believing account lockout has no downsides compared to rate limiting",
+          "Not identifying the specific DoS vector that account lockout introduces",
+          "Conflating the two mechanisms as functionally identical"
+        ],
+        "example": "An attacker who wants to disrupt a specific competitor's employee can repeatedly submit wrong passwords for their known work email, triggering an account lockout and denying them access, without the attacker needing to actually guess the correct password.",
+        "follow_up_questions": [
+          "How would you design a login protection mechanism that mitigates brute force without introducing this lockout-based DoS risk?",
+          "How does rate limiting per IP address differ in effectiveness from rate limiting per account when defending against credential stuffing?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish account lockout from rate limiting.",
+          "average": "Distinguishes the two mechanisms but doesn't identify the DoS risk of lockout.",
+          "good": "Correctly distinguishes the two and identifies the lockout DoS risk.",
+          "excellent": "Correctly distinguishes the two, identifies the DoS risk, and suggests an approach, like progressive delays or CAPTCHA, that avoids it."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "brute_force",
+          "account_lockout",
+          "rate_limiting"
+        ]
+      },
+      {
+        "id": "BE-146",
+        "domain": "authentication_authorization",
+        "topic": "Brute Force Protection",
+        "subtopic": "Credential Stuffing and How to Detect It",
+        "difficulty": "Hard",
+        "question_type": "security",
+        "question": "What is credential stuffing, and what detection/mitigation strategies work better against it than simple per-account rate limiting?",
+        "answer": "Credential stuffing is an attack where attackers use large lists of username and password pairs leaked from breaches of other, unrelated services, testing them against a target login endpoint on the assumption that many users reuse passwords across sites. Unlike a traditional brute-force attack against one account, credential stuffing typically spreads attempts across many different accounts, often using large botnets of IP addresses, specifically to evade simple per-account or per-IP rate limiting, since no single account or IP sees enough failed attempts to trigger a naive threshold. Better mitigations include detecting anomalous patterns like unusually high login-attempt volume from a wide range of IPs targeting many distinct accounts, deploying device fingerprinting or behavioral analysis to flag non-human traffic patterns, requiring CAPTCHA or step-up verification when such patterns are detected, and proactively checking submitted passwords against known-breached password databases to force a reset even on a successful login.",
+        "key_concepts": [
+          "credential stuffing",
+          "breach-derived credential lists",
+          "distributed attack pattern",
+          "anomaly detection",
+          "breached-password checking"
+        ],
+        "expected_points": [
+          "Explains credential stuffing uses breached username/password pairs from other services",
+          "Explains attacks are typically distributed across many accounts and IPs, evading simple per-account/per-IP limits",
+          "Proposes anomaly/pattern detection across the aggregate traffic rather than per-account thresholds alone",
+          "Proposes proactive breached-password checking as an additional mitigation"
+        ],
+        "common_mistakes": [
+          "Confusing credential stuffing with a traditional brute-force attack against a single account",
+          "Proposing only per-account rate limiting as if it would meaningfully stop a distributed attack",
+          "Not mentioning the reuse-of-leaked-credentials premise underlying the attack"
+        ],
+        "example": "A leaked list of millions of email/password pairs from an unrelated breach is systematically tested against a bank's login endpoint, with each account only receiving a single login attempt, so no per-account threshold is ever triggered, but the aggregate pattern across many accounts and IPs reveals the coordinated attack.",
+        "follow_up_questions": [
+          "How would you design a system to proactively check user passwords against known-breached password lists without ever transmitting the plaintext password?",
+          "What behavioral or device-fingerprinting signals might distinguish a credential stuffing bot from a legitimate user typing their password incorrectly?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what credential stuffing is.",
+          "average": "Explains the breached-credential-reuse premise but not why per-account rate limiting fails against it.",
+          "good": "Correctly explains the premise and why it evades simple per-account defenses.",
+          "excellent": "Correctly explains the premise, why simple defenses fail, and proposes concrete better mitigations like anomaly detection or breached-password checking."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "credential_stuffing",
+          "brute_force",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-147",
+        "domain": "authentication_authorization",
+        "topic": "Password Reset",
+        "subtopic": "Designing a Secure Password Reset Flow",
+        "difficulty": "Hard",
+        "question_type": "scenario",
+        "question": "How would you design a secure 'forgot password' flow, and what mistakes commonly weaken this kind of feature?",
+        "answer": "On a reset request, the server should generate a cryptographically random, single-use, short-lived token, store only its hash, not the raw token, server-side, and email a reset link containing the raw token to the account's registered email address; clicking the link and submitting a new password validates the token against the stored hash, and on success, immediately invalidates the token and, importantly, invalidates all of the user's existing active sessions, since a password reset likely means the account was compromised. The response to a reset request, whether the email exists or not, should be identical either way, a generic message saying an email was sent if an account exists, to avoid leaking which emails are registered, a user enumeration vulnerability. Common weakening mistakes include using predictable or short-lived-but-guessable tokens, not expiring the token after use or after a short window, not invalidating existing sessions after a successful reset, and revealing account existence through response differences in timing, wording, or status codes.",
+        "key_concepts": [
+          "password reset token",
+          "single-use time-limited token",
+          "user enumeration prevention",
+          "session invalidation after reset"
+        ],
+        "expected_points": [
+          "Generates a cryptographically random, single-use, short-lived reset token, storing only its hash",
+          "Sends the reset link to the registered email address",
+          "Invalidates the token immediately after use and expires it after a short window regardless",
+          "Invalidates existing sessions after a successful reset, and gives an identical response regardless of whether the email exists to prevent user enumeration"
+        ],
+        "common_mistakes": [
+          "Using a predictable or insufficiently random token",
+          "Not invalidating the token after first use or expiring it in a reasonable window",
+          "Revealing whether an email is registered through different responses, timing, or status codes",
+          "Forgetting to invalidate existing active sessions after a successful password reset"
+        ],
+        "example": "A reset request always responds with the same generic message regardless of whether the email exists in the system; the actual reset link, if sent, contains a random token whose hash is stored server-side, expires in 30 minutes, and is deleted immediately after successful use, at which point all of the user's other active sessions are also terminated.",
+        "follow_up_questions": [
+          "Why is storing only a hash of the reset token, rather than the raw token, important given the token is already short-lived and single-use?",
+          "How would you rate-limit password reset requests to prevent abuse, such as email-bombing a victim, without breaking legitimate use?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes a reset flow with significant security gaps, such as no expiry or reusable tokens.",
+          "average": "Proposes a reasonably secure token mechanism but misses user enumeration or session invalidation concerns.",
+          "good": "Proposes a secure token mechanism and addresses either user enumeration or session invalidation.",
+          "excellent": "Proposes a secure token mechanism and addresses both user enumeration prevention and post-reset session invalidation."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "password_reset",
+          "security",
+          "user_enumeration"
+        ]
+      },
+      {
+        "id": "BE-148",
+        "domain": "authentication_authorization",
+        "topic": "Authorization Models",
+        "subtopic": "RBAC (Role-Based Access Control) Basics",
+        "difficulty": "Easy",
+        "question_type": "definition",
+        "question": "What is Role-Based Access Control (RBAC), and how does it simplify permission management compared to assigning permissions directly to individual users?",
+        "answer": "RBAC organizes permissions around roles, like admin, editor, or viewer, rather than individual users: permissions are assigned to roles, and users are assigned one or more roles, so a user's effective permissions come from the roles they hold rather than being individually configured per user. This simplifies management significantly at scale, since granting or changing a permission for an entire class of users, such as all editors, only requires updating the role definition once, rather than updating potentially thousands of individual user records.",
+        "key_concepts": [
+          "RBAC",
+          "roles",
+          "permissions",
+          "role assignment"
+        ],
+        "expected_points": [
+          "Permissions are assigned to roles, not directly to individual users",
+          "Users are assigned one or more roles",
+          "A user's effective permissions derive from their assigned role(s)",
+          "Simplifies management by centralizing permission changes at the role level rather than per-user"
+        ],
+        "common_mistakes": [
+          "Believing RBAC assigns permissions directly to users with roles as just a label",
+          "Not explaining the management-at-scale benefit",
+          "Assuming a user can only ever have exactly one role"
+        ],
+        "example": "Instead of granting 'can publish articles' individually to each of 50 editors, an organization grants it once to the editor role, and any user assigned that role automatically gains the permission.",
+        "follow_up_questions": [
+          "Can a user hold multiple roles simultaneously, and how would conflicting permissions across roles typically be resolved?",
+          "What are the limitations of RBAC when permissions need to depend on context, like time of day or resource attributes?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what RBAC is.",
+          "average": "Knows roles are involved but not the management-simplification rationale.",
+          "good": "Correctly explains the role-permission-user relationship and the management benefit.",
+          "excellent": "Correctly explains the relationship, the benefit, and acknowledges multi-role assignment."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "rbac",
+          "authorization",
+          "access_control"
+        ]
+      },
+      {
+        "id": "BE-149",
+        "domain": "authentication_authorization",
+        "topic": "Authorization Models",
+        "subtopic": "ABAC vs RBAC",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "What is Attribute-Based Access Control (ABAC), and how does it differ from RBAC in the kinds of authorization decisions it can express?",
+        "answer": "RBAC grants permissions based on a user's assigned role, which works well for relatively coarse-grained, role-shaped access patterns but struggles to express decisions that depend on dynamic context, such as the specific resource being accessed, the relationship between the user and that resource, the time of day, or the user's current location. ABAC instead evaluates access based on a flexible combination of attributes drawn from the user, such as department or clearance level, the resource, such as owner or sensitivity classification, the action, and the environment, such as time, IP address, or device, allowing policies like 'a manager can approve an expense report only if they are the requester's direct manager and the amount is under their approval limit', a rule that doesn't map cleanly onto a static role at all. The trade-off is that ABAC policies are significantly more complex to define, reason about, and audit than a simpler RBAC role list.",
+        "key_concepts": [
+          "ABAC",
+          "RBAC limitations",
+          "attribute-based policies",
+          "dynamic/contextual authorization",
+          "policy complexity trade-off"
+        ],
+        "expected_points": [
+          "RBAC grants access based on static role assignment",
+          "RBAC struggles with dynamic, contextual conditions, such as resource relationship, time, or location",
+          "ABAC evaluates policies based on combinations of user, resource, action, and environment attributes",
+          "ABAC enables fine-grained, contextual rules RBAC can't express, at the cost of significantly higher policy complexity"
+        ],
+        "common_mistakes": [
+          "Believing RBAC and ABAC are just different names for the same concept",
+          "Not giving a concrete example of a rule ABAC can express that RBAC cannot",
+          "Not acknowledging ABAC's complexity trade-off compared to RBAC"
+        ],
+        "example": "A rule like 'only the manager who directly supervises this specific employee, and only during business hours, can approve their time-off request' is naturally expressed in ABAC using the reporting-relationship and time attributes, but would require an impractical explosion of highly specific roles to express in pure RBAC.",
+        "follow_up_questions": [
+          "Can RBAC and ABAC be combined in the same system, and what would that look like in practice?",
+          "What tooling or infrastructure investment does adopting ABAC typically require compared to RBAC?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish ABAC from RBAC.",
+          "average": "Describes ABAC vaguely as 'more flexible' without a concrete example of what it can express that RBAC cannot.",
+          "good": "Correctly explains the attribute-based mechanism and gives a concrete example RBAC struggles with.",
+          "excellent": "Correctly explains the mechanism, gives a concrete example, and discusses the complexity trade-off."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "abac",
+          "rbac",
+          "authorization"
+        ]
+      },
+      {
+        "id": "BE-150",
+        "domain": "authentication_authorization",
+        "topic": "Authorization Models",
+        "subtopic": "Designing a Role Hierarchy with Inheritance",
+        "difficulty": "Expert",
+        "question_type": "implementation",
+        "question": "How would you design a role hierarchy with inheritance, such that a 'senior_editor' role automatically includes all permissions of a base 'editor' role, plus some additional ones, without duplicating permission assignments?",
+        "answer": "Model roles as nodes in a hierarchy, often a directed acyclic graph rather than requiring a strict tree, since a role might reasonably inherit from more than one parent, where each role has its own directly assigned permissions, and a role's effective permissions are computed as the union of its own direct permissions plus the effective permissions of all roles it inherits from, resolved recursively. This is typically implemented by storing a parent-role, or parent-roles, reference per role and computing effective permissions either on-demand by walking the hierarchy at authorization-check time, or precomputing and caching the flattened permission set per role whenever the hierarchy or any role's direct permissions change, since real-time recursive resolution on every request can become a performance concern at scale. Care must be taken to detect and prevent cycles in the hierarchy, which would otherwise cause infinite recursion.",
+        "key_concepts": [
+          "role hierarchy",
+          "permission inheritance",
+          "effective permission resolution",
+          "cycle detection",
+          "caching flattened permissions"
+        ],
+        "expected_points": [
+          "Models roles with parent-role relationships forming a hierarchy, potentially a DAG, not just a tree",
+          "A role's effective permissions equal its own direct permissions plus inherited permissions, resolved recursively",
+          "Proposes either on-demand resolution or precomputed/cached flattened permission sets for performance",
+          "Addresses the need to detect/prevent cycles in the hierarchy"
+        ],
+        "common_mistakes": [
+          "Modeling the hierarchy as a strict single-parent tree without considering multi-parent inheritance needs",
+          "Not addressing the performance implications of recursive resolution at request time",
+          "Not considering cycle detection, risking infinite recursion in a malformed hierarchy"
+        ],
+        "example": "The senior_editor role has editor as a parent and directly holds one additional permission, such as can_delete_others_content; a user assigned senior_editor effectively has both that permission and everything editor grants, computed by walking up the hierarchy or from a precomputed cache.",
+        "follow_up_questions": [
+          "What are the performance trade-offs of computing effective permissions on every authorization check versus precomputing and caching them?",
+          "How would you handle a permission being explicitly revoked at a child role, if inherited permissions are meant to always be additive?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot propose a workable inheritance mechanism.",
+          "average": "Proposes a basic parent-role concept without addressing performance or cycle-detection concerns.",
+          "good": "Proposes a workable recursive resolution mechanism and mentions at least one of performance or cycle detection.",
+          "excellent": "Proposes the mechanism and addresses both performance, via caching, and cycle-detection concerns."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "rbac",
+          "role_hierarchy",
+          "authorization"
+        ]
+      },
+      {
+        "id": "BE-151",
+        "domain": "authentication_authorization",
+        "topic": "Broken Access Control",
+        "subtopic": "IDOR / Broken Object-Level Authorization",
+        "difficulty": "Hard",
+        "question_type": "security",
+        "question": "What is Insecure Direct Object Reference (IDOR), also known as Broken Object-Level Authorization, and how would you prevent it?",
+        "answer": "IDOR occurs when an application exposes a direct reference to an internal object, such as a database ID in a URL, and performs an action or returns data for that object based solely on the fact that the reference was provided and the user is authenticated, without separately verifying that the authenticated user is actually authorized to access that specific object. An attacker can exploit this by simply changing the ID in the request to access another user's data despite having no legitimate relationship to it. Prevention requires explicit, per-request object-level authorization checks, verifying that the specific resource being accessed actually belongs to or is otherwise accessible by the authenticated caller, rather than relying on authentication alone or on the assumption that IDs are hard to guess.",
+        "key_concepts": [
+          "IDOR",
+          "Broken Object-Level Authorization",
+          "object-level authorization checks",
+          "direct object reference"
+        ],
+        "expected_points": [
+          "Explains the vulnerability: authenticated but unauthorized access to a specific object via a guessable/enumerable reference",
+          "Explains that authentication alone is checked but object-level ownership/access is not",
+          "Prevention requires explicit per-request checks that the object belongs to/is accessible by the caller",
+          "Notes that relying on IDs being hard to guess is not a substitute for actual authorization checks"
+        ],
+        "common_mistakes": [
+          "Assuming using UUIDs instead of sequential IDs fully solves the problem rather than just making enumeration harder",
+          "Not explaining the core failure: missing object-level authorization, not just missing authentication",
+          "Describing this as a general 'security bug' without the specific object-ownership-check mechanism"
+        ],
+        "example": "An authenticated user's request to view invoice 1042 succeeds because they're logged in, but if the application doesn't check that invoice 1042 actually belongs to them, changing the request to reference invoice 1043 could return a different customer's invoice entirely.",
+        "follow_up_questions": [
+          "Why doesn't switching from sequential integer IDs to random UUIDs fully solve this vulnerability?",
+          "How would you systematically audit an existing API for missing object-level authorization checks?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what IDOR is.",
+          "average": "Describes the symptom, accessing others' data via URL manipulation, without identifying the missing-authorization-check root cause.",
+          "good": "Correctly explains the root cause and a concrete prevention approach.",
+          "excellent": "Correctly explains the root cause, prevention, and clarifies why obscuring IDs with UUIDs isn't a sufficient fix on its own."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "idor",
+          "broken_access_control",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-152",
+        "domain": "authentication_authorization",
+        "topic": "Broken Access Control",
+        "subtopic": "Function-Level Authorization Gaps",
+        "difficulty": "Hard",
+        "question_type": "security",
+        "question": "What is a function-level (or endpoint-level) authorization gap, and how does it differ from an object-level authorization gap like IDOR?",
+        "answer": "A function-level authorization gap occurs when an application fails to verify that the caller has permission to invoke a particular operation or endpoint at all, regardless of which specific object it targets, for example an admin-only delete-user operation that any authenticated user can successfully call, even a regular non-admin user, because the server never checks the caller's role or permission level before executing the admin-level operation. This differs from an object-level gap like IDOR, where the caller is legitimately allowed to perform the operation in general, but the check for whether they're allowed to perform it on this specific object is missing; here, the caller shouldn't be allowed to perform the operation at all, on any object, given their role. Prevention requires checking role/permission requirements for every sensitive endpoint or operation, ideally enforced centrally, via middleware or a policy layer, rather than being inconsistently sprinkled through individual handlers, where it's easy to forget on a new or less-obvious endpoint.",
+        "key_concepts": [
+          "function-level authorization",
+          "Broken Function-Level Authorization",
+          "missing role/permission check",
+          "centralized enforcement"
+        ],
+        "expected_points": [
+          "Explains the gap: an operation is invocable by a caller who lacks the required role/permission for that operation entirely",
+          "Distinguishes this from IDOR, where the operation is generally permitted but the specific target object isn't checked",
+          "Gives a concrete example, such as an admin-only endpoint reachable by a non-admin user",
+          "Proposes centralized enforcement, middleware/policy layer, rather than inconsistent per-handler checks"
+        ],
+        "common_mistakes": [
+          "Conflating function-level authorization gaps with IDOR/object-level gaps as the same issue",
+          "Not giving a concrete example distinguishing 'can they do this at all' from 'can they do this to this object'",
+          "Proposing only ad hoc per-endpoint checks without discussing the risk of missing one being systemic"
+        ],
+        "example": "A regular user discovers that calling an admin-promote endpoint directly, bypassing the admin UI that normally hides this action, succeeds because the backend never actually checks the caller's role before executing it, even though the endpoint was only ever intended to be reachable from an admin-only frontend.",
+        "follow_up_questions": [
+          "Why is it risky to rely on hiding a UI button or menu item as the only protection for a sensitive operation?",
+          "How would you design automated testing to catch missing function-level authorization checks before deployment?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what a function-level authorization gap is.",
+          "average": "Describes the general idea but doesn't clearly distinguish it from object-level gaps like IDOR.",
+          "good": "Correctly explains the gap with a concrete example and distinguishes it from IDOR.",
+          "excellent": "Correctly explains the gap, distinguishes it from IDOR, and proposes centralized enforcement as a systemic prevention measure."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "broken_access_control",
+          "function_level_authorization",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-153",
+        "domain": "authentication_authorization",
+        "topic": "Delegated Authorization",
+        "subtopic": "Scopes and the Principle of Least Privilege",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What are OAuth 'scopes', and how do they support the principle of least privilege?",
+        "answer": "Scopes are named permissions that a client requests and that a resource owner, or administrator, consents to, defining the specific, limited set of actions or data the resulting access token is allowed to be used for, for example distinct read and send scopes for an email-related integration. This supports least privilege by letting a client request, and a user grant, only the narrow set of permissions actually needed for the client's purpose, rather than an all-or-nothing grant of full account access; if a token is compromised, the damage is limited to whatever that token's specific scopes allow, rather than full account control.",
+        "key_concepts": [
+          "OAuth scopes",
+          "principle of least privilege",
+          "granular permissions",
+          "limited token capability"
+        ],
+        "expected_points": [
+          "Scopes are named, granular permissions attached to an access token",
+          "The client requests specific scopes, and the resource owner consents to them",
+          "This lets access be limited to only what's actually needed, rather than all-or-nothing",
+          "Limits the blast radius if a token is ever compromised, since it can only do what its scopes allow"
+        ],
+        "common_mistakes": [
+          "Believing scopes are just a UI/UX detail with no real security enforcement behind them",
+          "Not explaining the blast-radius-limiting benefit if a token is compromised",
+          "Assuming a single 'full access' scope is typically appropriate for most integrations"
+        ],
+        "example": "A calendar-scheduling integration might request only read and write calendar scopes, explicitly not requesting access to the user's email or contacts, so even if that integration's token were leaked, it couldn't be used to read the user's email.",
+        "follow_up_questions": [
+          "What risks does over-broad scope requesting introduce, even if the user technically consents to it?",
+          "How would a resource server enforce that a given access token's scopes actually permit the specific action being attempted?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what OAuth scopes are.",
+          "average": "Knows scopes 'limit permissions' without explaining the least-privilege or blast-radius rationale.",
+          "good": "Correctly explains scopes and the least-privilege rationale.",
+          "excellent": "Correctly explains scopes, least privilege, and the blast-radius-limiting benefit if a token is compromised."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "oauth",
+          "scopes",
+          "least_privilege"
+        ]
+      },
+      {
+        "id": "BE-154",
+        "domain": "authentication_authorization",
+        "topic": "Service-to-Service Auth",
+        "subtopic": "mTLS for Internal Service Communication",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "What is mutual TLS (mTLS), and why might it be used for authenticating internal service-to-service communication rather than API keys or tokens?",
+        "answer": "In standard TLS, only the server presents a certificate for the client to verify; in mutual TLS, both the client and the server present certificates to each other, so each side cryptographically verifies the other's identity as part of establishing the connection itself. For internal service-to-service communication, this provides strong, connection-level identity verification without requiring the application layer to separately generate, transmit, and validate a bearer credential like an API key or token, which reduces the risk of credential leakage through logs, error messages, or misconfigured logging, since the identity proof lives in the TLS handshake rather than in an application-visible header or payload. This is a natural fit in a service mesh, where a sidecar proxy can handle mTLS transparently for every service without each application needing its own credential-management logic.",
+        "key_concepts": [
+          "mutual TLS",
+          "bidirectional certificate verification",
+          "connection-level identity",
+          "service mesh",
+          "credential leakage reduction"
+        ],
+        "expected_points": [
+          "mTLS requires both client and server to present and verify certificates, unlike standard one-way TLS",
+          "Provides identity verification at the connection/transport layer rather than the application layer",
+          "Reduces risk of credential leakage through logs/headers since identity isn't a bearer token in the request itself",
+          "Fits naturally with a service mesh's sidecar proxy pattern for transparent enforcement across many services"
+        ],
+        "common_mistakes": [
+          "Describing mTLS as just 'TLS with extra encryption' rather than bidirectional identity verification",
+          "Not explaining the leakage-reduction benefit compared to header-based bearer tokens",
+          "Not mentioning service mesh as a natural deployment pattern for mTLS at scale"
+        ],
+        "example": "In a service mesh, a sidecar proxy automatically establishes mTLS connections between services, so the order service and inventory service mutually verify each other's certificate-based identity on every connection without either application needing to manage API keys.",
+        "follow_up_questions": [
+          "What are the operational challenges of managing and rotating certificates for mTLS across a large number of services?",
+          "How does mTLS interact with load balancers or proxies that need to terminate TLS partway through the request path?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what mTLS is or how it differs from standard TLS.",
+          "average": "Knows both sides present certificates but not the practical benefit over token/API-key-based auth.",
+          "good": "Correctly explains the bidirectional verification and the leakage-reduction benefit.",
+          "excellent": "Correctly explains the mechanism, the benefit, and the service mesh deployment pattern."
+        },
+        "skills": [
+          "security",
+          "distributed_systems",
+          "networking"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "mtls",
+          "service_to_service",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-155",
+        "domain": "authentication_authorization",
+        "topic": "Service-to-Service Auth",
+        "subtopic": "API Keys vs Service Tokens",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between a simple API key and a service token, such as an OAuth Client Credentials access token, for authenticating a service-to-service integration?",
+        "answer": "A simple API key is typically a static, long-lived, opaque string issued once and used directly on every request, often with no built-in expiration, scoping, or standardized revocation/rotation mechanism beyond whatever the issuing system implements custom. A service token obtained via a flow like OAuth's Client Credentials grant is usually short-lived and must be periodically re-obtained by re-authenticating with a separate, longer-lived client secret, carries standardized scopes limiting what it can do, and can be issued with fine-grained claims; if the token itself leaks, its short lifetime limits the exposure window, whereas the actual long-term credential, the client secret, is used less frequently and can be more easily rotated independently of the tokens it issues.",
+        "key_concepts": [
+          "API keys",
+          "service tokens",
+          "Client Credentials grant",
+          "static vs short-lived credentials",
+          "scoping and rotation"
+        ],
+        "expected_points": [
+          "API keys are typically static, long-lived, and often lack built-in expiration/scoping",
+          "Service tokens, such as from Client Credentials, are typically short-lived and must be periodically re-obtained",
+          "Service tokens carry standardized scopes for finer-grained permission control",
+          "A leaked service token has a smaller exposure window than a leaked static API key, since the underlying secret is used less frequently and can rotate independently"
+        ],
+        "common_mistakes": [
+          "Treating API keys and service tokens as functionally identical, just different terminology",
+          "Not explaining the exposure-window difference between a static long-lived credential and a short-lived token",
+          "Not mentioning standardized scoping as a service token's practical advantage"
+        ],
+        "example": "A static API key committed accidentally to a public code repository remains valid and exploitable until someone notices and manually revokes it, while a leaked short-lived OAuth service token naturally expires within minutes to hours, limiting the damage even before anyone notices the leak.",
+        "follow_up_questions": [
+          "What operational practices would you put in place to detect and respond to a leaked static API key more quickly?",
+          "In what scenarios might a simple API key still be a reasonable, pragmatic choice over a full OAuth-based service token setup?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish API keys from service tokens.",
+          "average": "Describes one mechanism accurately but not the meaningful trade-offs versus the other.",
+          "good": "Correctly explains both mechanisms and the exposure-window/scoping differences.",
+          "excellent": "Correctly explains both, the differences, and acknowledges legitimate cases where a simple API key remains a reasonable choice."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "api_keys",
+          "service_tokens",
+          "oauth"
+        ]
+      },
+      {
+        "id": "BE-156",
+        "domain": "authentication_authorization",
+        "topic": "Confused Deputy Problem",
+        "subtopic": "How OAuth Scopes Mitigate It",
+        "difficulty": "Expert",
+        "question_type": "security",
+        "question": "What is the 'confused deputy' problem, and how do OAuth scopes, combined with the audience claim, help mitigate it in a system with multiple services calling each other on a user's behalf?",
+        "answer": "The confused deputy problem occurs when a privileged intermediary service, acting on behalf of a legitimate caller, can be tricked into misusing its own broad privileges to perform an action the original caller wasn't actually authorized to request, since the intermediary has more authority than the request it's fulfilling should warrant, and nothing distinguishes a legitimate request from a malicious one exploiting that gap. In a microservices context, this can happen if Service A calls Service B using Service A's own powerful, static service credentials for every request, regardless of which specific end user originally initiated the call; if Service A has a bug or is compromised, it can be tricked into making requests to Service B that exceed what the actual originating user should be allowed to do. Using narrowly-scoped, user-delegated tokens, rather than Service A's own broad static credentials, that carry both the specific scopes granted by the original user and an audience claim restricting the token to the intended downstream service mitigates this: Service B can verify the token's scope actually covers the requested action and that the token was genuinely intended for it, rather than trusting Service A's own blanket authority.",
+        "key_concepts": [
+          "confused deputy problem",
+          "intermediary service authority",
+          "scoped user-delegated tokens",
+          "audience claim restriction"
+        ],
+        "expected_points": [
+          "Explains the confused deputy problem: a privileged intermediary can be tricked into misusing its own broad authority on a caller's behalf",
+          "Gives a concrete service-to-service example of how this manifests",
+          "Explains that using narrowly-scoped, user-delegated tokens instead of the intermediary's own static broad credentials limits this risk",
+          "Explains the audience claim's role in ensuring the token is actually valid for the intended downstream service"
+        ],
+        "common_mistakes": [
+          "Cannot articulate the confused deputy problem in concrete terms",
+          "Proposing a fix that doesn't actually narrow the intermediary's effective authority, such as just adding more logging",
+          "Not explaining the specific role of the audience claim in the mitigation"
+        ],
+        "example": "If Service A always calls Service B using its own powerful static service credential regardless of which user's request triggered the call, a bug in Service A that lets any user trigger an arbitrary downstream call could let a low-privilege user perform an action only an admin should be able to; using a token scoped to and delegated from the specific originating user's permissions, checked by Service B, prevents this.",
+        "follow_up_questions": [
+          "How would you retrofit this scoped-token pattern into an existing system where services currently call each other using shared static credentials?",
+          "What's the performance/latency cost of propagating and validating user-scoped tokens through a deep chain of service-to-service calls, and how might you mitigate it?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the confused deputy problem.",
+          "average": "Describes the general idea vaguely without a concrete service-to-service example or the scoped-token mitigation.",
+          "good": "Correctly explains the problem with a concrete example and proposes scoped, user-delegated tokens as a mitigation.",
+          "excellent": "Correctly explains the problem, a concrete example, the scoped-token mitigation, and the audience claim's specific role in it."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "confused_deputy",
+          "oauth",
+          "microservices",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-157",
+        "domain": "authentication_authorization",
+        "topic": "Multi-Tenant Authorization",
+        "subtopic": "Preventing Cross-Tenant Data Access",
+        "difficulty": "Expert",
+        "question_type": "architecture",
+        "question": "In a multi-tenant SaaS application where each customer's data must be strictly isolated, what authorization design would you use to prevent one tenant's users from ever accessing another tenant's data, even accidentally through a coding bug?",
+        "answer": "Beyond application-level authorization checks, which are necessary but, as history shows, prone to being forgotten on some code path, a robust design adds tenant isolation as a structural, enforced property rather than relying solely on developers remembering to filter by tenant ID in every query. This often means embedding the tenant ID in the authenticated session/token and requiring every data-access layer call to be scoped by it automatically, for example via a data-access wrapper or ORM-level default scope that transparently adds a tenant filter to every query so it's structurally difficult to forget; using database-level enforcement like PostgreSQL row-level security policies tied to the current session's tenant context as a defense-in-depth backstop even if application code has a bug; and, for the highest-sensitivity tenants or stricter compliance requirements, physically separating data into per-tenant databases or schemas rather than relying purely on logical row-level separation within a single shared database.",
+        "key_concepts": [
+          "multi-tenant isolation",
+          "tenant-scoped queries",
+          "row-level security",
+          "defense-in-depth",
+          "per-tenant database separation"
+        ],
+        "expected_points": [
+          "Recognizes relying solely on developers remembering per-query authorization checks is fragile",
+          "Proposes structurally enforcing tenant scoping, such as an ORM-level default scope automatically applied to every query",
+          "Proposes database-level enforcement, such as row-level security, as a defense-in-depth backstop",
+          "Considers physical separation, per-tenant databases/schemas, for the highest-sensitivity cases"
+        ],
+        "common_mistakes": [
+          "Relying solely on 'always remembering to filter by tenant_id in the query' as the complete solution",
+          "Not proposing any database-level or structural enforcement beyond application code discipline",
+          "Assuming physical per-tenant database separation is always necessary/practical regardless of scale or requirements"
+        ],
+        "example": "Even if a developer writes a buggy query that forgets to filter by tenant, PostgreSQL row-level security tied to the session's current tenant context transparently prevents that query from ever returning rows belonging to a different tenant, catching the bug before it becomes a data leak.",
+        "follow_up_questions": [
+          "What are the performance and operational trade-offs of row-level security versus application-level tenant scoping alone?",
+          "How would you design automated testing specifically to catch cross-tenant data leakage before it reaches production?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Relies solely on 'developers should remember to check tenant_id' with no structural enforcement.",
+          "average": "Proposes one structural mechanism, such as an ORM default scope, without defense-in-depth.",
+          "good": "Proposes structural application-level enforcement plus at least one additional layer, like row-level security.",
+          "excellent": "Proposes structural enforcement, database-level defense-in-depth, and considers physical separation for the highest-sensitivity cases."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization",
+          "architecture",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "multi_tenancy",
+          "authorization",
+          "security",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-158",
+        "domain": "authentication_authorization",
+        "topic": "Social Login",
+        "subtopic": "Risks of Relying Solely on Third-Party Login",
+        "difficulty": "Medium",
+        "question_type": "tradeoff",
+        "question": "What are the risks of relying solely on third-party social login, such as 'Sign in with Google or Facebook', without offering an alternative authentication method?",
+        "answer": "If a user's access to the underlying third-party account is ever lost, due to that account being suspended, compromised, or the user simply losing access to it, they lose access to your application too, with no independent recovery path under your own control, since your application never established its own separate credential for them. It also creates a dependency on the third-party provider's availability and continued support of their OAuth/OIDC integration, and, from a data perspective, ties your understanding of who this user is entirely to an external identity you don't control and that could change, for example if the user's email associated with that provider changes. A more resilient design offers social login as a convenient option while also maintaining an independent account recovery mechanism, such as a verified email address on file that isn't solely tied to the third-party identity.",
+        "key_concepts": [
+          "social login dependency risk",
+          "third-party account loss",
+          "provider availability dependency",
+          "independent account recovery"
+        ],
+        "expected_points": [
+          "User loses application access entirely if they lose access to the third-party account, with no independent recovery path",
+          "Creates a dependency on the third-party provider's continued availability and support of the integration",
+          "Application's understanding of user identity is entirely tied to an external, uncontrolled identity source",
+          "Recommends maintaining an independent recovery mechanism alongside social login rather than relying on it exclusively"
+        ],
+        "common_mistakes": [
+          "Believing social login has no meaningful downside compared to owning the authentication relationship directly",
+          "Not identifying the account-recovery gap as the core risk",
+          "Not proposing any mitigation, such as an independent recovery mechanism"
+        ],
+        "example": "A user whose Google account gets suspended for an unrelated policy violation suddenly loses access to every third-party application that relied solely on Sign in with Google with no other way to prove their identity to those applications.",
+        "follow_up_questions": [
+          "How would you design an account-linking flow that lets a user add a traditional password or a second social provider as a backup recovery method?",
+          "What data privacy or compliance considerations arise from depending on a third-party identity provider for core account access?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot identify any risk of relying solely on social login.",
+          "average": "Identifies a vague risk without explaining the account-recovery gap specifically.",
+          "good": "Correctly identifies the account-recovery gap and the provider-dependency risk.",
+          "excellent": "Correctly identifies both risks and proposes a concrete mitigation, such as maintaining independent recovery methods."
+        },
+        "skills": [
+          "authentication_authorization",
+          "security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "social_login",
+          "oauth",
+          "tradeoffs"
+        ]
+      },
+      {
+        "id": "BE-159",
+        "domain": "authentication_authorization",
+        "topic": "Secrets Management",
+        "subtopic": "Storing and Rotating API Secrets/Credentials",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "How would you securely store and rotate sensitive credentials, like database passwords and third-party API keys, used by your backend services, rather than hardcoding them or placing them in plain configuration files?",
+        "answer": "Use a dedicated secrets management system, such as HashiCorp Vault or a cloud provider's secrets manager, that stores secrets encrypted at rest, provides fine-grained access control over which services or identities can retrieve which secrets, and gives an audit trail of secret access. Services retrieve secrets at startup or runtime via an authenticated API call to the secrets manager rather than having them baked into source code, container images, or environment variables checked into version control, which reduces the risk of accidental exposure through logs, code repositories, or container image inspection. For rotation, design the secrets manager to support issuing new credential versions on a schedule or on demand, and design consuming services to gracefully pick up a rotated secret, either by re-fetching periodically or via a push notification/dynamic reload mechanism, ideally without requiring a service restart or causing a service disruption during the rotation window, for example by briefly supporting both the old and new credential simultaneously.",
+        "key_concepts": [
+          "secrets management system",
+          "encryption at rest",
+          "access control and audit trail",
+          "credential rotation",
+          "avoiding hardcoded/checked-in secrets"
+        ],
+        "expected_points": [
+          "Proposes a dedicated secrets management system rather than hardcoding or plain config files",
+          "Explains the benefits: encryption at rest, fine-grained access control, audit trail",
+          "Services retrieve secrets via authenticated API calls rather than baking them into code/images/version control",
+          "Addresses rotation: services must gracefully pick up rotated credentials, ideally without downtime, such as briefly overlapping old and new credentials"
+        ],
+        "common_mistakes": [
+          "Proposing to just store secrets in environment variables without addressing how those are securely populated/rotated in the first place",
+          "Not addressing how already-running services pick up a rotated secret without a disruptive restart",
+          "Not mentioning access control/audit as a benefit, focusing only on encryption"
+        ],
+        "example": "A database password stored in a secrets manager is fetched by the application at startup via an authenticated request using the application's own service identity; when the password is rotated, the secrets manager briefly accepts both the old and new password so running services can pick up the new one on their next scheduled refresh without an outage.",
+        "follow_up_questions": [
+          "How would you bootstrap the very first credential a service needs to authenticate to the secrets manager itself, avoiding a chicken-and-egg problem?",
+          "What's the risk of a secret being cached in application memory or logs even after being properly fetched from a secrets manager?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Proposes storing secrets in plain config files or environment variables with no further protection.",
+          "average": "Proposes a secrets manager but doesn't address rotation or graceful pickup by running services.",
+          "good": "Proposes a secrets manager, explains its benefits, and addresses rotation at a basic level.",
+          "excellent": "Proposes a secrets manager, its benefits, and a concrete rotation strategy that avoids service disruption."
+        },
+        "skills": [
+          "security",
+          "architecture",
+          "backend_fundamentals"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "secrets_management",
+          "credential_rotation",
+          "security"
+        ]
+      },
+      {
+        "id": "BE-160",
+        "domain": "authentication_authorization",
+        "topic": "Production Incident",
+        "subtopic": "A Leaked JWT Signing Key",
+        "difficulty": "Expert",
+        "question_type": "production_incident",
+        "question": "You discover that your JWT signing key, used with a symmetric algorithm like HS256, was accidentally committed to a public code repository six months ago. What's the full scope of impact, and how do you respond?",
+        "answer": "This is a severe incident: with the signing key, an attacker can forge arbitrary valid JWTs for any user, including granting themselves admin-level claims, for the entire period the key has been exposed, potentially six months of undetected forgery capability, not just from the moment of discovery. Immediate response: rotate the signing key immediately, which invalidates every currently outstanding token signed with the old key, forcing all users to re-authenticate; audit logs as thoroughly as possible for the exposure window to look for suspicious activity or anomalous claims that might indicate the key was actually exploited, understanding that a sophisticated attacker's forged tokens might not look obviously anomalous; rotate any other credentials that might have been exposed alongside the key in that same repository; and conduct a broader review of how the key ended up in a public repository, likely involving secret-scanning tooling and repository access controls, to prevent recurrence. Communicate transparently with affected users and, depending on jurisdiction and the nature of the data involved, this may constitute a reportable security incident requiring regulatory disclosure.",
+        "key_concepts": [
+          "JWT signing key compromise",
+          "arbitrary token forgery",
+          "key rotation",
+          "retroactive exposure window",
+          "incident audit and disclosure"
+        ],
+        "expected_points": [
+          "Recognizes the severity: an attacker could forge arbitrary valid tokens, including admin claims, for the entire exposure window",
+          "Recognizes the exposure window is six months, not just from the moment of discovery, since the key was live the whole time",
+          "Proposes immediate key rotation to invalidate all outstanding tokens and force re-authentication",
+          "Proposes auditing logs for the exposure period and considers broader remediation like secret-scanning tooling and possible regulatory disclosure"
+        ],
+        "common_mistakes": [
+          "Treating this as a routine key rotation without appreciating the retroactive exposure window and forgery risk",
+          "Not recognizing that a sophisticated attacker's forged tokens might not be obviously distinguishable in logs",
+          "Not considering broader remediation, such as secret-scanning tooling or regulatory disclosure obligations"
+        ],
+        "example": "Upon discovery, the team immediately rotates the signing key, invalidating every session; a log audit over the six-month exposure window reveals a handful of anomalous admin actions from unfamiliar IP addresses, confirming the key was indeed exploited, triggering a broader incident response and user notification process.",
+        "follow_up_questions": [
+          "How would switching to an asymmetric signing algorithm, like RS256, have changed or limited the impact of this specific exposure compared to a symmetric HS256 key?",
+          "What secret-scanning or pre-commit tooling would you put in place to catch this class of exposure before it reaches a public repository in the future?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Treats this as a minor issue or proposes only rotating the key going forward without addressing the retroactive exposure.",
+          "average": "Recognizes the severity and proposes key rotation, but doesn't address the retroactive exposure window or log auditing.",
+          "good": "Recognizes the full retroactive exposure window, proposes key rotation, and proposes auditing logs for suspicious activity.",
+          "excellent": "Recognizes the full exposure window, proposes rotation and log auditing, and addresses broader remediation like secret-scanning tooling and potential regulatory disclosure obligations."
+        },
+        "skills": [
+          "security",
+          "authentication_authorization",
+          "incident_response"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "jwt",
+          "key_compromise",
+          "production_incident",
+          "security"
+        ]
+      }
+    ]
+  }
+}

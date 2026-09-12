@@ -96,8 +96,7 @@ export default function VoiceInterviewPage() {
     setIsPlayingQuestion(true);
     try {
       const { audio_url } = await textToSpeech(text);
-      const apiBase = import.meta.env.VITE_API_URL || '/api/v1';
-      const fullUrl = audio_url.startsWith('http') ? audio_url : `${apiBase}${audio_url}`;
+      const fullUrl = audio_url;
       const audio = new Audio(fullUrl);
       questionAudioRef.current = audio;
       audio.onended = () => {
@@ -119,8 +118,17 @@ export default function VoiceInterviewPage() {
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 44100,
+        },
+      });
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus',
+        audioBitsPerSecond: 128000,
+      });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -135,7 +143,7 @@ export default function VoiceInterviewPage() {
         transcribeAudio(blob);
       };
 
-      mediaRecorder.start(1000);
+      mediaRecorder.start();
       setRecordingState('recording');
       setRecordingDuration(0);
       recordingTimerRef.current = setInterval(() => {

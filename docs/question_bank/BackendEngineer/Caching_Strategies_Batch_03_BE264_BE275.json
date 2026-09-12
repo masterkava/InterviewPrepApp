@@ -1,0 +1,722 @@
+{
+  "question_bank": {
+    "id": "backend-caching-strategies-batch-03",
+    "title": "Backend Engineering — Caching Strategies — Batch 03",
+    "description": "Final batch of the 35-question Caching Strategies domain, covering cache failure modes, performance and memory management, and production caching/system design.",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "question_count": 12,
+    "difficulty_distribution": {
+      "Easy": 0,
+      "Medium": 1,
+      "Hard": 6,
+      "Expert": 5
+    },
+    "questions": [
+      {
+        "id": "BE-264",
+        "domain": "caching_strategies",
+        "topic": "Cache Failure Modes",
+        "subtopic": "Cache Stampede",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "What is a cache stampede, and how would you prevent many concurrent requests from rebuilding the same expired cache entry?",
+        "answer": "A cache stampede occurs when a popular cache entry expires or becomes unavailable and many requests simultaneously miss the cache and independently query the underlying data source. This can create a sudden load spike on the database or downstream service precisely when the cache is least able to protect it. Common mitigations include request coalescing or single-flight locking so only one request rebuilds the value, TTL jitter to avoid synchronized expiration, stale-while-revalidate behavior, and controlled refresh before expiration. The appropriate approach depends on freshness requirements and whether serving slightly stale data is acceptable.",
+        "key_concepts": [
+          "Cache stampede",
+          "Thundering herd",
+          "Request coalescing",
+          "Single-flight",
+          "TTL jitter",
+          "Stale-while-revalidate"
+        ],
+        "expected_points": [
+          "A popular entry expires and many requests miss simultaneously.",
+          "Without protection, each request may query the underlying source and amplify load.",
+          "Request coalescing or locking can allow one request to rebuild the entry while others wait or reuse the result.",
+          "TTL jitter can reduce synchronized expirations across many keys.",
+          "Stale-while-revalidate can continue serving an older value while a fresh value is rebuilt."
+        ],
+        "common_mistakes": [
+          "Thinking a cache stampede is simply a low cache hit ratio.",
+          "Adding more cache capacity without addressing synchronized expiration or concurrent misses.",
+          "Using a global lock that serializes unrelated cache keys."
+        ],
+        "example": "A product page receives 5,000 requests per second and its cached value expires. Without protection, thousands of requests can simultaneously query the database. A per-key single-flight mechanism can let one request refresh the value while the others wait for the result.",
+        "follow_up_questions": [
+          "Why is a per-key lock generally safer than a global cache lock?",
+          "When would stale-while-revalidate be preferable to making every request wait for fresh data?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why concurrent cache misses overload the underlying service.",
+          "average": "Identifies simultaneous misses but suggests only increasing cache size.",
+          "good": "Explains the stampede mechanism and proposes per-key coordination, TTL jitter, or stale-while-revalidate.",
+          "excellent": "Designs a targeted mitigation strategy that considers concurrency, failure of the lock/refresh path, freshness requirements, and avoiding unnecessary serialization."
+        },
+        "skills": [
+          "Caching",
+          "Concurrency",
+          "Performance",
+          "Reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-stampede",
+          "thundering-herd",
+          "single-flight",
+          "ttl-jitter"
+        ]
+      },
+      {
+        "id": "BE-265",
+        "domain": "caching_strategies",
+        "topic": "Cache Failure Modes",
+        "subtopic": "Thundering Herd",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A popular cache key suddenly disappears while thousands of requests arrive at the same time. How is the thundering-herd problem different from an ordinary cache miss, and how would you mitigate it?",
+        "answer": "An ordinary cache miss usually causes one request to fall back to the source, whereas a thundering herd occurs when a large number of concurrent requests experience the same miss and all perform the expensive fallback operation. The resulting synchronized load can overwhelm the database or downstream service. Mitigations include per-key request coalescing, distributed locking where appropriate, prewarming important entries, randomized expiration, stale serving, and rate limiting or admission control on the fallback path. The design should ensure that coordination itself does not become a new bottleneck.",
+        "key_concepts": [
+          "Thundering herd",
+          "Concurrent cache misses",
+          "Request coalescing",
+          "Distributed locking",
+          "Cache prewarming",
+          "Admission control"
+        ],
+        "expected_points": [
+          "The distinguishing factor is high concurrency around the same missing data.",
+          "Each fallback request can multiply load on the underlying dependency.",
+          "Per-key coordination can reduce duplicate rebuild work.",
+          "Prewarming and randomized expiration can reduce predictable large-scale misses.",
+          "Fallback traffic may need rate limiting or admission control during dependency degradation."
+        ],
+        "common_mistakes": [
+          "Treating every cache miss as a thundering-herd event.",
+          "Using one global lock for all cache keys.",
+          "Ignoring the possibility that the database is already degraded when deciding how to refresh the cache."
+        ],
+        "example": "A homepage configuration object expires at 12:00:00 and 10,000 requests arrive immediately afterward. If every request queries the database, the cache has failed to protect the database at exactly the wrong moment.",
+        "follow_up_questions": [
+          "How would you design request coalescing if the service runs on many application instances?",
+          "What changes if the underlying database is already close to saturation when the herd occurs?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish a normal miss from a concurrent fallback surge.",
+          "average": "Recognizes the load spike but gives only generic scaling advice.",
+          "good": "Explains the concurrency amplification and provides practical coordination and load-protection techniques.",
+          "excellent": "Designs a distributed mitigation strategy that protects the source dependency while accounting for lock scope, stale serving, prewarming, and dependency health."
+        },
+        "skills": [
+          "Caching",
+          "Concurrency",
+          "Distributed Systems",
+          "Reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "thundering-herd",
+          "cache-miss",
+          "request-coalescing",
+          "load-shedding"
+        ]
+      },
+      {
+        "id": "BE-266",
+        "domain": "caching_strategies",
+        "topic": "Cache Failure Modes",
+        "subtopic": "Cache Penetration",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "What is cache penetration, and how can a backend prevent repeated requests for data that does not exist from reaching the database?",
+        "answer": "Cache penetration occurs when requests repeatedly ask for keys that are not present in the underlying data source, so the application experiences a cache miss every time and repeatedly queries the database. This can be especially damaging when attackers or clients intentionally generate many nonexistent identifiers. Common mitigations include caching negative results for a short period, validating identifiers before querying the source when possible, using a probabilistic filter such as a Bloom filter for suitable datasets, and applying rate limits or abuse controls. Negative caching must use an appropriate TTL so that a newly created record is not hidden for too long.",
+        "key_concepts": [
+          "Cache penetration",
+          "Negative caching",
+          "Bloom filter",
+          "Nonexistent keys",
+          "Rate limiting",
+          "Abuse protection"
+        ],
+        "expected_points": [
+          "The requested key is absent from both cache and the source of truth.",
+          "Repeated nonexistent-key requests can bypass the cache and overload the source.",
+          "Short-lived negative caching can prevent repeated database lookups for known-missing keys.",
+          "A Bloom filter can reject many keys that are definitely absent before an expensive lookup.",
+          "Rate limiting and validation can reduce malicious or pathological request traffic."
+        ],
+        "common_mistakes": [
+          "Confusing cache penetration with a cache stampede caused by expiration.",
+          "Caching nonexistent results forever.",
+          "Using a Bloom filter without acknowledging that false positives are possible."
+        ],
+        "example": "An API receives requests for random product IDs that do not exist. If missing IDs are never cached, every request can reach the database. A short negative-cache entry such as `product:not-found:987654` can prevent repeated lookups for the same invalid ID.",
+        "follow_up_questions": [
+          "What is the main trade-off when using negative caching?",
+          "Why can a Bloom filter return a false positive but not a false negative?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why nonexistent keys can repeatedly bypass the cache.",
+          "average": "Understands negative caching but misses other protections or TTL considerations.",
+          "good": "Explains the failure mode and discusses negative caching, probabilistic filtering, validation, and rate limiting.",
+          "excellent": "Distinguishes penetration from other cache failures and chooses layered mitigations based on traffic characteristics, correctness, and abuse risk."
+        },
+        "skills": [
+          "Caching",
+          "Database Protection",
+          "Performance",
+          "Security"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-penetration",
+          "negative-caching",
+          "bloom-filter",
+          "rate-limiting"
+        ]
+      },
+      {
+        "id": "BE-267",
+        "domain": "caching_strategies",
+        "topic": "Cache Failure Modes",
+        "subtopic": "Cache Avalanche",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "What is a cache avalanche, and how can synchronized expiration or a cache-cluster failure cause a large backend outage?",
+        "answer": "A cache avalanche is a large-scale loss of cache protection in which many entries become unavailable or expire around the same time, causing a sudden surge of traffic to the underlying services. It can result from synchronized TTLs, a mass cache restart, or a cluster-wide failure. Mitigations include adding randomized TTL jitter, staggering refreshes, retaining stale data where acceptable, prewarming critical keys, using redundant cache infrastructure, and protecting the source with concurrency limits or load shedding. The key objective is to prevent a large cache failure from becoming a simultaneous database failure.",
+        "key_concepts": [
+          "Cache avalanche",
+          "Synchronized expiration",
+          "TTL jitter",
+          "Cache cluster failure",
+          "Prewarming",
+          "Load shedding"
+        ],
+        "expected_points": [
+          "An avalanche affects many cache entries or a large portion of the cache at once.",
+          "Synchronized expiration can create a sudden backend traffic surge.",
+          "A cache infrastructure failure can have a similar effect even when TTLs are well distributed.",
+          "Jitter, staggered refresh, stale serving, and prewarming can reduce synchronized load.",
+          "The underlying source needs protection because cache recovery can itself create a traffic spike."
+        ],
+        "common_mistakes": [
+          "Using cache avalanche as a synonym for a single-key stampede.",
+          "Assuming adding more cache memory prevents cluster-wide failure.",
+          "Ignoring database protection during cache recovery."
+        ],
+        "example": "A deployment restarts a cache cluster and removes millions of entries simultaneously. All application instances fall back to the database, causing connection pools and database CPU to saturate.",
+        "follow_up_questions": [
+          "How would TTL jitter reduce the probability of synchronized expiration?",
+          "What would you do if the cache cluster fails completely and cannot recover immediately?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain how widespread cache loss can overload the source system.",
+          "average": "Recognizes mass expiration but provides only a generic cache restart solution.",
+          "good": "Explains synchronized loss of cache protection and proposes jitter, stale serving, redundancy, and source protection.",
+          "excellent": "Distinguishes avalanche from single-key stampede and designs recovery around controlled rehydration, dependency protection, and high availability."
+        },
+        "skills": [
+          "Caching",
+          "Reliability",
+          "High Availability",
+          "Capacity Planning"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-avalanche",
+          "synchronized-expiration",
+          "ttl-jitter",
+          "cache-failure"
+        ]
+      },
+      {
+        "id": "BE-268",
+        "domain": "caching_strategies",
+        "topic": "Cache Failure Modes",
+        "subtopic": "Hot Keys",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A distributed cache is evenly partitioned by key, but one cache node is receiving far more traffic than the others because one key is extremely popular. Why does this happen, and how would you mitigate it?",
+        "answer": "Hash-based partitioning distributes keys, not necessarily request volume. A single extremely popular key can therefore map to one node and make that node a bottleneck even though the number of keys is evenly distributed. Mitigations include replicating or sharding the hot value across multiple cache keys, using local caching for very hot immutable or slowly changing data, request coalescing, and rate limiting where appropriate. The solution should consider consistency because replicating a frequently updated value creates additional invalidation or refresh work.",
+        "key_concepts": [
+          "Hot key",
+          "Traffic skew",
+          "Partitioning",
+          "Key replication",
+          "Local cache",
+          "Request coalescing"
+        ],
+        "expected_points": [
+          "Partitioning by key does not guarantee balanced request volume.",
+          "A single popular key can overload the node that owns it.",
+          "Hot values can be replicated across multiple cache keys or served from local caches.",
+          "Request coalescing can reduce duplicate backend work for concurrent reads.",
+          "Replication introduces additional consistency and invalidation considerations."
+        ],
+        "common_mistakes": [
+          "Assuming better hashing alone solves a hot-key problem.",
+          "Adding more cache nodes without changing how the hot key is served.",
+          "Replicating frequently changing data without considering invalidation complexity."
+        ],
+        "example": "A flash-sale product's inventory summary is requested by 100,000 clients per second. If the key maps to one cache node, that node can saturate even though the rest of the cluster is nearly idle.",
+        "follow_up_questions": [
+          "How would you safely replicate a hot key that changes frequently?",
+          "When would a local cache be a better solution than adding more distributed-cache replicas?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why one cache node can be overloaded despite balanced key distribution.",
+          "average": "Identifies the hot key but suggests only adding more nodes.",
+          "good": "Explains traffic skew and proposes replication, local caching, and request coalescing with consistency considerations.",
+          "excellent": "Analyzes the access pattern and selects a mitigation based on update frequency, freshness, latency, and the operational cost of spreading the hot key."
+        },
+        "skills": [
+          "Caching",
+          "Distributed Systems",
+          "Scalability",
+          "Performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "hot-key",
+          "traffic-skew",
+          "cache-sharding",
+          "local-cache"
+        ]
+      },
+      {
+        "id": "BE-269",
+        "domain": "caching_strategies",
+        "topic": "Performance & Memory Management",
+        "subtopic": "Eviction Policies",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is a cache eviction policy, and how would you compare common policies such as LRU, LFU, and FIFO?",
+        "answer": "An eviction policy determines which cached entries should be removed when the cache needs space. LRU, or least recently used, removes entries that have not been accessed recently and often works well when recent access predicts near-future reuse. LFU, or least frequently used, removes entries with lower access frequency and can be useful when a stable set of popular objects should remain cached, although it needs to account for stale historical popularity. FIFO removes the oldest inserted entries regardless of access frequency or recency and is simple but may discard valuable frequently accessed items. The best policy depends on the workload's temporal and frequency locality.",
+        "key_concepts": [
+          "Cache eviction",
+          "LRU",
+          "LFU",
+          "FIFO",
+          "Temporal locality",
+          "Frequency locality"
+        ],
+        "expected_points": [
+          "Eviction decides what leaves the cache when capacity is constrained.",
+          "LRU prioritizes recent access history.",
+          "LFU prioritizes access frequency.",
+          "FIFO prioritizes insertion age and ignores access patterns.",
+          "The workload's locality should determine the policy rather than choosing one universally."
+        ],
+        "common_mistakes": [
+          "Saying LRU always outperforms LFU.",
+          "Confusing TTL expiration with capacity-driven eviction.",
+          "Ignoring stale frequency information when evaluating LFU."
+        ],
+        "example": "A cache for recently viewed pages may benefit from LRU because recent pages are likely to be requested again, while a cache containing a stable set of highly popular reference objects may benefit from LFU.",
+        "follow_up_questions": [
+          "How can LFU behave poorly when an item was extremely popular in the past but is no longer requested?",
+          "Can an entry be removed by eviction before its TTL expires?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what an eviction policy does.",
+          "average": "Can define LRU and FIFO but does not connect policies to workload behavior.",
+          "good": "Correctly compares LRU, LFU, and FIFO and explains locality considerations.",
+          "excellent": "Evaluates eviction policies against realistic workload patterns and distinguishes capacity eviction from TTL expiration."
+        },
+        "skills": [
+          "Caching",
+          "Performance",
+          "Memory Management"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "eviction",
+          "lru",
+          "lfu",
+          "fifo",
+          "memory"
+        ]
+      },
+      {
+        "id": "BE-270",
+        "domain": "caching_strategies",
+        "topic": "Performance & Memory Management",
+        "subtopic": "Cache Memory Sizing",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "How would you estimate the memory required for a distributed cache before deploying it for a high-traffic backend service?",
+        "answer": "I would estimate the number of entries that are expected to be resident, the average serialized value size, key overhead, metadata overhead, replication factor, and headroom for traffic and workload variation. I would also analyze the working set rather than assuming the entire source dataset belongs in the cache. Eviction rate, hit ratio, object-size distribution, and growth over time should be measured or modeled. Finally, capacity should include operational safety margins and account for failover behavior, because losing a node can temporarily increase memory pressure on the remaining nodes.",
+        "key_concepts": [
+          "Cache capacity planning",
+          "Working set",
+          "Object size",
+          "Metadata overhead",
+          "Replication factor",
+          "Safety margin"
+        ],
+        "expected_points": [
+          "Estimate the number of simultaneously resident entries rather than blindly caching the entire dataset.",
+          "Include serialized values, keys, metadata, and cache-engine overhead.",
+          "Account for replication and failover capacity.",
+          "Use object-size distribution and eviction metrics rather than relying only on averages.",
+          "Leave headroom for workload spikes, growth, and operational events."
+        ],
+        "common_mistakes": [
+          "Calculating capacity using only the raw database data size.",
+          "Ignoring replication and metadata overhead.",
+          "Sizing the cache to 100% utilization with no headroom."
+        ],
+        "example": "If the working set is 5 million objects averaging 1 KB each, the raw values alone require about 5 GB, but the deployed capacity must also account for keys, metadata, serialization overhead, replication, and safety headroom.",
+        "follow_up_questions": [
+          "Why is average object size alone insufficient for cache capacity planning?",
+          "How would a cache-node failure change your capacity calculation?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Only multiplies object count by average value size.",
+          "average": "Includes value size and some overhead but misses replication or failover considerations.",
+          "good": "Accounts for working set, keys, metadata, replication, growth, and safety margin.",
+          "excellent": "Builds a capacity model using measured distributions, eviction behavior, workload growth, failover requirements, and operational headroom."
+        },
+        "skills": [
+          "Caching",
+          "Capacity Planning",
+          "Performance Engineering"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-capacity",
+          "memory-sizing",
+          "working-set",
+          "replication"
+        ]
+      },
+      {
+        "id": "BE-271",
+        "domain": "caching_strategies",
+        "topic": "Production Caching & System Design",
+        "subtopic": "Hot-Key Production Incident",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "In production, one cache node is at 95% CPU while the other nodes are below 30%. Investigation shows that a single product key receives 40% of all cache requests. Walk through how you would diagnose and mitigate the incident without causing a database overload.",
+        "answer": "I would first confirm the traffic skew by examining per-key request rate, node ownership, latency, errors, and cache hit behavior, while checking whether the hot value is frequently changing. I would avoid simply adding cache nodes because the same hot key can remain mapped to one node. For a stable or slowly changing value, I would use local caching or replicate the value across multiple cache keys/nodes; for a changing value, I would combine controlled replication with versioning or coordinated refresh. Request coalescing can reduce duplicate refreshes, and a fallback rate limit can protect the database if cache capacity is temporarily lost. After mitigation, I would monitor node load, hit ratio, invalidation lag, and database traffic to verify that the solution actually removes pressure rather than moving it elsewhere.",
+        "key_concepts": [
+          "Hot-key incident",
+          "Traffic skew",
+          "Per-key observability",
+          "Key replication",
+          "Local caching",
+          "Database protection"
+        ],
+        "expected_points": [
+          "Confirm the hot key and correlate it with the overloaded cache node.",
+          "Check whether the value is static, slowly changing, or frequently updated before selecting a mitigation.",
+          "Avoid assuming that adding cache nodes will solve a single-key bottleneck.",
+          "Use local caching or controlled key replication to spread reads for suitable workloads.",
+          "Protect the database with request coalescing, rate limiting, and controlled fallback behavior.",
+          "Monitor cache-node load, latency, hit ratio, invalidation behavior, and database traffic after the change."
+        ],
+        "common_mistakes": [
+          "Adding cache nodes as the only mitigation.",
+          "Replicating a frequently changing key without designing invalidation or version handling.",
+          "Allowing all requests to fall back to the database during the mitigation."
+        ],
+        "example": "A product page becomes viral and one cache key accounts for 40% of all requests. Replicating the value across several cache keys and using a small local cache can spread the read load while keeping the database protected.",
+        "follow_up_questions": [
+          "How would your mitigation change if the hot product's value changed every few seconds?",
+          "What metrics would you use to prove that the hot-key mitigation succeeded?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests adding cache nodes or increasing cache size without diagnosing the hot key.",
+          "average": "Identifies the hot key and suggests replication but does not address consistency or database protection.",
+          "good": "Provides a staged incident response covering diagnosis, local/replicated caching, consistency, and database protection.",
+          "excellent": "Demonstrates production incident thinking: validates traffic concentration, selects a workload-appropriate mitigation, controls fallback load, handles freshness, and defines measurable success criteria."
+        },
+        "skills": [
+          "Caching",
+          "Incident Response",
+          "Distributed Systems",
+          "Scalability",
+          "Observability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "hot-key",
+          "production-incident",
+          "cache-mitigation",
+          "database-protection"
+        ]
+      },
+      {
+        "id": "BE-272",
+        "domain": "caching_strategies",
+        "topic": "Production Caching & System Design",
+        "subtopic": "Cache Stampede During Database Degradation",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "Your database is already degraded, and a large number of popular cache entries expire at the same time. What would you do to prevent the cache stampede from turning the database degradation into a full outage?",
+        "answer": "The priority is to protect the already-degraded database rather than aggressively rebuilding every expired cache entry. I would temporarily serve stale values where business correctness permits, enable or strengthen per-key request coalescing, reduce refresh concurrency, and prioritize the most important keys. I would also apply bounded timeouts, circuit breaking, and fallback behavior so cache misses do not create unbounded database work. If possible, I would extend or selectively refresh critical entries and add randomized expiration for future cycles. Recovery should be gradual, with database health used as a signal to increase refresh concurrency only after the dependency stabilizes.",
+        "key_concepts": [
+          "Cache stampede",
+          "Database degradation",
+          "Stale-while-revalidate",
+          "Request coalescing",
+          "Circuit breaker",
+          "Load shedding"
+        ],
+        "expected_points": [
+          "Protect the degraded database before attempting broad cache rehydration.",
+          "Serve stale cached data where the business can tolerate it.",
+          "Use per-key coordination and limit concurrent cache rebuilds.",
+          "Apply timeouts, circuit breaking, and controlled fallback behavior to prevent cascading load.",
+          "Prioritize critical data and gradually restore refresh concurrency as database health improves."
+        ],
+        "common_mistakes": [
+          "Increasing refresh concurrency because cache misses are increasing.",
+          "Forcing all expired entries to be rebuilt immediately.",
+          "Treating stale data as unacceptable without checking the actual business requirement."
+        ],
+        "example": "During a database incident, millions of cache entries expire. Instead of allowing every request to query the database, the service can temporarily serve stale product metadata and refresh only a controlled set of high-priority keys.",
+        "follow_up_questions": [
+          "How would you decide which cached data is safe to serve stale?",
+          "How would you prevent the recovery process from creating a second traffic spike after the database becomes healthy?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Attempts to refresh all expired entries immediately.",
+          "average": "Suggests serving stale data but does not protect the degraded database systematically.",
+          "good": "Prioritizes database protection, stale serving, request coalescing, bounded concurrency, and controlled recovery.",
+          "excellent": "Demonstrates cascading-failure reasoning and designs a feedback-controlled recovery strategy based on dependency health and business freshness requirements."
+        },
+        "skills": [
+          "Caching",
+          "Reliability",
+          "Resilience Engineering",
+          "Incident Response"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-stampede",
+          "database-degradation",
+          "circuit-breaker",
+          "load-shedding"
+        ]
+      },
+      {
+        "id": "BE-273",
+        "domain": "caching_strategies",
+        "topic": "Production Caching & System Design",
+        "subtopic": "Multi-Region Caching",
+        "difficulty": "Expert",
+        "question_type": "system_design",
+        "question": "Design a multi-region caching strategy for a globally distributed read-heavy application. How would you balance latency, availability, cache consistency, and invalidation across regions?",
+        "answer": "I would place cache capacity close to users in each region so reads can usually be served locally, while defining a clear source of truth outside the cache layer. The design should decide whether cache entries are independently populated per region or replicated across regions, based on freshness and operational requirements. For eventual consistency, changes can propagate asynchronously through durable events with version information to prevent older updates from overwriting newer ones. Each region should have bounded TTLs, protection against stampedes, and a defined behavior during cross-region or source-system failures. Strong cross-region consistency should be used only where the business requirement justifies its latency and availability costs.",
+        "key_concepts": [
+          "Multi-region caching",
+          "Regional locality",
+          "Eventual consistency",
+          "Cross-region invalidation",
+          "Versioning",
+          "Availability"
+        ],
+        "expected_points": [
+          "Keep cache reads local to reduce user-facing latency.",
+          "Define the authoritative source of truth separately from regional cache copies.",
+          "Choose between independent regional population and replicated cache state based on freshness requirements.",
+          "Use durable change propagation and versioning when asynchronous invalidation is used.",
+          "Define regional failure behavior, TTL bounds, stampede protection, and cache rebuild strategy.",
+          "Use strong consistency across regions only when business correctness justifies the cost."
+        ],
+        "common_mistakes": [
+          "Assuming a globally replicated cache automatically provides strong consistency.",
+          "Ignoring cross-region network partitions and invalidation delays.",
+          "Designing for minimum latency without defining the source of truth and failure semantics."
+        ],
+        "example": "An e-commerce catalog can maintain regional caches in Mumbai, Frankfurt, and Virginia. Product updates are published through a durable event stream with version numbers, allowing each region to converge while users continue reading locally.",
+        "follow_up_questions": [
+          "How would you handle a network partition where one region cannot receive invalidation events?",
+          "When would you choose a single global cache instead of regional caches?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests one global cache without discussing latency, regional failures, or consistency.",
+          "average": "Proposes regional caches but gives little detail on invalidation and failure behavior.",
+          "good": "Balances regional latency, source-of-truth boundaries, asynchronous invalidation, versioning, and regional failures.",
+          "excellent": "Presents a coherent multi-region architecture with explicit consistency guarantees, failure modes, recovery paths, and business-driven trade-offs."
+        },
+        "skills": [
+          "Caching",
+          "System Design",
+          "Distributed Systems",
+          "Multi-Region Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "multi-region",
+          "distributed-cache",
+          "eventual-consistency",
+          "cache-invalidation"
+        ]
+      },
+      {
+        "id": "BE-274",
+        "domain": "caching_strategies",
+        "topic": "Production Caching & System Design",
+        "subtopic": "Cache Outage and Degraded Mode",
+        "difficulty": "Expert",
+        "question_type": "scenario_based",
+        "question": "Your distributed cache becomes unavailable for 10 minutes during peak traffic. How should a backend service behave so that the cache outage does not become a database outage?",
+        "answer": "The service should treat the cache as a performance dependency unless the business design explicitly requires it for correctness. On cache failures, requests should use bounded timeouts and quickly fall back to a controlled source path rather than waiting on an unhealthy cache. Because a full fallback can overload the database, the service may need local caching, request coalescing, rate limiting, load shedding, stale responses where acceptable, and circuit breakers around the source. Recovery should also be gradual so that rebuilding the cache does not create another surge. Observability should clearly distinguish cache errors from source-system errors.",
+        "key_concepts": [
+          "Cache outage",
+          "Graceful degradation",
+          "Circuit breaker",
+          "Load shedding",
+          "Fallback",
+          "Database protection"
+        ],
+        "expected_points": [
+          "Avoid long cache timeouts that cause requests to pile up during cache failure.",
+          "Define a fallback path and determine whether cache data is required for correctness.",
+          "Protect the database from the increased miss traffic using concurrency limits, coalescing, rate limiting, or load shedding.",
+          "Use local or stale data when appropriate to reduce dependency on the database.",
+          "Recover and repopulate the cache gradually rather than causing a synchronized rebuild.",
+          "Monitor cache availability separately from database health."
+        ],
+        "common_mistakes": [
+          "Sending every cache miss directly to the database with no load protection.",
+          "Using long cache timeouts during an outage.",
+          "Rebuilding the entire cache immediately when the cache service returns."
+        ],
+        "example": "If the cache normally serves 95% of reads, losing it can multiply database traffic dramatically. A resilient service can serve local/stale data for selected endpoints and limit database fallback concurrency until the cache recovers.",
+        "follow_up_questions": [
+          "Which endpoints would you allow to serve stale data during the outage, and why?",
+          "How would you prevent a cache recovery from causing a cache stampede?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Simply bypasses the cache and sends all traffic to the database.",
+          "average": "Adds a fallback but does not address database overload or cache recovery.",
+          "good": "Uses bounded timeouts, controlled fallback, source protection, stale/local data, and gradual recovery.",
+          "excellent": "Designs a complete degraded-mode strategy with explicit dependency classification, load protection, graceful recovery, and observability."
+        },
+        "skills": [
+          "Caching",
+          "Resilience Engineering",
+          "Reliability",
+          "Incident Response"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-outage",
+          "graceful-degradation",
+          "circuit-breaker",
+          "database-protection"
+        ]
+      },
+      {
+        "id": "BE-275",
+        "domain": "caching_strategies",
+        "topic": "Production Caching & System Design",
+        "subtopic": "End-to-End Caching Architecture",
+        "difficulty": "Expert",
+        "question_type": "system_design",
+        "question": "Design an end-to-end caching architecture for a high-traffic backend API that serves frequently read product and user data. Explain the cache layers, key strategy, invalidation model, consistency guarantees, failure handling, capacity planning, and observability you would put in production.",
+        "answer": "I would start with a clear source of truth and classify data by freshness and read-reuse requirements. A two-level strategy can use a small local cache for extremely hot, safely cacheable data and a distributed cache for shared application-wide reuse, with cache-aside as a practical baseline. Keys should be deterministic, namespaced, and versioned where representations evolve. Writes should trigger reliable invalidation or update events, ideally with durable change capture and idempotent consumers, while TTLs provide a bounded fallback for missed invalidations. The architecture should protect against stampedes, hot keys, cache penetration, and cache outages through request coalescing, controlled refresh, negative caching where appropriate, and graceful degradation. Capacity should be based on the working set, object-size distribution, replication, growth, and failover headroom. Production observability should cover hit/miss rate, latency, eviction, memory, key-level traffic, errors, invalidation lag, backend load, and cache-node health.",
+        "key_concepts": [
+          "Cache architecture",
+          "Cache-aside",
+          "Invalidation",
+          "Consistency",
+          "Failure handling",
+          "Capacity planning"
+        ],
+        "expected_points": [
+          "Define the source of truth and classify data according to freshness and reuse requirements.",
+          "Select appropriate cache layers and patterns rather than applying one strategy to every dataset.",
+          "Use deterministic, namespaced, and version-aware cache keys.",
+          "Design reliable invalidation/update propagation with bounded TTL fallback.",
+          "Mitigate stampedes, hot keys, penetration, and cache outages without overloading the source.",
+          "Plan capacity using working set, object sizes, replication, growth, and failover headroom.",
+          "Instrument cache and backend metrics so correctness and performance regressions are detectable."
+        ],
+        "common_mistakes": [
+          "Designing only the happy-path cache lookup without failure or invalidation behavior.",
+          "Treating high cache hit ratio as the only success metric.",
+          "Ignoring source-system protection, capacity headroom, and operational observability."
+        ],
+        "example": "For a high-traffic product API, requests can check a local cache, then a distributed cache, then the database. Product updates publish durable change events that invalidate or update distributed entries and trigger local refresh behavior, while TTLs provide eventual cleanup.",
+        "follow_up_questions": [
+          "How would you modify the architecture if product prices require near-real-time freshness but user preferences can tolerate five minutes of staleness?",
+          "What would be your first five dashboards or alerts for this caching system in production?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Provides only a cache-plus-database diagram without discussing invalidation, failures, or capacity.",
+          "average": "Covers basic cache-aside and TTL but misses major production failure modes and observability.",
+          "good": "Covers cache layers, keys, invalidation, consistency, failure protection, capacity, and monitoring coherently.",
+          "excellent": "Produces a production-grade architecture driven by workload and business requirements, explicitly balancing latency, freshness, availability, correctness, cost, scalability, and operational resilience."
+        },
+        "skills": [
+          "Caching",
+          "System Design",
+          "Distributed Systems",
+          "Scalability",
+          "Reliability",
+          "Observability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "system-design",
+          "caching-architecture",
+          "cache-aside",
+          "invalidation",
+          "observability"
+        ]
+      }
+    ]
+  }
+}

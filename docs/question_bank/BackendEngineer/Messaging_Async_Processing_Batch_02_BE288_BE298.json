@@ -1,0 +1,613 @@
+{
+  "question_bank": {
+    "id": "backend-messaging-async-35",
+    "title": "Messaging & Asynchronous Processing Interview Question Bank",
+    "description": "Production-oriented interview questions covering messaging fundamentals, queues, pub-sub, delivery semantics, producer/consumer reliability, and asynchronous backend processing.",
+    "language": "Backend Engineering",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "question_count": 11,
+    "difficulty_distribution": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 7,
+      "Expert": 0
+    },
+    "questions": [
+      {
+        "id": "BE-288",
+        "domain": "messaging_async_processing",
+        "topic": "Producers, Consumers & Processing",
+        "subtopic": "Acknowledgement Strategies",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "What is the difference between acknowledging a message before processing it and acknowledging it after processing it? What reliability trade-off does each approach create?",
+        "answer": "Acknowledging before processing tells the messaging system that the message has been handled even though the business work may not be complete, which can reduce redelivery but creates a risk of losing work if the consumer crashes. Acknowledging after successful processing reduces the risk of losing work, but a crash after the business operation and before the acknowledgement can cause redelivery. Therefore, post-processing acknowledgement is commonly paired with idempotent or deduplicated consumers.",
+        "key_concepts": [
+          "acknowledgement timing",
+          "message loss",
+          "redelivery",
+          "idempotent processing"
+        ],
+        "expected_points": [
+          "Early acknowledgement can cause message loss if processing subsequently fails.",
+          "Late acknowledgement can cause duplicate delivery after a crash.",
+          "Acknowledgement should reflect the required processing state rather than mere receipt.",
+          "Consumers using late acknowledgement must safely handle duplicates."
+        ],
+        "common_mistakes": [
+          "Assuming acknowledgement means the business operation succeeded regardless of when it occurs.",
+          "Claiming late acknowledgement eliminates duplicate processing.",
+          "Ignoring the crash window between business completion and acknowledgement."
+        ],
+        "example": "A consumer receives an invoice message, writes the invoice to the database, and then acknowledges the message. If it crashes before acknowledgement, the invoice message may be delivered again, so the invoice creation must be idempotent.",
+        "follow_up_questions": [
+          "Where should acknowledgement occur when processing includes multiple external operations?",
+          "How would you detect messages repeatedly failing before acknowledgement?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain the effect of acknowledgement timing.",
+          "average": "Understands early versus late acknowledgement but misses the failure windows.",
+          "good": "Explains message-loss versus redelivery trade-offs and connects late acknowledgement to idempotency.",
+          "excellent": "Precisely analyzes acknowledgement timing, crash windows, transaction boundaries, redelivery, and business-level idempotency."
+        },
+        "skills": [
+          "message_reliability",
+          "consumer_processing",
+          "idempotency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "acknowledgement",
+          "redelivery",
+          "consumers"
+        ]
+      },
+      {
+        "id": "BE-289",
+        "domain": "messaging_async_processing",
+        "topic": "Reliability & Failure Handling",
+        "subtopic": "Retry Strategies",
+        "difficulty": "Medium",
+        "question_type": "scenario_based",
+        "question": "A consumer fails intermittently while processing messages. How would you design a retry strategy without overwhelming the downstream dependency?",
+        "answer": "A robust retry strategy should distinguish transient failures from permanent failures and use bounded retries with increasing delays, commonly exponential backoff with jitter. The system should cap retry attempts and delay so failures do not create an ever-growing retry storm. After the retry budget is exhausted, the message can be moved to a dead-letter or quarantine mechanism for investigation, while metrics and alerts expose the failure rate and backlog.",
+        "key_concepts": [
+          "transient failure",
+          "exponential backoff",
+          "jitter",
+          "retry budget",
+          "dead-letter handling"
+        ],
+        "expected_points": [
+          "Retry only failures that are plausibly transient.",
+          "Use bounded retries rather than infinite immediate retries.",
+          "Exponential backoff and jitter reduce synchronized retry bursts.",
+          "Messages that exceed the retry policy should enter a controlled failure path such as a DLQ."
+        ],
+        "common_mistakes": [
+          "Retrying every error indefinitely.",
+          "Retrying immediately with no backoff.",
+          "Treating permanent validation failures as transient infrastructure failures."
+        ],
+        "example": "If a downstream service returns temporary 503 errors, retry after increasing delays with jitter. If the message contains invalid business data and repeatedly fails validation, sending it to a dead-letter queue is more appropriate than retrying indefinitely.",
+        "follow_up_questions": [
+          "How would you choose a maximum retry count and retry delay?",
+          "What metrics would tell you that retries are harming system health?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests repeated retries without limits or backoff.",
+          "average": "Mentions exponential backoff but does not distinguish transient and permanent failures.",
+          "good": "Designs bounded retries with backoff, jitter, classification, and a DLQ path.",
+          "excellent": "Explains retry budgets, jitter, dependency protection, poison-message handling, observability, and how retry policy should reflect business semantics."
+        },
+        "skills": [
+          "reliability",
+          "failure_handling",
+          "resilience"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "retries",
+          "backoff",
+          "dead-letter"
+        ]
+      },
+      {
+        "id": "BE-290",
+        "domain": "messaging_async_processing",
+        "topic": "Reliability & Failure Handling",
+        "subtopic": "Dead-Letter Queues",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is a dead-letter queue (DLQ), and why should a production messaging system use one?",
+        "answer": "A dead-letter queue is a separate destination for messages that cannot be successfully processed under the normal retry policy. It prevents permanently failing messages from repeatedly blocking or consuming resources in the main processing path. A production DLQ should preserve enough metadata to diagnose the failure, support controlled replay after correction, and be monitored so that failed business work does not silently accumulate.",
+        "key_concepts": [
+          "dead-letter queue",
+          "poison message",
+          "retry exhaustion",
+          "failure isolation",
+          "replay"
+        ],
+        "expected_points": [
+          "A DLQ isolates messages that repeatedly fail normal processing.",
+          "It prevents endless retries from consuming normal consumer capacity.",
+          "Failure context and original message metadata should be retained.",
+          "DLQs require monitoring and a controlled replay or remediation process."
+        ],
+        "common_mistakes": [
+          "Treating a DLQ as permanent deletion.",
+          "Moving every temporary failure to the DLQ immediately.",
+          "Creating a DLQ without monitoring or a recovery/replay process."
+        ],
+        "example": "A message with an invalid schema fails five times and is moved to the DLQ. Engineers correct the producer contract, validate the message, and replay it only after confirming that the consumer can process it safely.",
+        "follow_up_questions": [
+          "What information should be stored with a dead-lettered message?",
+          "How would you safely replay a large DLQ without creating another incident?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why failed messages need a separate path.",
+          "average": "Defines a DLQ as storage for failed messages but misses monitoring or replay.",
+          "good": "Explains retry exhaustion, failure isolation, metadata, and controlled recovery.",
+          "excellent": "Designs a complete DLQ lifecycle including classification, metadata, alerting, remediation, replay safety, and retention."
+        },
+        "skills": [
+          "failure_handling",
+          "messaging_operations",
+          "reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "DLQ",
+          "dead-letter",
+          "recovery"
+        ]
+      },
+      {
+        "id": "BE-291",
+        "domain": "messaging_async_processing",
+        "topic": "Reliability & Failure Handling",
+        "subtopic": "Poison Messages",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A single malformed message keeps failing and is repeatedly retried, causing consumer throughput to collapse. How would you identify and handle this poison message?",
+        "answer": "First, inspect failure metrics and message-level error information to determine whether the same message or message type is repeatedly failing. The consumer should use a bounded retry policy and route messages that exceed the retry threshold to a dead-letter or quarantine destination instead of retrying forever. The system should preserve the original payload and failure metadata, alert the owning team, and support safe replay after the underlying defect is fixed.",
+        "key_concepts": [
+          "poison message",
+          "retry exhaustion",
+          "quarantine",
+          "failure isolation",
+          "observability"
+        ],
+        "expected_points": [
+          "Identify repeated failures using message IDs, error types, and retry counts.",
+          "Use bounded retries so one bad message cannot consume unlimited processing capacity.",
+          "Move exhausted messages to a DLQ or quarantine destination.",
+          "Provide monitoring, ownership, remediation, and controlled replay."
+        ],
+        "common_mistakes": [
+          "Increasing retry counts indefinitely.",
+          "Deleting the message without preserving diagnostic information.",
+          "Treating a malformed message as a temporary dependency outage."
+        ],
+        "example": "A consumer receives one event with an invalid required field and fails every attempt. After three or five attempts, the message is quarantined with its ID, payload metadata, exception, timestamps, and retry history while healthy messages continue processing.",
+        "follow_up_questions": [
+          "How would you distinguish a poison message from a temporarily unavailable dependency?",
+          "How would you prevent a DLQ replay from creating another retry storm?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Only recommends retrying the message again or deleting it.",
+          "average": "Recognizes repeated failure but lacks a complete isolation and recovery strategy.",
+          "good": "Identifies poison messages, bounds retries, uses quarantine/DLQ, and preserves diagnostics.",
+          "excellent": "Explains failure classification, retry isolation, observability, operational ownership, safe replay, and protection of healthy traffic."
+        },
+        "skills": [
+          "failure_handling",
+          "observability",
+          "resilience"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "poison-message",
+          "DLQ",
+          "retry"
+        ]
+      },
+      {
+        "id": "BE-292",
+        "domain": "messaging_async_processing",
+        "topic": "Producers, Consumers & Processing",
+        "subtopic": "Consumer Scaling",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A queue has a growing backlog even though all consumers are healthy. How would you determine whether to add consumers, optimize processing, or increase downstream capacity?",
+        "answer": "Start by comparing message arrival rate, processing rate, queue depth, message age, and consumer utilization. If consumers are saturated and the messaging system has enough parallelism, adding consumers may increase throughput, but only if downstream dependencies can handle the additional load. If each message is expensive, profiling and batching may improve service time more efficiently. If the downstream dependency is already the bottleneck, adding consumers can make the incident worse, so capacity or backpressure must be addressed there instead.",
+        "key_concepts": [
+          "consumer throughput",
+          "queue backlog",
+          "parallelism",
+          "downstream bottleneck",
+          "backpressure"
+        ],
+        "expected_points": [
+          "Measure arrival rate versus processing/service rate.",
+          "Check consumer saturation and available messaging parallelism.",
+          "Determine whether downstream systems can safely absorb more concurrency.",
+          "Optimize processing when service time is the bottleneck and avoid scaling into an already saturated dependency."
+        ],
+        "common_mistakes": [
+          "Automatically adding consumers whenever queue depth rises.",
+          "Ignoring downstream capacity.",
+          "Using queue depth alone without looking at message age and throughput."
+        ],
+        "example": "If 1,000 messages per second arrive and each consumer processes 100 per second, ten consumers may theoretically match the arrival rate. But if the database supports only six concurrent workers effectively, adding ten more consumers may increase contention rather than throughput.",
+        "follow_up_questions": [
+          "What metrics would you use to calculate the required consumer capacity?",
+          "How would you implement backpressure when downstream capacity is fixed?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says simply to add more consumers.",
+          "average": "Considers consumer throughput but does not analyze downstream bottlenecks.",
+          "good": "Uses arrival rate, service rate, parallelism, and dependency capacity to choose a scaling strategy.",
+          "excellent": "Performs a capacity analysis across broker, consumers, CPU/I/O, downstream dependencies, backlog age, and backpressure before changing concurrency."
+        },
+        "skills": [
+          "capacity_planning",
+          "consumer_scaling",
+          "performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "consumer-scaling",
+          "backlog",
+          "throughput"
+        ]
+      },
+      {
+        "id": "BE-293",
+        "domain": "messaging_async_processing",
+        "topic": "Producers, Consumers & Processing",
+        "subtopic": "Backpressure",
+        "difficulty": "Hard",
+        "question_type": "conceptual",
+        "question": "What is backpressure in an asynchronous system, and why is it necessary when producers can generate work faster than consumers can process it?",
+        "answer": "Backpressure is a mechanism for preventing an upstream producer or intermediary from overwhelming downstream processing capacity. Without it, queues can grow indefinitely, memory can be exhausted, latency can become unacceptable, or downstream services can fail under excessive concurrency. Backpressure can be implemented through bounded queues, producer throttling, rate limits, admission control, controlled consumer concurrency, or explicit overload responses.",
+        "key_concepts": [
+          "backpressure",
+          "bounded queues",
+          "rate limiting",
+          "admission control",
+          "overload protection"
+        ],
+        "expected_points": [
+          "Backpressure limits work entering a system when processing capacity is constrained.",
+          "Uncontrolled backlog can increase memory use, latency, and operational risk.",
+          "It can be applied at producers, brokers, consumers, or service boundaries.",
+          "The design should define what happens when capacity is exhausted."
+        ],
+        "common_mistakes": [
+          "Thinking a queue itself is unlimited capacity.",
+          "Equating backpressure only with retry logic.",
+          "Ignoring what happens to work that cannot be accepted immediately."
+        ],
+        "example": "A document-processing API can cap the number of queued jobs per tenant. When capacity is exhausted, it can return a controlled overload response or ask clients to retry later rather than accepting unlimited work.",
+        "follow_up_questions": [
+          "How is backpressure different from rate limiting?",
+          "What should a system do with work that is rejected because capacity is exhausted?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why producers need to react to downstream capacity.",
+          "average": "Understands overload but gives only generic throttling advice.",
+          "good": "Explains bounded capacity, overload protection, and several practical backpressure mechanisms.",
+          "excellent": "Connects backpressure to queue bounds, admission control, latency, fairness, overload behavior, and end-to-end flow control."
+        },
+        "skills": [
+          "resilience",
+          "capacity_planning",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "backpressure",
+          "overload",
+          "rate-limiting"
+        ]
+      },
+      {
+        "id": "BE-294",
+        "domain": "messaging_async_processing",
+        "topic": "Ordering, Deduplication & Idempotency",
+        "subtopic": "Message Ordering",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "Why is global message ordering difficult in a distributed messaging system, and what is a practical way to preserve ordering where the business requires it?",
+        "answer": "Global ordering becomes difficult because messages may be produced concurrently, distributed across partitions or nodes, retried, and processed by multiple consumers. A practical approach is to define the smallest business scope that requires ordering, such as per account or per order, and route messages for that key to the same ordered partition or processing sequence. This preserves required local ordering without forcing the entire system into a single serial stream.",
+        "key_concepts": [
+          "message ordering",
+          "partitioning",
+          "ordering key",
+          "parallelism",
+          "per-entity ordering"
+        ],
+        "expected_points": [
+          "Concurrent producers and distributed processing make global ordering expensive or difficult.",
+          "Most business requirements need ordering only within a defined key or entity.",
+          "An ordering key can route related messages to the same ordered processing path.",
+          "Global serialization reduces scalability and availability of parallel processing."
+        ],
+        "common_mistakes": [
+          "Claiming a timestamp automatically guarantees processing order.",
+          "Using one global queue for every message without considering scale.",
+          "Ignoring retries and concurrent consumers when discussing ordering."
+        ],
+        "example": "For an account balance workflow, all events for account 123 can be routed using account_id as the ordering key so deposits and withdrawals for that account are processed in sequence while other accounts process concurrently.",
+        "follow_up_questions": [
+          "What happens to ordering when a message is retried or a consumer fails?",
+          "How would you handle an operation that requires ordering across two different entities?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Assumes messages are naturally processed in production order everywhere.",
+          "average": "Knows ordering is difficult but cannot explain how to scope it.",
+          "good": "Explains per-key ordering and the scalability trade-off of global ordering.",
+          "excellent": "Analyzes partitions, concurrent producers, retries, consumer assignment, ordering keys, and why business-scoped ordering is usually preferable."
+        },
+        "skills": [
+          "distributed_systems",
+          "partitioning",
+          "message_ordering"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "ordering",
+          "partitions",
+          "parallelism"
+        ]
+      },
+      {
+        "id": "BE-295",
+        "domain": "messaging_async_processing",
+        "topic": "Ordering, Deduplication & Idempotency",
+        "subtopic": "Idempotent Consumer",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A consumer receives the same OrderPaid message twice. How would you make the consumer idempotent so the order is not marked as paid twice or another side effect is not duplicated?",
+        "answer": "The consumer should identify each logical message or business operation with a stable idempotency key, such as an event ID or payment operation ID, and persist processing state atomically with the relevant business update where possible. On a duplicate delivery, the consumer detects that the operation was already applied and avoids repeating the side effect. If an external system is involved, the idempotency mechanism may need to exist at that system's API boundary or use a durable deduplication record.",
+        "key_concepts": [
+          "idempotency key",
+          "deduplication",
+          "atomic state change",
+          "duplicate delivery",
+          "side-effect safety"
+        ],
+        "expected_points": [
+          "Use a stable identifier for the logical operation.",
+          "Persist the deduplication or processing state durably.",
+          "Make the business update and deduplication decision atomic where possible.",
+          "Ensure external side effects have their own idempotency strategy when they cannot share the same transaction."
+        ],
+        "common_mistakes": [
+          "Using the consumer process memory as the deduplication store.",
+          "Generating a new random identifier on every delivery.",
+          "Checking for duplicates and performing the side effect in separate non-atomic operations without considering races."
+        ],
+        "example": "The consumer receives event_id=evt-8472 and records that ID in a unique table while applying the payment-state update in one transaction. A second delivery of evt-8472 violates the uniqueness constraint and is treated as already processed.",
+        "follow_up_questions": [
+          "How would you implement idempotency when the side effect is a third-party API call?",
+          "What is the difference between an idempotency key and a message ID?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests checking a local variable or simply ignoring the second message.",
+          "average": "Understands deduplication but does not address persistence or race conditions.",
+          "good": "Uses a stable idempotency key and durable state with atomic processing where possible.",
+          "excellent": "Analyzes duplicate delivery, transaction boundaries, uniqueness constraints, external APIs, race conditions, and the distinction between transport IDs and business idempotency keys."
+        },
+        "skills": [
+          "idempotency",
+          "data_consistency",
+          "message_reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "idempotency",
+          "deduplication",
+          "duplicates"
+        ]
+      },
+      {
+        "id": "BE-296",
+        "domain": "messaging_async_processing",
+        "topic": "Ordering, Deduplication & Idempotency",
+        "subtopic": "Replay and Recovery",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A downstream service was unavailable for two hours, and thousands of messages accumulated. Once the service recovers, how would you safely process the backlog without causing another outage?",
+        "answer": "First, confirm that the downstream service has recovered and establish its sustainable processing capacity. Then gradually increase consumer concurrency or drain rate while monitoring error rate, latency, queue depth, message age, and downstream resource utilization. Processing should remain idempotent, retries should be bounded, and backpressure should prevent the recovery surge from overwhelming dependencies. If necessary, prioritize or throttle traffic so the backlog drains predictably rather than all at once.",
+        "key_concepts": [
+          "backlog recovery",
+          "consumer throttling",
+          "downstream capacity",
+          "backpressure",
+          "idempotency"
+        ],
+        "expected_points": [
+          "Determine sustainable downstream capacity before increasing processing rate.",
+          "Ramp consumers gradually instead of releasing the entire backlog at once.",
+          "Monitor backlog age, throughput, errors, latency, and dependency saturation.",
+          "Use idempotency and controlled retries because recovery processing can still produce duplicates."
+        ],
+        "common_mistakes": [
+          "Immediately starting every available consumer at maximum concurrency.",
+          "Monitoring only queue depth.",
+          "Assuming recovered downstream availability means unlimited capacity."
+        ],
+        "example": "After a database outage, 500,000 messages are waiting. The team starts with a small consumer pool, verifies database utilization and latency, then increases concurrency in controlled steps while maintaining an error budget and watching message age.",
+        "follow_up_questions": [
+          "How would you estimate how long the backlog will take to drain?",
+          "What would you do if the backlog continues growing even after the dependency recovers?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Suggests simply starting all consumers immediately.",
+          "average": "Recognizes the need to process gradually but lacks measurable controls.",
+          "good": "Explains controlled ramp-up, capacity checks, monitoring, backpressure, and idempotency.",
+          "excellent": "Builds a recovery strategy based on sustainable throughput, backlog age, drain-time estimation, dependency protection, traffic prioritization, and failure-safe processing."
+        },
+        "skills": [
+          "reliability",
+          "capacity_planning",
+          "backpressure",
+          "idempotency"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "backlog",
+          "recovery",
+          "throttling"
+        ]
+      },
+      {
+        "id": "BE-297",
+        "domain": "messaging_async_processing",
+        "topic": "Reliability & Failure Handling",
+        "subtopic": "Retry Storms",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "Several consumers retry messages immediately whenever a downstream service returns errors, and the downstream service becomes even less healthy. What is happening, and how would you fix it?",
+        "answer": "This is a retry storm: failures cause consumers to generate additional load against an already unhealthy dependency, creating positive feedback that makes recovery harder. The fix is to classify transient failures, apply exponential backoff with jitter and bounded retry budgets, limit consumer concurrency, and use circuit-breaking or load-shedding where appropriate. Failed messages can be deferred or moved to a controlled retry/DLQ path so the dependency has time to recover.",
+        "key_concepts": [
+          "retry storm",
+          "exponential backoff",
+          "jitter",
+          "circuit breaker",
+          "load shedding"
+        ],
+        "expected_points": [
+          "Immediate retries amplify load on an unhealthy dependency.",
+          "Backoff and jitter spread retries over time.",
+          "Concurrency limits and retry budgets prevent unbounded amplification.",
+          "A controlled failure path allows the dependency time to recover."
+        ],
+        "common_mistakes": [
+          "Increasing consumer count to compensate for downstream errors.",
+          "Retrying immediately until the operation succeeds.",
+          "Treating all errors as retryable."
+        ],
+        "example": "A database begins returning timeout errors. Instead of every consumer retrying immediately, consumers use bounded exponential backoff with jitter, reduce concurrency, and temporarily defer failed messages while database health is restored.",
+        "follow_up_questions": [
+          "When should a consumer stop retrying and move a message to a DLQ?",
+          "How can a circuit breaker protect a downstream dependency in an asynchronous workflow?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Does not recognize that retries are increasing the outage.",
+          "average": "Suggests backoff but misses concurrency limits or failure classification.",
+          "good": "Identifies a retry storm and proposes backoff, jitter, bounded retries, and dependency protection.",
+          "excellent": "Explains the feedback loop and combines retry budgets, jitter, concurrency control, circuit breaking, load shedding, and controlled recovery."
+        },
+        "skills": [
+          "resilience",
+          "failure_handling",
+          "distributed_systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "retry-storm",
+          "circuit-breaker",
+          "backoff"
+        ]
+      },
+      {
+        "id": "BE-298",
+        "domain": "messaging_async_processing",
+        "topic": "Producers, Consumers & Processing",
+        "subtopic": "Batch Processing",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "When can batching improve asynchronous message-processing throughput, and what trade-offs does batching introduce?",
+        "answer": "Batching can improve throughput by reducing per-message network calls, broker interactions, transaction overhead, and database round trips. It is especially useful when individual messages are small and processing has significant fixed overhead. However, larger batches can increase per-message latency, memory usage, failure complexity, and the number of messages that may need to be retried together. Batch size and timeout should therefore be tuned against throughput, latency, and failure behavior.",
+        "key_concepts": [
+          "batch processing",
+          "throughput",
+          "latency",
+          "amortized overhead",
+          "partial failure"
+        ],
+        "expected_points": [
+          "Batching reduces fixed per-message overhead.",
+          "Larger batches can improve throughput when operations can be grouped efficiently.",
+          "Batching increases waiting time and memory usage.",
+          "Partial failures require careful handling so successful messages are not incorrectly retried or lost."
+        ],
+        "common_mistakes": [
+          "Assuming larger batches always improve performance.",
+          "Ignoring latency introduced while waiting to fill a batch.",
+          "Retrying an entire failed batch without considering which items actually succeeded."
+        ],
+        "example": "A consumer writing 1,000 analytics events to a database may achieve higher throughput by inserting them in batches rather than issuing 1,000 individual transactions, while still enforcing a maximum batch size and maximum wait time.",
+        "follow_up_questions": [
+          "How would you choose batch size and maximum batch wait time?",
+          "How would you handle partial failure when some messages in a batch succeed and others fail?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Says batching simply means processing many messages at once without discussing trade-offs.",
+          "average": "Understands throughput improvement but misses latency or partial failure.",
+          "good": "Explains amortized overhead and balances throughput, latency, memory, and failure handling.",
+          "excellent": "Analyzes batch sizing, transaction boundaries, partial failures, retry semantics, workload characteristics, and measurable performance trade-offs."
+        },
+        "skills": [
+          "performance",
+          "consumer_processing",
+          "reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "batching",
+          "throughput",
+          "latency"
+        ]
+      }
+    ]
+  }
+}

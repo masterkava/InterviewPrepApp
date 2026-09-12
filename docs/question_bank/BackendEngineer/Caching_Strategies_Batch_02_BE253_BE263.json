@@ -1,0 +1,651 @@
+{
+  "question_bank": {
+    "id": "backend-caching-strategies-batch-02",
+    "title": "Backend Engineering — Caching Strategies — Batch 02",
+    "description": "Second batch of the 35-question Caching Strategies domain, covering cache invalidation, consistency, and distributed caching.",
+    "version": "1.0.0",
+    "schema_version": "2.0",
+    "question_count": 11,
+    "difficulty_distribution": {
+      "Easy": 0,
+      "Medium": 4,
+      "Hard": 7,
+      "Expert": 0
+    },
+    "questions": [
+      {
+        "id": "BE-253",
+        "domain": "caching_strategies",
+        "topic": "Cache Invalidation",
+        "subtopic": "Invalidation Strategies",
+        "difficulty": "Medium",
+        "question_type": "conceptual",
+        "question": "What is cache invalidation, and what are the main strategies a backend system can use to keep cached data reasonably fresh?",
+        "answer": "Cache invalidation is the process of making a cached value unusable or updating it when the underlying data changes. Common approaches include TTL-based expiration, explicit invalidation after a successful write, updating the cache as part of the write path, and event-driven invalidation triggered by a change event. The right strategy depends on how fresh the data must be, how frequently it changes, and how much complexity the system can tolerate. No single invalidation strategy is universally correct.",
+        "key_concepts": [
+          "Cache invalidation",
+          "TTL",
+          "Explicit invalidation",
+          "Event-driven invalidation",
+          "Data freshness",
+          "Stale data"
+        ],
+        "expected_points": [
+          "Invalidation prevents an outdated cached representation from being served indefinitely.",
+          "TTL allows entries to expire automatically after a defined period.",
+          "Explicit invalidation can remove or update an affected key when the source data changes.",
+          "Event-driven invalidation can propagate changes from the source system to cache consumers.",
+          "The strategy should be selected according to freshness requirements and operational complexity."
+        ],
+        "common_mistakes": [
+          "Assuming TTL is the only form of cache invalidation.",
+          "Assuming invalidation automatically guarantees zero stale reads.",
+          "Ignoring failure handling when an invalidation operation cannot be delivered."
+        ],
+        "example": "When a product price changes, the application can delete the product's cache entry immediately, update the cached value, or publish a product-updated event that causes the relevant cache entry to be invalidated.",
+        "follow_up_questions": [
+          "When would TTL alone be sufficient for a cached value?",
+          "What could happen if a database write succeeds but the corresponding invalidation fails?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain what cache invalidation means or gives an unrelated cache operation.",
+          "average": "Defines invalidation and mentions TTL but does not explain alternative strategies or trade-offs.",
+          "good": "Explains TTL, explicit, and event-driven approaches and relates them to freshness requirements.",
+          "excellent": "Explains invalidation as a correctness concern, compares multiple strategies, and recognizes delivery failures and residual stale-read windows."
+        },
+        "skills": [
+          "Caching",
+          "Data Consistency",
+          "Cache Invalidation"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-invalidation",
+          "ttl",
+          "freshness",
+          "stale-data"
+        ]
+      },
+      {
+        "id": "BE-254",
+        "domain": "caching_strategies",
+        "topic": "Cache Invalidation",
+        "subtopic": "TTL vs Explicit Invalidation",
+        "difficulty": "Medium",
+        "question_type": "comparison",
+        "question": "Compare TTL-based invalidation with explicit invalidation. What are the trade-offs between them?",
+        "answer": "TTL-based invalidation is simple and resilient to many application failures because entries eventually expire without requiring a specific delete operation. Its weakness is that data can remain stale until the TTL expires. Explicit invalidation removes or updates affected entries when the source data changes, which can provide much fresher data but creates a dependency on reliable invalidation execution. In practice, systems often combine both: explicit invalidation provides fast freshness while TTL acts as a safety bound against entries that were not invalidated correctly.",
+        "key_concepts": [
+          "TTL",
+          "Explicit invalidation",
+          "Freshness window",
+          "Failure tolerance",
+          "Safety bound"
+        ],
+        "expected_points": [
+          "TTL provides automatic expiration without requiring a change-triggered delete.",
+          "Explicit invalidation can remove stale data soon after a source update.",
+          "TTL can leave stale data available for the duration of the TTL.",
+          "Explicit invalidation can fail or be missed, so it should not necessarily be the only protection.",
+          "Combining explicit invalidation with TTL can provide both freshness and eventual cleanup."
+        ],
+        "common_mistakes": [
+          "Claiming explicit invalidation is always reliable because it is synchronous.",
+          "Claiming TTL guarantees fresh data.",
+          "Ignoring the operational value of keeping a TTL even when explicit invalidation exists."
+        ],
+        "example": "For a user profile, an application might delete `user:123` immediately after a successful profile update while also setting a six-hour TTL on all profile entries as a fallback.",
+        "follow_up_questions": [
+          "Why can a TTL still be useful when every write triggers explicit invalidation?",
+          "What consistency guarantees would you need before relying heavily on event-driven invalidation?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot distinguish TTL expiration from explicit invalidation.",
+          "average": "Explains both mechanisms but only compares them in terms of expiration timing.",
+          "good": "Clearly compares freshness, reliability, complexity, and fallback behavior.",
+          "excellent": "Explains why the mechanisms are complementary and evaluates them in terms of failure modes and business freshness requirements."
+        },
+        "skills": [
+          "Caching",
+          "Consistency",
+          "Architecture Trade-offs"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "ttl",
+          "explicit-invalidation",
+          "cache-consistency",
+          "freshness"
+        ]
+      },
+      {
+        "id": "BE-255",
+        "domain": "caching_strategies",
+        "topic": "Cache Invalidation",
+        "subtopic": "Event-Driven Invalidation",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A service updates customer data in a database and publishes a customer-updated event to invalidate the cache. What failure scenarios should you consider in this design?",
+        "answer": "The design must consider failures between the database commit and event publication, duplicate or delayed events, out-of-order events, consumer failures, and invalidation requests that are processed more than once. A database transaction can succeed while event publication fails, leaving stale cache data. The consumer should therefore be idempotent, and the architecture may need a reliable event publication mechanism such as a transactional outbox. Event ordering or version information may also be needed when multiple updates can race. TTL remains useful as a fallback because event-driven invalidation does not inherently guarantee delivery.",
+        "key_concepts": [
+          "Event-driven invalidation",
+          "Transactional outbox",
+          "Idempotency",
+          "Event ordering",
+          "Duplicate events",
+          "Failure recovery"
+        ],
+        "expected_points": [
+          "A database commit and event publication can fail independently.",
+          "Events can be duplicated, delayed, or delivered out of order.",
+          "Cache invalidation consumers should be safe to execute repeatedly.",
+          "Reliable event publication may require an outbox or equivalent mechanism.",
+          "TTL can provide a fallback against missed invalidation events."
+        ],
+        "common_mistakes": [
+          "Assuming publishing an event after a database commit is automatically atomic.",
+          "Ignoring duplicate or out-of-order event delivery.",
+          "Assuming a message broker alone guarantees the cache will never become stale."
+        ],
+        "example": "A customer update commits successfully, but the application crashes before publishing the invalidation event. The customer cache remains stale unless the system has a durable mechanism to record and publish the change.",
+        "follow_up_questions": [
+          "How would a transactional outbox reduce the database-to-event consistency gap?",
+          "How would you make cache invalidation safe if events can arrive out of order?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Only mentions that the event consumer might fail.",
+          "average": "Identifies some delivery failures but does not reason about atomicity or ordering.",
+          "good": "Identifies database/event atomicity gaps, duplicate delivery, ordering, idempotency, and fallback expiration.",
+          "excellent": "Designs the invalidation flow around durable change capture, idempotent consumers, version-aware processing, and bounded staleness."
+        },
+        "skills": [
+          "Caching",
+          "Event-Driven Architecture",
+          "Distributed Systems",
+          "Reliability"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "event-driven",
+          "cache-invalidation",
+          "outbox",
+          "idempotency",
+          "event-ordering"
+        ]
+      },
+      {
+        "id": "BE-256",
+        "domain": "caching_strategies",
+        "topic": "Cache Invalidation",
+        "subtopic": "Stale Cache Data",
+        "difficulty": "Medium",
+        "question_type": "scenario_based",
+        "question": "A user updates their profile successfully, but immediately reading the profile sometimes returns the old value. What caching behavior could cause this, and how would you fix it?",
+        "answer": "A likely cause is that the read path is still serving an older cached representation after the database update. This can happen when a write updates only the source of truth, when cache invalidation is delayed or fails, or when multiple cache layers contain different versions. A common fix is to invalidate or update the relevant cache entry as part of the write workflow and use a TTL as a fallback. If strict read-after-write behavior is required, the design may need stronger coordination, such as temporarily bypassing the cache for the writer or using version-aware reads.",
+        "key_concepts": [
+          "Stale cache",
+          "Read-after-write",
+          "Invalidation",
+          "Cache layers",
+          "Consistency"
+        ],
+        "expected_points": [
+          "The database can contain the new value while the cache still contains the old value.",
+          "The stale result may come from failed, delayed, or missing invalidation.",
+          "Multiple cache layers can make stale data persist at different levels.",
+          "Invalidating or updating the relevant cache entry can reduce the stale-read window.",
+          "Strict read-after-write requirements may require stronger coordination than ordinary eventual consistency."
+        ],
+        "common_mistakes": [
+          "Assuming the database update itself automatically updates every cache.",
+          "Solving the issue only by increasing the TTL.",
+          "Ignoring multiple cache layers or distributed application instances."
+        ],
+        "example": "A profile is updated in the database, but a local application cache still contains the previous profile object. The next request hits the local cache and returns the old value even though the database is correct.",
+        "follow_up_questions": [
+          "How would you diagnose whether the stale value came from a local cache or a distributed cache?",
+          "When is eventual consistency acceptable for cached profile data?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain how a cache could return an old value after a successful database update.",
+          "average": "Identifies stale cache data but proposes only shortening TTL.",
+          "good": "Explains the invalidation gap and provides practical fixes while recognizing read-after-write requirements.",
+          "excellent": "Analyzes multi-layer caching and consistency semantics and proposes a solution appropriate to the required freshness guarantee."
+        },
+        "skills": [
+          "Caching",
+          "Consistency",
+          "Troubleshooting"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "stale-cache",
+          "read-after-write",
+          "invalidation",
+          "consistency"
+        ]
+      },
+      {
+        "id": "BE-257",
+        "domain": "caching_strategies",
+        "topic": "Cache Invalidation",
+        "subtopic": "Cache-Database Consistency",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "In a cache-aside architecture, a database update succeeds but cache invalidation fails. What consistency problems can occur, and what safeguards would you consider?",
+        "answer": "The cache can continue serving the previous value even though the database, which is the source of truth, contains the new value. The stale value may persist until another invalidation succeeds or the TTL expires. Safeguards include using a TTL as a bounded fallback, retrying invalidation, making invalidation idempotent, publishing durable change events, and monitoring invalidation failures. For stricter consistency requirements, versioned values or coordinated read/write behavior may be needed. The goal should be to define an explicit maximum acceptable staleness rather than assuming cache-aside is strongly consistent.",
+        "key_concepts": [
+          "Cache-aside",
+          "Cache-database consistency",
+          "Stale reads",
+          "Retries",
+          "Versioning",
+          "Bounded staleness"
+        ],
+        "expected_points": [
+          "The database can become correct while the cache remains stale.",
+          "Stale data can persist until invalidation succeeds or TTL expires.",
+          "Retries and durable change events can improve invalidation reliability.",
+          "Invalidation should be idempotent because retry mechanisms can repeat operations.",
+          "The system should define the required consistency or maximum staleness explicitly."
+        ],
+        "common_mistakes": [
+          "Claiming cache-aside provides strong consistency by default.",
+          "Assuming one retry guarantees eventual invalidation.",
+          "Ignoring monitoring and detection of invalidation failures."
+        ],
+        "example": "An order status changes from `PROCESSING` to `SHIPPED` in the database, but the cached order remains `PROCESSING`. A customer request can therefore see an outdated status until the cache is invalidated or expires.",
+        "follow_up_questions": [
+          "How would you design retries so a temporary cache outage does not lose invalidation work permanently?",
+          "When would versioned cache entries be preferable to simply deleting the cache key?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Does not recognize that the cache can remain stale after the database update.",
+          "average": "Identifies stale reads and suggests invalidation retries without defining consistency requirements.",
+          "good": "Explains the failure window and discusses TTL, durable events, retries, idempotency, and monitoring.",
+          "excellent": "Frames the problem in explicit consistency guarantees and designs safeguards around durable invalidation, bounded staleness, and observability."
+        },
+        "skills": [
+          "Caching",
+          "Data Consistency",
+          "Reliability",
+          "Distributed Systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-database-consistency",
+          "cache-aside",
+          "stale-data",
+          "retries"
+        ]
+      },
+      {
+        "id": "BE-258",
+        "domain": "caching_strategies",
+        "topic": "Distributed Caching",
+        "subtopic": "Distributed Cache Architecture",
+        "difficulty": "Medium",
+        "question_type": "architecture",
+        "question": "What makes a cache distributed, and what additional architectural concerns appear when multiple application instances share a cache?",
+        "answer": "A distributed cache is a cache service or cluster that can be accessed by multiple application instances rather than being confined to one process. Shared caching improves cache reuse across instances and avoids duplicating the same cached dataset in every application process. It also introduces network latency, connection management, cache-node failures, partitioning, replication, and consistency concerns. The application must treat the cache as an external dependency and decide what should happen when the cache is slow or unavailable.",
+        "key_concepts": [
+          "Distributed cache",
+          "Shared cache",
+          "Network dependency",
+          "Cache cluster",
+          "Failure handling",
+          "Consistency"
+        ],
+        "expected_points": [
+          "Multiple application instances can access the same logical cache.",
+          "Shared caching can improve reuse and reduce duplicate local copies.",
+          "Network latency and connection failures become part of the request path.",
+          "Scaling, partitioning, replication, and cache-node failure require architectural planning.",
+          "The application needs a defined behavior for cache degradation or unavailability."
+        ],
+        "common_mistakes": [
+          "Treating a distributed cache as simply a larger local dictionary.",
+          "Ignoring network and cache-node failure because the cache is considered non-critical.",
+          "Assuming every cache entry is automatically consistent across all nodes."
+        ],
+        "example": "Ten API instances can use a shared distributed cache for frequently requested product data, allowing a value populated by one instance to be reused by the other nine.",
+        "follow_up_questions": [
+          "What should an application do if the distributed cache becomes unavailable?",
+          "Why might a local cache still be useful even when a distributed cache exists?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why a distributed cache differs from an in-process cache.",
+          "average": "Understands that multiple instances share it but misses operational concerns.",
+          "good": "Explains shared state, network dependency, scaling, failures, and consistency concerns.",
+          "excellent": "Treats the distributed cache as an independent infrastructure dependency and discusses graceful degradation and architecture boundaries."
+        },
+        "skills": [
+          "Caching",
+          "Distributed Systems",
+          "Backend Architecture"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "distributed-cache",
+          "cache-cluster",
+          "shared-cache",
+          "architecture"
+        ]
+      },
+      {
+        "id": "BE-259",
+        "domain": "caching_strategies",
+        "topic": "Distributed Caching",
+        "subtopic": "Cache Replication",
+        "difficulty": "Hard",
+        "question_type": "comparison",
+        "question": "Why might a distributed cache replicate data across multiple nodes, and what trade-offs does replication introduce?",
+        "answer": "Replication creates additional copies of cached data so the cache can continue serving requests when a node fails and can potentially distribute read traffic. It improves availability and may reduce access latency depending on topology, but it consumes more memory and creates a consistency problem because multiple copies can temporarily differ. Replication also adds operational complexity around synchronization, failover, and recovery. Because cache data is often reconstructible, the required replication level should be based on the cost of cache misses and the importance of cache availability rather than treating replication as automatically necessary.",
+        "key_concepts": [
+          "Cache replication",
+          "Availability",
+          "Redundancy",
+          "Consistency",
+          "Failover",
+          "Memory overhead"
+        ],
+        "expected_points": [
+          "Replication creates multiple copies of cached data.",
+          "Copies can improve availability when a cache node fails.",
+          "Replication increases memory consumption and operational complexity.",
+          "Replicated values can temporarily diverge depending on the consistency model.",
+          "The appropriate replication level depends on workload and cache-loss consequences."
+        ],
+        "common_mistakes": [
+          "Claiming replication makes a cache strongly consistent by default.",
+          "Ignoring the memory cost of maintaining multiple copies.",
+          "Assuming every cache requires the same replication strategy."
+        ],
+        "example": "A distributed cache may keep replicas of frequently accessed data so a node failure does not immediately force all requests to query the database.",
+        "follow_up_questions": [
+          "When might losing all cached data be acceptable even though it causes a performance hit?",
+          "How would cache replication affect memory capacity planning?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why cache data would be replicated.",
+          "average": "Mentions high availability but misses consistency and memory trade-offs.",
+          "good": "Explains availability benefits and the costs of replication, including consistency and memory.",
+          "excellent": "Evaluates replication according to failure impact, cache rebuild cost, workload, consistency requirements, and capacity economics."
+        },
+        "skills": [
+          "Caching",
+          "Distributed Systems",
+          "High Availability",
+          "Capacity Planning"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-replication",
+          "availability",
+          "failover",
+          "consistency"
+        ]
+      },
+      {
+        "id": "BE-260",
+        "domain": "caching_strategies",
+        "topic": "Distributed Caching",
+        "subtopic": "Cache Partitioning",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "What is cache partitioning or sharding, and why is it useful when a single cache node cannot handle the workload?",
+        "answer": "Cache partitioning distributes cache keys across multiple nodes so the dataset and traffic can scale beyond the capacity of one node. A partitioning strategy, commonly based on hashing the key, determines which node owns a key. A good strategy spreads keys and traffic evenly while allowing the cluster to add or remove capacity with manageable disruption. Engineers must also consider hot keys, node failures, rebalancing, replication, and what happens to cached data when the partition layout changes.",
+        "key_concepts": [
+          "Cache sharding",
+          "Partitioning",
+          "Consistent hashing",
+          "Load distribution",
+          "Hot keys",
+          "Rebalancing"
+        ],
+        "expected_points": [
+          "Partitioning distributes cache entries across multiple nodes.",
+          "A deterministic routing strategy maps a key to a cache partition.",
+          "The goal is to scale memory and request throughput horizontally.",
+          "Poor distribution can create overloaded or hot partitions.",
+          "Node membership changes require a strategy for minimizing unnecessary key movement."
+        ],
+        "common_mistakes": [
+          "Assuming simply hashing keys guarantees perfectly balanced traffic.",
+          "Ignoring hot keys that can overload one partition despite even key distribution.",
+          "Assuming adding a node never causes cache misses or key movement."
+        ],
+        "example": "A cache cluster with four nodes can hash each cache key and route it to one node. If a fifth node is added, a consistent-hashing approach can reduce the number of keys that need to move compared with a naive modulo-based scheme.",
+        "follow_up_questions": [
+          "How can a single hot key overload one cache node even when hashing distributes keys evenly?",
+          "What is the benefit of consistent hashing when cache nodes are added or removed?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why cache data would be split across nodes.",
+          "average": "Explains sharding but misses routing, rebalancing, or hot-key concerns.",
+          "good": "Explains partitioning, key routing, scaling, and the impact of node membership changes.",
+          "excellent": "Connects partitioning to capacity and throughput, then analyzes hashing, hot partitions, rebalancing, failure, and replication trade-offs."
+        },
+        "skills": [
+          "Caching",
+          "Distributed Systems",
+          "Scalability",
+          "Data Partitioning"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-sharding",
+          "partitioning",
+          "consistent-hashing",
+          "hot-partition"
+        ]
+      },
+      {
+        "id": "BE-261",
+        "domain": "caching_strategies",
+        "topic": "Distributed Caching",
+        "subtopic": "Consistency Across Cache Nodes",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A distributed cache has multiple nodes holding copies of related data, and different application requests sometimes observe different values. How would you reason about and troubleshoot the inconsistency?",
+        "answer": "First, I would identify whether the architecture intentionally permits eventual consistency or whether the divergence indicates a defect. I would inspect replication behavior, invalidation or update propagation, node health, routing, failover events, timestamps or versions of entries, and whether different application instances are using different cache layers. If multiple copies can legitimately diverge temporarily, the system needs a defined convergence model and acceptable staleness window. If divergence is unintended, versioned updates, reliable invalidation, and better observability can help identify and prevent stale replicas or missed updates.",
+        "key_concepts": [
+          "Distributed cache consistency",
+          "Replication",
+          "Versioning",
+          "Invalidation propagation",
+          "Eventual consistency",
+          "Observability"
+        ],
+        "expected_points": [
+          "Determine whether the observed divergence is expected under the cache consistency model.",
+          "Check replication and invalidation/update propagation between nodes.",
+          "Compare entry versions or timestamps to identify stale copies.",
+          "Investigate routing and local-cache layers that may cause different requests to see different values.",
+          "Define an explicit convergence and staleness expectation for the system."
+        ],
+        "common_mistakes": [
+          "Immediately blaming the database without checking cache replication and routing.",
+          "Assuming all distributed caches provide identical consistency guarantees.",
+          "Ignoring local application caches that may sit in front of the distributed cache."
+        ],
+        "example": "One request routed to an application instance with a warm local cache returns an older product price, while another instance reads the newer value from the distributed cache. The apparent cache inconsistency is actually caused by two cache layers with different invalidation behavior.",
+        "follow_up_questions": [
+          "How would version numbers help prevent an older cache update from overwriting a newer value?",
+          "What metrics and logs would you add to diagnose cache divergence?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why different requests might observe different cached values.",
+          "average": "Mentions replication lag but does not systematically investigate the architecture.",
+          "good": "Checks consistency model, replication, invalidation, routing, versions, and multiple cache layers.",
+          "excellent": "Separates expected eventual consistency from genuine correctness defects and proposes version-aware, observable, failure-tolerant mechanisms."
+        },
+        "skills": [
+          "Caching",
+          "Distributed Systems",
+          "Consistency",
+          "Troubleshooting"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "cache-consistency",
+          "replication",
+          "versioning",
+          "eventual-consistency"
+        ]
+      },
+      {
+        "id": "BE-262",
+        "domain": "caching_strategies",
+        "topic": "Distributed Caching",
+        "subtopic": "Local and Distributed Cache",
+        "difficulty": "Hard",
+        "question_type": "architecture",
+        "question": "Why might a backend use both a local cache and a distributed cache? What consistency and failure considerations would you need to handle?",
+        "answer": "A two-level cache can use a very fast in-process cache as the first level and a shared distributed cache as the second level. A local hit avoids the network entirely, while a local miss can check the distributed cache before falling back to the source of truth. The main challenge is that two cache layers can contain different versions of the same data. The design therefore needs clear invalidation or refresh rules, bounded TTLs, protection against stale local entries, and defined behavior when the distributed cache is unavailable.",
+        "key_concepts": [
+          "Two-level cache",
+          "Local cache",
+          "Distributed cache",
+          "Cache hierarchy",
+          "Consistency",
+          "Failure handling"
+        ],
+        "expected_points": [
+          "The local cache can reduce latency and network traffic for very hot data.",
+          "The distributed cache provides shared data across application instances.",
+          "A local entry can remain stale even after the distributed cache is updated.",
+          "Invalidation and TTL policies must account for both cache layers.",
+          "The system needs a fallback strategy when the distributed cache is unavailable."
+        ],
+        "common_mistakes": [
+          "Assuming two cache layers automatically improve performance without considering invalidation overhead.",
+          "Ignoring stale local entries after a distributed-cache update.",
+          "Treating the distributed cache as an always-available dependency."
+        ],
+        "example": "A request checks a local cache first. On a local miss it checks the shared cache, then the database if necessary. When a product changes, both the local and distributed representations need a defined refresh or invalidation strategy.",
+        "follow_up_questions": [
+          "How would you prevent a stale local entry from surviving much longer than the distributed-cache entry?",
+          "What should happen to requests when the distributed cache is unavailable but local entries exist?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why both local and distributed caches might be used.",
+          "average": "Understands the latency benefit but misses multi-layer consistency issues.",
+          "good": "Explains the lookup hierarchy and addresses stale local data, TTL, invalidation, and failure handling.",
+          "excellent": "Designs the two-level cache around explicit freshness guarantees, failure behavior, and the trade-off between local latency and consistency complexity."
+        },
+        "skills": [
+          "Caching",
+          "Distributed Systems",
+          "Architecture",
+          "Performance"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "two-level-cache",
+          "local-cache",
+          "distributed-cache",
+          "cache-hierarchy"
+        ]
+      },
+      {
+        "id": "BE-263",
+        "domain": "caching_strategies",
+        "topic": "Distributed Caching",
+        "subtopic": "Versioned Cache Keys and Freshness",
+        "difficulty": "Hard",
+        "question_type": "scenario_based",
+        "question": "A service is deploying a new representation of cached objects while old application instances are still running. How can versioned cache keys reduce compatibility and stale-data risks?",
+        "answer": "A versioned cache key separates entries created under different serialization or data-contract versions, such as `product:v1:123` and `product:v2:123`. During a rolling deployment, new instances can read and write the new version without accidentally interpreting an old representation using the new schema. Versioning also makes controlled cache migration and rollback easier because old and new entries are isolated. It does not by itself solve source-data staleness; TTL and invalidation policies are still required. After the rollout, old entries can expire naturally or be removed deliberately.",
+        "key_concepts": [
+          "Versioned cache keys",
+          "Rolling deployment",
+          "Schema evolution",
+          "Backward compatibility",
+          "Cache migration",
+          "Staleness"
+        ],
+        "expected_points": [
+          "A version component isolates entries created under different data representations.",
+          "Versioning reduces the risk of old application instances reading incompatible new representations and vice versa.",
+          "It can simplify rollout, rollback, and controlled cache migration.",
+          "Versioning does not replace freshness or invalidation mechanisms.",
+          "Old versions should have a defined cleanup or expiration strategy."
+        ],
+        "common_mistakes": [
+          "Assuming key versioning automatically keeps cached business data fresh.",
+          "Changing the key format without planning cleanup for old entries.",
+          "Ignoring rolling deployments where old and new application versions coexist."
+        ],
+        "example": "During a deployment, `user:v1:42` stores the old serialized profile structure while the new application uses `user:v2:42`. The two formats can coexist temporarily without the new code accidentally parsing the old structure.",
+        "follow_up_questions": [
+          "When would you prefer versioned keys over trying to make the new application backward-compatible with the old cached representation?",
+          "How would you safely remove old cache versions after a deployment?"
+        ],
+        "evaluation_rubric": {
+          "poor": "Cannot explain why a cache key would contain a version.",
+          "average": "Understands that versions separate entries but cannot connect this to deployment safety.",
+          "good": "Explains rolling deployments, schema compatibility, migration, rollback, and cleanup.",
+          "excellent": "Uses versioning as a deliberate deployment and data-contract strategy while clearly separating compatibility concerns from cache freshness and invalidation."
+        },
+        "skills": [
+          "Caching",
+          "Deployment Architecture",
+          "Schema Evolution",
+          "Distributed Systems"
+        ],
+        "roles": [
+          "backend_developer",
+          "software_developer",
+          "full_stack_developer"
+        ],
+        "tags": [
+          "versioned-keys",
+          "schema-evolution",
+          "rolling-deployment",
+          "cache-migration"
+        ]
+      }
+    ]
+  }
+}
