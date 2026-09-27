@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { getRoles, createInterview } from '../services/api';
-import { useSessionId } from '../hooks/useSessionId';
 import type { Role } from '../types/role';
 import type { ExperienceLevel, Difficulty, InterviewMode } from '../types/interview';
 
@@ -24,7 +23,6 @@ const DURATIONS = [15, 30, 45, 60];
 
 export default function InterviewSetupPage() {
   const navigate = useNavigate();
-  const userId = useSessionId();
 
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [experience, setExperience] = useState<ExperienceLevel>('junior');
@@ -50,7 +48,6 @@ export default function InterviewSetupPage() {
   const handleStart = () => {
     if (!selectedRole) return;
     mutation.mutate({
-      user_id: userId,
       role_id: selectedRole.id,
       experience_level: experience,
       difficulty,
@@ -204,7 +201,7 @@ export default function InterviewSetupPage() {
           {/* Step 6: Interview Mode */}
           <section className="mt-10">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">6. Interview Mode</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => setInterviewMode('text')}
                 className={`text-left rounded-xl p-5 border-2 transition-all cursor-pointer ${
@@ -240,6 +237,25 @@ export default function InterviewSetupPage() {
                   <h3 className="font-semibold text-gray-900 text-lg">Voice Mode</h3>
                 </div>
                 <p className="text-sm text-gray-600">Hear questions spoken by AI and respond with your microphone. Closest to a real interview experience.</p>
+                <p className="text-xs text-amber-600 mt-2 font-medium">Requires microphone access</p>
+              </button>
+              <button
+                onClick={() => setInterviewMode('live')}
+                className={`text-left rounded-xl p-5 border-2 transition-all cursor-pointer ${
+                  interviewMode === 'live'
+                    ? 'border-primary-500 bg-primary-50 shadow-md'
+                    : 'border-gray-200 bg-white hover:border-primary-300 hover:shadow-sm'
+                }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">
+                    <svg className="w-7 h-7 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+                    </svg>
+                  </span>
+                  <h3 className="font-semibold text-gray-900 text-lg">Live Bot</h3>
+                </div>
+                <p className="text-sm text-gray-600">Fully hands-free conversation. The bot speaks questions and listens to your answers automatically — no buttons needed.</p>
                 <p className="text-xs text-amber-600 mt-2 font-medium">Requires microphone access</p>
               </button>
             </div>

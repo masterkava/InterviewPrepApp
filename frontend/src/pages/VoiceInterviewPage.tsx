@@ -18,6 +18,20 @@ import type {
 
 type RecordingState = 'idle' | 'recording' | 'transcribing' | 'reviewing';
 
+const DRAFT_KEY = (id: string) => `interview_draft_${id}`;
+
+function saveDraft(interviewId: string, text: string) {
+  try { if (text) localStorage.setItem(DRAFT_KEY(interviewId), text); else localStorage.removeItem(DRAFT_KEY(interviewId)); } catch {}
+}
+
+function loadDraft(interviewId: string): string {
+  try { return localStorage.getItem(DRAFT_KEY(interviewId)) ?? ''; } catch { return ''; }
+}
+
+function clearDraft(interviewId: string) {
+  try { localStorage.removeItem(DRAFT_KEY(interviewId)); } catch {}
+}
+
 export default function VoiceInterviewPage() {
   const { interviewId } = useParams<{ interviewId: string }>();
   const location = useLocation();
@@ -39,6 +53,7 @@ export default function VoiceInterviewPage() {
   const [isPlayingQuestion, setIsPlayingQuestion] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [ttsError, setTtsError] = useState<string | null>(null);
+  const [showPauseConfirm, setShowPauseConfirm] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -74,6 +89,23 @@ export default function VoiceInterviewPage() {
     setTtsError(null);
     playQuestionTTS(currentQuestion.question_text);
   }, [currentQuestion?.id]);
+
+  // Restore draft transcript on mount
+  useEffect(() => {
+    if (!interviewId) return;
+    const draft = loadDraft(interviewId);
+    if (draft) {
+      setTranscript(draft);
+      setRecordingState('reviewing');
+    }
+  }, [interviewId]);
+
+  // Auto-save draft transcript
+  useEffect(() => {
+    if (!interviewId || recordingState !== 'reviewing') return;
+    const timer = setTimeout(() => saveDraft(interviewId, transcript), 500);
+    return () => clearTimeout(timer);
+  }, [transcript, interviewId, recordingState]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -172,6 +204,7 @@ export default function VoiceInterviewPage() {
       setRecordingState('reviewing');
     } catch {
       setTranscript('');
+      setAudioBlob(null);
       setRecordingState('reviewing');
       setTtsError('Transcription failed. You can type your answer manually.');
     }
@@ -189,8 +222,12 @@ export default function VoiceInterviewPage() {
       const responseTime = Math.round((Date.now() - answerStartTime) / 1000);
       let audioUrl: string | undefined;
       if (audioBlob) {
-        const uploadResult = await uploadAudio(audioBlob);
-        audioUrl = uploadResult.audio_url;
+        try {
+          const uploadResult = await uploadAudio(audioBlob);
+          audioUrl = uploadResult.audio_url;
+        } catch {
+          // Audio upload failed — submit text answer without audio
+        }
       }
       return submitAnswer(interviewId!, {
         question_id: currentQuestion!.id,
@@ -220,6 +257,7 @@ export default function VoiceInterviewPage() {
       setRecordingState('idle');
       setTranscript('');
       setAudioBlob(null);
+      if (interviewId) clearDraft(interviewId);
 
       if (data.interview_complete) {
         setTimeout(() => {
@@ -288,13 +326,21 @@ export default function VoiceInterviewPage() {
             </div>
           )}
         </div>
-        <button
-          onClick={() => completeMutation.mutate()}
-          disabled={completeMutation.isPending}
-          className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
-        >
-          End Interview
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowPauseConfirm(true)}
+            className="px-4 py-2 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            Pause &amp; Exit
+          </button>
+          <button
+            onClick={() => completeMutation.mutate()}
+            disabled={completeMutation.isPending}
+            className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            End Interview
+          </button>
+        </div>
       </div>
 
       {/* Main content area */}
@@ -456,6 +502,41 @@ export default function VoiceInterviewPage() {
           </div>
         )}
       </div>
+
+      {/* Pause & Exit confirmation */}
+      {showPauseConfirm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Pause Interview?</h3>
+            <p className="text-sm text-gray-600 mb-1">
+              Your submitted answers are saved. You can resume this interview anytime from your Interview History.
+            </p>
+            {transcript.trim() && (
+              <p className="text-sm text-amber-600 mb-4">
+                Your current draft answer will be saved and restored when you return.
+              </p>
+            )}
+            {!transcript.trim() && <div className="mb-4" />}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPauseConfirm(false)}
+                className="flex-1 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Continue Interview
+              </button>
+              <button
+                onClick={() => {
+                  if (interviewId) saveDraft(interviewId, transcript);
+                  navigate('/history', { replace: true });
+                }}
+                className="flex-1 py-2.5 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors cursor-pointer"
+              >
+                Save &amp; Exit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

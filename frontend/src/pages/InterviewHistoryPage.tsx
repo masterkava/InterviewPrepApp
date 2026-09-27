@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getUserInterviews } from '../services/api';
-import { useSessionId } from '../hooks/useSessionId';
 import type { InterviewHistoryItem } from '../types/interview';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -15,12 +14,11 @@ const PAGE_SIZE = 10;
 
 export default function InterviewHistoryPage() {
   const navigate = useNavigate();
-  const userId = useSessionId();
   const [page, setPage] = useState(0);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['history', userId, page],
-    queryFn: () => getUserInterviews(userId, PAGE_SIZE, page * PAGE_SIZE),
+    queryKey: ['history', page],
+    queryFn: () => getUserInterviews(PAGE_SIZE, page * PAGE_SIZE),
   });
 
   return (
@@ -104,7 +102,22 @@ export default function InterviewHistoryPage() {
 function HistoryCard({ interview }: { interview: InterviewHistoryItem }) {
   const navigate = useNavigate();
   const status = STATUS_CONFIG[interview.status] ?? STATUS_CONFIG.configured;
-  const hasReport = interview.status === 'completed' && interview.overall_score != null;
+  const isCompleted = interview.status === 'completed';
+  const isClickable = isCompleted || interview.status === 'in_progress' || interview.status === 'configured';
+
+  const handleClick = () => {
+    if (isCompleted) {
+      navigate(`/interview/${interview.id}/report`);
+    } else if (interview.status === 'in_progress') {
+      navigate(`/interview/${interview.id}/lobby`, {
+        state: { resume: true, interview_mode: interview.interview_mode },
+      });
+    } else if (interview.status === 'configured') {
+      navigate(`/interview/${interview.id}/lobby`, {
+        state: { interview_mode: interview.interview_mode },
+      });
+    }
+  };
 
   const scoreColor =
     interview.overall_score != null
@@ -121,11 +134,30 @@ function HistoryCard({ interview }: { interview: InterviewHistoryItem }) {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 
+  const formatDuration = () => {
+    if (!interview.started_at || !interview.completed_at) return null;
+    const start = new Date(interview.started_at).getTime();
+    const end = new Date(interview.completed_at).getTime();
+    const mins = Math.round((end - start) / 60000);
+    if (mins < 1) return '<1 min';
+    return `${mins} min`;
+  };
+
+  const duration = formatDuration();
+
+  const actionLabel = isCompleted
+    ? 'View Report'
+    : interview.status === 'in_progress'
+      ? 'Resume'
+      : interview.status === 'configured'
+        ? 'Start'
+        : '';
+
   return (
     <div
-      onClick={() => hasReport && navigate(`/interview/${interview.id}/report`)}
+      onClick={handleClick}
       className={`bg-white rounded-xl border border-gray-200 p-5 transition-all ${
-        hasReport
+        isClickable
           ? 'hover:border-primary-300 hover:shadow-md cursor-pointer'
           : ''
       }`}
@@ -138,10 +170,18 @@ function HistoryCard({ interview }: { interview: InterviewHistoryItem }) {
               {status.label}
             </span>
           </div>
-          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+          <div className="flex items-center gap-3 mt-2 text-sm text-gray-500 flex-wrap">
             <span className="capitalize">{interview.experience_level}</span>
             <span>&#x2022;</span>
             <span>{interview.questions_asked} question{interview.questions_asked !== 1 ? 's' : ''}</span>
+            <span>&#x2022;</span>
+            <span>{interview.interview_mode === 'live' ? 'Live Bot' : interview.interview_mode === 'voice' ? 'Voice' : 'Text'}</span>
+            {duration && (
+              <>
+                <span>&#x2022;</span>
+                <span>{duration}</span>
+              </>
+            )}
             <span>&#x2022;</span>
             <span>{formatDate(interview.completed_at ?? interview.started_at)}</span>
           </div>
@@ -155,14 +195,11 @@ function HistoryCard({ interview }: { interview: InterviewHistoryItem }) {
               </div>
               <div className="text-xs text-gray-400">Score</div>
             </div>
-          ) : (
-            <div className="text-right">
-              <div className="text-lg text-gray-300">—</div>
-              <div className="text-xs text-gray-400">No score</div>
-            </div>
-          )}
+          ) : actionLabel ? (
+            <span className="text-sm font-medium text-primary-600">{actionLabel}</span>
+          ) : null}
 
-          {hasReport && (
+          {isClickable && (
             <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>

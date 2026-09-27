@@ -29,10 +29,22 @@ class AIError(AppError):
         super().__init__(message, code)
 
 
+class AuthenticationError(AppError):
+    def __init__(self, message: str = "Authentication failed", code: str = "AUTH_ERROR") -> None:
+        super().__init__(message, code)
+
+
+class RateLimitError(AppError):
+    def __init__(self, message: str = "Too many requests", code: str = "RATE_LIMIT") -> None:
+        super().__init__(message, code)
+
+
 STATUS_MAP: dict[type[AppError], int] = {
     NotFoundError: 404,
+    AuthenticationError: 401,
     ConflictError: 409,
     ValidationError: 422,
+    RateLimitError: 429,
     AIError: 503,
 }
 

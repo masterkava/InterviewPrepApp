@@ -1,0 +1,176 @@
+export type InterviewMode = 'text' | 'voice';
+
+export interface InterviewConfig {
+  role_id: string;
+  experience_level: ExperienceLevel;
+  difficulty: Difficulty;
+  duration_minutes: number;
+  focus_areas?: string[];
+  interview_mode: InterviewMode;
+}
+
+export type ExperienceLevel = 'fresher' | 'junior' | 'mid' | 'senior';
+export type Difficulty = 'easy' | 'medium' | 'hard' | 'adaptive';
+
+export interface InterviewSession {
+  id: string;
+  user_id: string;
+  role: { id: string; name: string };
+  experience_level: string;
+  difficulty: string;
+  duration_minutes: number;
+  question_budget: number;
+  focus_areas: string[] | null;
+  status: string;
+  created_at: string;
+}
+
+export interface Question {
+  id: string;
+  sequence_number: number;
+  question_text: string;
+  difficulty: string;
+  skill: string;
+  question_type: string;
+  parent_question_id?: string | null;
+}
+
+export interface Progress {
+  current: number;
+  total: number;
+  skills_covered: string[];
+  skills_remaining: string[];
+}
+
+export interface InterviewStartResponse {
+  session_id: string;
+  status: string;
+  interviewer_message: string;
+  question: Question;
+  progress: Progress;
+}
+
+export interface EvaluationResponse {
+  question_id: string;
+  overall_score: number;
+  technical_correctness: number;
+  conceptual_depth: number;
+  communication_clarity: number;
+  relevance: number;
+  problem_solving: number;
+  completeness: number;
+  feedback: string;
+  strengths: string[];
+  weaknesses: string[];
+}
+
+export interface AnswerRequest {
+  question_id: string;
+  answer_text: string;
+  response_time_seconds?: number;
+  audio_url?: string;
+}
+
+export interface AnswerResponse {
+  evaluation: EvaluationResponse;
+  next_question: Question | null;
+  progress: Progress;
+  interview_complete: boolean;
+  closing_message: string | null;
+}
+
+export interface InterviewCompleteResponse {
+  session_id: string;
+  status: string;
+  questions_asked: number;
+  question_budget: number;
+  message: string;
+}
+
+export interface ReportResponse {
+  id: string;
+  session_id: string;
+  overall_score: number;
+  technical_score: number;
+  communication_score: number;
+  problem_solving_score: number;
+  confidence_score: number;
+  readiness_level: string;
+  summary: string;
+  strengths: string[];
+  weaknesses: string[];
+  recommendations: string[];
+  recommended_topics: string[];
+  category_breakdown: Record<string, number>;
+  questions: ReportQuestion[];
+  created_at: string;
+}
+
+export interface ReportQuestion {
+  sequence_number: number;
+  question_text: string;
+  answer_text: string;
+  evaluation: {
+    overall_score: number;
+    feedback: string;
+    strengths: string[];
+    weaknesses: string[];
+  };
+  reference_answer?: string;
+  expected_concepts?: string[];
+  matched_concepts?: string[];
+  missed_concepts?: string[];
+}
+
+export interface InterviewHistoryItem {
+  id: string;
+  role_name: string;
+  experience_level: string;
+  status: string;
+  overall_score: number | null;
+  questions_asked: number;
+  interview_mode: InterviewMode;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface InterviewHistoryResponse {
+  interviews: InterviewHistoryItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+// --- Question Bank ---
+export interface QuestionBankItem {
+  id: string;
+  category: string;
+  category_label: string;
+  topic: string;
+  subtopic: string;
+  difficulty: string;
+  question_type: string;
+  question_text: string;
+  answer: string;
+  key_concepts: string[];
+}
+
+export interface QuestionBankCategory {
+  slug: string;
+  label: string;
+  topics: string[];
+  count: number;
+}
+
+export interface QuestionBankResponse {
+  questions: QuestionBankItem[];
+  total: number;
+  page: number;
+  limit: number;
+  total_pages: number;
+}
+
+export interface QuestionBankMetaResponse {
+  categories: QuestionBankCategory[];
+  total: number;
+}

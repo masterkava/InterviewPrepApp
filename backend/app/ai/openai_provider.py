@@ -1,7 +1,10 @@
 """OpenAI LLM provider implementation."""
 
 import json
+import ssl
+from pathlib import Path
 
+import httpx
 import structlog
 from openai import AsyncOpenAI
 from pydantic import ValidationError
@@ -14,10 +17,19 @@ logger = structlog.get_logger()
 
 STRUCTURED_OUTPUT_MODELS = {"gpt-4o", "gpt-4o-mini", "gpt-4o-2024-08-06"}
 
+AVG_CERT = Path(__file__).resolve().parent.parent.parent / "avg_root.pem"
+
 
 class OpenAIProvider(LLMProvider):
     def __init__(self) -> None:
-        self._client = AsyncOpenAI(api_key=settings.openai_api_key)
+        http_client = None
+        if AVG_CERT.exists():
+            ctx = ssl.create_default_context(cafile=str(AVG_CERT))
+            http_client = httpx.AsyncClient(verify=ctx)
+        self._client = AsyncOpenAI(
+            api_key=settings.openai_api_key,
+            http_client=http_client,
+        )
 
     async def chat_completion(
         self,

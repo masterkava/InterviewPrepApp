@@ -1,7 +1,6 @@
-export type InterviewMode = 'text' | 'voice';
+export type InterviewMode = 'text' | 'voice' | 'live';
 
 export interface InterviewConfig {
-  user_id?: string;
   role_id: string;
   experience_level: ExperienceLevel;
   difficulty: Difficulty;
@@ -140,6 +139,7 @@ export interface InterviewHistoryItem {
   status: string;
   overall_score: number | null;
   questions_asked: number;
+  interview_mode: InterviewMode;
   started_at: string | null;
   completed_at: string | null;
 }

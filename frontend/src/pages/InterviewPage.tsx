@@ -11,6 +11,20 @@ import type {
   Question,
 } from '../types/interview';
 
+const DRAFT_KEY = (id: string) => `interview_draft_${id}`;
+
+function loadDraft(interviewId: string): string {
+  try { return localStorage.getItem(DRAFT_KEY(interviewId)) ?? ''; } catch { return ''; }
+}
+
+function saveDraft(interviewId: string, text: string) {
+  try { if (text) localStorage.setItem(DRAFT_KEY(interviewId), text); else localStorage.removeItem(DRAFT_KEY(interviewId)); } catch {}
+}
+
+function clearDraft(interviewId: string) {
+  try { localStorage.removeItem(DRAFT_KEY(interviewId)); } catch {}
+}
+
 export default function InterviewPage() {
   const { interviewId } = useParams<{ interviewId: string }>();
   const location = useLocation();
@@ -22,7 +36,8 @@ export default function InterviewPage() {
     startData?.question ?? null,
   );
   const [progress, setProgress] = useState<Progress | null>(startData?.progress ?? null);
-  const [answerText, setAnswerText] = useState('');
+  const [answerText, setAnswerText] = useState(() => loadDraft(interviewId ?? ''));
+  const [showPauseConfirm, setShowPauseConfirm] = useState(false);
   const [conversation, setConversation] = useState<ConversationEntry[]>(() => {
     const entries: ConversationEntry[] = [];
     if (startData?.interviewer_message) {
@@ -73,6 +88,13 @@ export default function InterviewPage() {
     setAnswerStartTime(Date.now());
     textareaRef.current?.focus();
   }, [currentQuestion?.id]);
+
+  // Auto-save draft as user types
+  useEffect(() => {
+    if (!interviewId) return;
+    const timer = setTimeout(() => saveDraft(interviewId, answerText), 500);
+    return () => clearTimeout(timer);
+  }, [answerText, interviewId]);
 
   const answerMutation = useMutation({
     mutationFn: (text: string) => {
@@ -147,6 +169,7 @@ export default function InterviewPage() {
       { type: 'answer', text: trimmed, timestamp: Date.now() },
     ]);
     setAnswerText('');
+    if (interviewId) clearDraft(interviewId);
     answerMutation.mutate(trimmed);
   }, [answerText, currentQuestion, answerMutation]);
 
@@ -205,13 +228,21 @@ export default function InterviewPage() {
             </div>
           )}
         </div>
-        <button
-          onClick={() => completeMutation.mutate()}
-          disabled={completeMutation.isPending}
-          className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
-        >
-          End Interview
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowPauseConfirm(true)}
+            className="px-4 py-2 text-sm border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            Pause &amp; Exit
+          </button>
+          <button
+            onClick={() => completeMutation.mutate()}
+            disabled={completeMutation.isPending}
+            className="px-4 py-2 text-sm border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            End Interview
+          </button>
+        </div>
       </div>
 
       {/* Conversation area */}
@@ -266,6 +297,41 @@ export default function InterviewPage() {
         <p className="mt-2 text-sm text-red-600">
           Failed to submit answer. Please try again.
         </p>
+      )}
+
+      {/* Pause & Exit confirmation */}
+      {showPauseConfirm && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Pause Interview?</h3>
+            <p className="text-sm text-gray-600 mb-1">
+              Your submitted answers are saved. You can resume this interview anytime from your Interview History.
+            </p>
+            {answerText.trim() && (
+              <p className="text-sm text-amber-600 mb-4">
+                Your current draft answer will be saved and restored when you return.
+              </p>
+            )}
+            {!answerText.trim() && <div className="mb-4" />}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPauseConfirm(false)}
+                className="flex-1 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Continue Interview
+              </button>
+              <button
+                onClick={() => {
+                  if (interviewId) saveDraft(interviewId, answerText);
+                  navigate('/history', { replace: true });
+                }}
+                className="flex-1 py-2.5 rounded-lg bg-primary-600 text-white font-medium hover:bg-primary-700 transition-colors cursor-pointer"
+              >
+                Save &amp; Exit
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

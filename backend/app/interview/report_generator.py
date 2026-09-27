@@ -12,7 +12,6 @@ from sqlalchemy.orm import selectinload
 from app.ai.provider import LLMProvider
 from app.ai.schemas import ReportAnalysisOutput
 from app.config import settings
-from app.interview.concept_evaluator import _tokenize
 from app.models.interview import (
     Evaluation,
     InterviewAnswer,
@@ -141,20 +140,12 @@ class ReportGenerator:
             seed = seed_lookup.get(q.question_text)
             if seed and seed.reference_answer:
                 entry["reference_answer"] = seed.reference_answer
-                concepts = seed.expected_concepts or []
-                entry["expected_concepts"] = concepts
-                if concepts:
-                    answer_tokens = set(_tokenize(q.answer.answer_text))
-                    matched = []
-                    missed = []
-                    for concept in concepts:
-                        concept_words = set(_tokenize(concept))
-                        if concept_words & answer_tokens:
-                            matched.append(concept)
-                        else:
-                            missed.append(concept)
-                    entry["matched_concepts"] = matched
-                    entry["missed_concepts"] = missed
+                entry["expected_concepts"] = seed.expected_concepts or []
+
+            if ev.concepts_identified:
+                entry["matched_concepts"] = ev.concepts_identified
+            if ev.concepts_missed:
+                entry["missed_concepts"] = ev.concepts_missed
 
             questions_data.append(entry)
 

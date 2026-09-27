@@ -5,6 +5,8 @@ from pathlib import Path
 
 from fastapi import APIRouter, Query
 
+from app.api.deps import CurrentUser
+
 router = APIRouter(prefix="/question-bank", tags=["question-bank"])
 
 BANK_DIR = Path(__file__).resolve().parent.parent / "db" / "question_banks"
@@ -118,6 +120,7 @@ def reload_cache() -> None:
 
 @router.get("")
 async def list_questions(
+    _user: CurrentUser,
     category: str | None = None,
     topic: str | None = None,
     difficulty: str | None = None,
@@ -154,7 +157,7 @@ async def list_questions(
 
 
 @router.get("/meta")
-async def get_metadata():
+async def get_metadata(_user: CurrentUser):
     questions = _get_questions()
 
     categories_map: dict[str, set[str]] = {}

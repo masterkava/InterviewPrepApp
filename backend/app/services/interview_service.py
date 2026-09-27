@@ -83,8 +83,8 @@ class InterviewService:
             created_at=interview.created_at,
         )
 
-    async def start_interview(self, interview_id: UUID) -> InterviewStartResponse:
-        interview = await self._get_interview(interview_id)
+    async def start_interview(self, interview_id: UUID, user_id: UUID | None = None) -> InterviewStartResponse:
+        interview = await self._get_interview(interview_id, user_id)
         if interview.status != "configured":
             raise ConflictError(f"Interview is already {interview.status}")
 
@@ -113,8 +113,8 @@ class InterviewService:
             ),
         )
 
-    async def submit_answer(self, interview_id: UUID, req: AnswerRequest) -> AnswerResponse:
-        interview = await self._get_interview(interview_id)
+    async def submit_answer(self, interview_id: UUID, req: AnswerRequest, user_id: UUID | None = None) -> AnswerResponse:
+        interview = await self._get_interview(interview_id, user_id)
         if interview.status != "in_progress":
             raise ConflictError(f"Interview is not in progress (status: {interview.status})")
 
@@ -171,8 +171,55 @@ class InterviewService:
             closing_message=result.closing_message,
         )
 
-    async def complete_interview(self, interview_id: UUID) -> InterviewCompleteResponse:
-        interview = await self._get_interview(interview_id)
+    async def resume_interview(self, interview_id: UUID, user_id: UUID | None = None) -> InterviewStartResponse:
+        interview = await self._get_interview(interview_id, user_id)
+        if interview.status != "in_progress":
+            raise ConflictError(f"Interview cannot be resumed (status: {interview.status})")
+
+        result = await self._db.execute(
+            select(InterviewQuestion)
+            .where(InterviewQuestion.session_id == interview.id)
+            .options(
+                selectinload(InterviewQuestion.skill),
+                selectinload(InterviewQuestion.answer),
+            )
+            .order_by(InterviewQuestion.sequence_number)
+        )
+        questions = list(result.scalars().unique().all())
+
+        unanswered = next((q for q in questions if q.answer is None), None)
+        if unanswered is None:
+            raise ConflictError("All questions have been answered. Complete the interview instead.")
+
+        engine = self._get_engine()
+        state = await engine._build_state(interview)
+        skill_slug = unanswered.skill.slug if unanswered.skill else "general"
+
+        return InterviewStartResponse(
+            session_id=interview.id,
+            status=interview.status,
+            interviewer_message=(
+                f"Welcome back! Let's continue your {interview.role.name} interview. "
+                f"Here's your next question."
+            ),
+            question=QuestionResponse(
+                id=unanswered.id,
+                sequence_number=unanswered.sequence_number,
+                question_text=unanswered.question_text,
+                difficulty=unanswered.difficulty,
+                skill=skill_slug,
+                question_type=unanswered.question_type,
+            ),
+            progress=ProgressResponse(
+                current=interview.questions_asked,
+                total=interview.question_budget,
+                skills_covered=state.skills_covered,
+                skills_remaining=state.skills_remaining,
+            ),
+        )
+
+    async def complete_interview(self, interview_id: UUID, user_id: UUID | None = None) -> InterviewCompleteResponse:
+        interview = await self._get_interview(interview_id, user_id)
         if interview.status not in ("in_progress", "configured"):
             raise ConflictError(f"Interview cannot be completed (status: {interview.status})")
         interview.status = "completed"
@@ -186,8 +233,8 @@ class InterviewService:
             message="Interview ended early. Your report will be generated based on the questions answered.",
         )
 
-    async def get_report(self, interview_id: UUID) -> InterviewReport:
-        interview = await self._get_interview(interview_id)
+    async def get_report(self, interview_id: UUID, user_id: UUID | None = None) -> InterviewReport:
+        interview = await self._get_interview(interview_id, user_id)
         if interview.status != "completed":
             raise ConflictError("Interview has not been completed yet")
 
@@ -207,7 +254,7 @@ class InterviewService:
 
     async def get_user_interviews(
         self, user_id: UUID, limit: int = 20, offset: int = 0,
-    ) -> tuple[list[InterviewSession], int]:
+    ) -> tuple[list[tuple[InterviewSession, float | None]], int]:
         from sqlalchemy import func
         count_result = await self._db.execute(
             select(func.count()).select_from(InterviewSession).where(InterviewSession.user_id == user_id)
@@ -215,19 +262,22 @@ class InterviewService:
         total = count_result.scalar() or 0
 
         result = await self._db.execute(
-            select(InterviewSession)
+            select(InterviewSession, InterviewReport.overall_score)
+            .outerjoin(InterviewReport, InterviewReport.session_id == InterviewSession.id)
             .where(InterviewSession.user_id == user_id)
             .options(selectinload(InterviewSession.role))
             .order_by(InterviewSession.created_at.desc())
             .limit(limit)
             .offset(offset)
         )
-        interviews = list(result.scalars().all())
-        return interviews, total
+        rows = list(result.all())
+        return rows, total
 
-    async def _get_interview(self, interview_id: UUID) -> InterviewSession:
+    async def _get_interview(self, interview_id: UUID, user_id: UUID | None = None) -> InterviewSession:
         interview = await self._interview_repo.get_by_id(interview_id)
         if interview is None:
+            raise NotFoundError("Interview", str(interview_id))
+        if user_id is not None and interview.user_id != user_id:
             raise NotFoundError("Interview", str(interview_id))
         return interview
 

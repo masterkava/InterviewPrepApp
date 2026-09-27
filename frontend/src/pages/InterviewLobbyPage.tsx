@@ -1,6 +1,6 @@
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
-import { startInterview } from '../services/api';
+import { startInterview, resumeInterview } from '../services/api';
 import InterviewerAvatar from '../components/InterviewerAvatar';
 import type { InterviewMode } from '../types/interview';
 
@@ -8,13 +8,29 @@ export default function InterviewLobbyPage() {
   const { interviewId } = useParams<{ interviewId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const interviewMode: InterviewMode =
-    (location.state as { interview_mode?: InterviewMode })?.interview_mode ?? 'text';
+  const locState = location.state as { interview_mode?: InterviewMode; resume?: boolean } | null;
+  const interviewMode: InterviewMode = locState?.interview_mode ?? 'text';
+  const isResume = locState?.resume === true;
 
-  const sessionRoute = interviewMode === 'voice' ? 'voice-session' : 'session';
+  const sessionRoute = interviewMode === 'live' ? 'live-session' : interviewMode === 'voice' ? 'voice-session' : 'session';
 
   const startMutation = useMutation({
-    mutationFn: () => startInterview(interviewId!),
+    mutationFn: async () => {
+      if (interviewMode === 'live') {
+        return null;
+      }
+      if (isResume) {
+        return resumeInterview(interviewId!);
+      }
+      try {
+        return await startInterview(interviewId!);
+      } catch (err: any) {
+        if (err?.status === 409) {
+          return resumeInterview(interviewId!);
+        }
+        throw err;
+      }
+    },
     onSuccess: (data) => {
       navigate(`/interview/${interviewId}/${sessionRoute}`, {
         state: {
@@ -37,21 +53,30 @@ export default function InterviewLobbyPage() {
         {/* Header */}
         <div className="bg-gradient-to-br from-primary-600 to-primary-700 px-8 py-10 text-center text-white">
           <InterviewerAvatar state="idle" size="lg" />
-          <h1 className="mt-4 text-2xl font-bold">Your Interviewer is Ready</h1>
+          <h1 className="mt-4 text-2xl font-bold">
+            {isResume ? 'Welcome Back' : 'Your Interviewer is Ready'}
+          </h1>
           <p className="mt-2 text-primary-100">
-            Take a deep breath. This is a safe space to practice.
+            {isResume
+              ? "Let's pick up where you left off."
+              : 'Take a deep breath. This is a safe space to practice.'}
           </p>
         </div>
 
         {/* Instructions */}
         <div className="px-8 py-8">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">Before You Begin</h2>
-          {interviewMode === 'voice' && (
+          {(interviewMode === 'voice' || interviewMode === 'live') && (
             <div className="mb-4 p-3 bg-primary-50 border border-primary-200 rounded-lg text-sm text-primary-800 flex items-center gap-2">
               <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
               </svg>
-              <span><strong>Voice Mode</strong> — Questions will be spoken aloud. Use your microphone to answer.</span>
+              <span>
+                {interviewMode === 'live'
+                  ? <><strong>Live Bot Mode</strong> — The interviewer will speak questions and automatically listen for your answers. Fully hands-free.</>
+                  : <><strong>Voice Mode</strong> — Questions will be spoken aloud. Use your microphone to answer.</>
+                }
+              </span>
             </div>
           )}
           <ul className="space-y-3">
@@ -61,7 +86,9 @@ export default function InterviewLobbyPage() {
             />
             <Instruction
               number={2}
-              text={interviewMode === 'voice'
+              text={interviewMode === 'live'
+                ? "Just speak naturally. The AI will detect when you finish and move to the next question automatically."
+                : interviewMode === 'voice'
                 ? "Click the microphone button to record your answer. You can review the transcript before submitting."
                 : "Type your answers as you would speak in a real interview. Be clear and structured."
               }
@@ -89,10 +116,10 @@ export default function InterviewLobbyPage() {
             {startMutation.isPending ? (
               <span className="flex items-center justify-center gap-2">
                 <Spinner />
-                Starting Interview...
+                {isResume ? 'Resuming...' : 'Starting Interview...'}
               </span>
             ) : (
-              "Begin Interview"
+              isResume ? "Resume Interview" : "Begin Interview"
             )}
           </button>
 

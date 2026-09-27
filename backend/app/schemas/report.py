@@ -46,6 +46,7 @@ class InterviewHistoryItem(BaseModel):
     status: str
     overall_score: float | None
     questions_asked: int
+    interview_mode: str = "text"
     started_at: datetime | None
     completed_at: datetime | None
 

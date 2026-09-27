@@ -4,30 +4,35 @@ Role: {role_name}
 Experience level: {experience_level}
 Question: {question_text}
 Candidate's answer: {answer_text}
+{grading_context}
+EXPERIENCE-LEVEL CALIBRATION — adjust scoring expectations based on the candidate's level:
+- Fresher (0-1 yr): A correct textbook definition with basic understanding = 7-8. Real-world examples or depth beyond fundamentals = 9-10.
+- Junior (1-2 yr): A correct definition alone = 5-6. Needs practical application and some depth to reach 7-8.
+- Mid-level (3-5 yr): Correct definition alone = 4-5. Needs trade-off analysis, real-world patterns, and depth to reach 7-8.
+- Senior (5+ yr): Correct definition alone = 3-4. Needs system-level thinking, architectural awareness, and mentoring-level clarity to reach 7-8.
 
-Score this answer as you would evaluate a {experience_level} candidate. Be calibrated and honest — do NOT default to a 7/10 for every answer.
+SCORING ANCHORS (0-10 scale):
+- 1-3: Wrong, irrelevant, or fundamentally confused
+- 4-5: Partial understanding with significant gaps
+- 6-7: Correct and relevant but incomplete for this experience level
+- 8-9: Thorough, accurate, and appropriate depth for this level
+- 10: Exemplary — exceeds expectations for this experience level
 
-EXPERIENCE LEVEL EXPECTATIONS:
-- Fresher (0-1 yr): knows fundamentals and basic terminology. Score 7+ only if they show clear understanding beyond surface-level definitions.
-- Junior (1-2 yr): knows fundamentals well, some practical experience. Score 7+ only if they demonstrate applied knowledge.
-- Mid-level (3-5 yr): demonstrates depth, trade-off analysis, real-world experience. Score 7+ requires concrete examples and nuanced understanding.
-- Senior (5+ yr): demonstrates mastery, system-level thinking, mentoring-level clarity. Score 7+ requires deep expertise and architectural awareness.
+EVALUATION RULES:
+1. Score based on CORRECTNESS first, then depth. A correct one-sentence answer is always better than a verbose wrong answer.
+2. Never penalize brevity if the answer is correct and complete for the level. A concise correct answer for a fresher = 7-8.
+3. Strengths must reference specific things the candidate said (quote or paraphrase their words).
+4. Weaknesses must identify specific missing knowledge, not generic phrases like "could be more detailed."
+5. If expected concepts are provided above, report which were covered (concepts_identified) and which were missed (concepts_missed) based on semantic meaning, not keyword matching. If no expected concepts were provided, leave these arrays empty.
+6. The overall_score should reflect a weighted judgment across all dimensions, anchored to the experience level.
 
-SCORING RUBRIC (0-10 scale for each dimension):
-- 0-2: No understanding or completely wrong
-- 3-4: Vague or mostly incorrect, fundamental gaps
-- 5-6: Partially correct, shows some understanding but missing key aspects
-- 7-8: Good understanding with minor gaps
-- 9-10: Excellent, comprehensive answer with depth
-
-Technical Correctness: How factually and technically accurate is the answer?
-Conceptual Depth: Does the candidate understand why, not just what?
-Communication Clarity: Can the candidate explain their thinking clearly and coherently?
-Relevance: Does the answer address the question that was asked?
-Problem Solving: Does the candidate demonstrate analytical thinking?
-Completeness: Does the answer cover the expected scope for this experience level?
-
-Overall Score: Should reflect the weighted quality across all dimensions. A vague one-sentence answer should NOT score above 5. A factually incorrect answer should NOT score above 3.
+Score each dimension for a {experience_level} candidate:
+- Technical Correctness: Is the answer factually and technically accurate?
+- Conceptual Depth: Does the candidate understand WHY, not just WHAT?
+- Communication Clarity: Is the explanation clear and well-structured?
+- Relevance: Does the answer address the actual question asked?
+- Problem Solving: Does the candidate show analytical thinking?
+- Completeness: Does the answer cover the expected scope for a {experience_level} candidate?
 
 Respond with JSON:
 {{
@@ -38,9 +43,11 @@ Respond with JSON:
   "problem_solving": 0-10,
   "completeness": 0-10,
   "overall_score": 0-10,
-  "strengths": ["specific strength 1", "specific strength 2"],
-  "weaknesses": ["specific area for improvement 1", "specific area for improvement 2"],
-  "feedback": "2-3 sentence constructive feedback specific to what the candidate said",
+  "concepts_identified": ["concept the candidate covered", "..."],
+  "concepts_missed": ["concept the candidate did not cover", "..."],
+  "strengths": ["specific strength referencing what the candidate said", "..."],
+  "weaknesses": ["specific gap or missing knowledge area", "..."],
+  "feedback": "2-3 sentence constructive feedback specific to what the candidate said, calibrated to their experience level",
   "follow_up_recommended": true/false,
   "follow_up_reason": "reason for follow-up or null"
 }}

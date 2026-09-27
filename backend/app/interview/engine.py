@@ -13,7 +13,6 @@ from app.ai.schemas import EvaluationOutput
 from app.config import settings
 from app.interview.adaptive_engine import AdaptiveQuestionEngine
 from app.interview.answer_evaluator import AnswerEvaluator
-from app.interview.concept_evaluator import evaluate_with_concepts
 from app.interview.question_engine import QuestionEngine
 from app.interview.state import InterviewState, QuestionRecord
 from app.models.interview import (
@@ -53,6 +52,47 @@ class InterviewEngine:
         self._adaptive_engine = AdaptiveQuestionEngine(session)
         self._question_engine = QuestionEngine(provider)
         self._evaluator = AnswerEvaluator(provider)
+
+    async def preload_all_questions(self, interview: InterviewSession) -> tuple[str, list[QuestionResult]]:
+        """Pre-select all questions upfront for live mode. No evaluation needed."""
+        intro = (
+            f"Hello! I'm your AI interviewer. Let's begin your {interview.role.name} interview. "
+            f"I'll ask you {interview.question_budget} questions. Speak naturally — "
+            f"I'll move to the next question automatically when you finish. Let's go!"
+        )
+
+        questions: list[QuestionResult] = []
+        for i in range(interview.question_budget):
+            state = await self._build_state(interview)
+            question_output = await self._adaptive_engine.pick_question(state)
+            skill_id = self._find_skill_id(interview, question_output.skill_area)
+            q = InterviewQuestion(
+                id=uuid.uuid4(),
+                session_id=interview.id,
+                skill_id=skill_id,
+                sequence_number=i + 1,
+                question_text=question_output.question_text,
+                difficulty=question_output.difficulty,
+                question_type="initial",
+            )
+            self._db.add(q)
+            interview.questions_asked = i + 1
+            await self._db.flush()
+
+            questions.append(QuestionResult(
+                question_id=q.id,
+                sequence_number=q.sequence_number,
+                question_text=q.question_text,
+                difficulty=q.difficulty,
+                skill_slug=question_output.skill_area,
+                question_type=q.question_type,
+            ))
+
+        interview.status = "in_progress"
+        from datetime import datetime, timezone
+        interview.started_at = datetime.now(timezone.utc)
+
+        return intro, questions
 
     async def start_interview(self, interview: InterviewSession) -> tuple[str, QuestionResult]:
         state = await self._build_state(interview)
@@ -126,6 +166,8 @@ class InterviewEngine:
             problem_solving=eval_output.problem_solving,
             completeness=eval_output.completeness,
             overall_score=eval_output.overall_score,
+            concepts_identified=eval_output.concepts_identified,
+            concepts_missed=eval_output.concepts_missed,
             feedback=eval_output.feedback,
             strengths=eval_output.strengths,
             weaknesses=eval_output.weaknesses,
@@ -307,13 +349,8 @@ class InterviewEngine:
     ) -> EvaluationOutput:
         seed_q = await self._find_seed_question(interview.role_id, question.question_text)
 
-        if seed_q and seed_q.expected_concepts and seed_q.reference_answer:
-            return evaluate_with_concepts(
-                answer_text=answer_text,
-                expected_concepts=seed_q.expected_concepts,
-                reference_answer=seed_q.reference_answer,
-                difficulty=question.difficulty,
-            )
+        reference_answer = seed_q.reference_answer if seed_q else None
+        expected_concepts = seed_q.expected_concepts if seed_q else None
 
         try:
             return await self._evaluator.evaluate(
@@ -321,6 +358,8 @@ class InterviewEngine:
                 experience_level=interview.experience_level,
                 question_text=question.question_text,
                 answer_text=answer_text,
+                reference_answer=reference_answer,
+                expected_concepts=expected_concepts,
             )
         except Exception:
             logger.warning("llm.evaluation_failed_using_basic_scoring")

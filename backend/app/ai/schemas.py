@@ -26,6 +26,8 @@ class EvaluationOutput(BaseModel):
     problem_solving: float = Field(ge=0, le=10)
     completeness: float = Field(ge=0, le=10)
     overall_score: float = Field(ge=0, le=10)
+    concepts_identified: list[str] = Field(default_factory=list)
+    concepts_missed: list[str] = Field(default_factory=list)
     strengths: list[str]
     weaknesses: list[str]
     feedback: str

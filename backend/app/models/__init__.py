@@ -6,6 +6,7 @@ from app.models.interview import (
     InterviewReport,
     InterviewSession,
 )
+from app.models.otp import OTPCode
 from app.models.role import Role, RoleSkill, SeedQuestion, Skill
 from app.models.user import User
 
@@ -17,6 +18,7 @@ __all__ = [
     "InterviewQuestion",
     "InterviewReport",
     "InterviewSession",
+    "OTPCode",
     "Role",
     "RoleSkill",
     "SeedQuestion",

@@ -1,15 +1,18 @@
 """Voice API — TTS, STT, and audio file management."""
 
 import hashlib
+import ssl
 import uuid
 from pathlib import Path
 
+import httpx
 import structlog
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import FileResponse
 from openai import AsyncOpenAI
 from pydantic import BaseModel
 
+from app.api.deps import CurrentUser
 from app.config import settings
 
 logger = structlog.get_logger()
@@ -20,13 +23,22 @@ TTS_CACHE_DIR = AUDIO_DIR / "tts_cache"
 
 _openai_client: AsyncOpenAI | None = None
 
+AVG_CERT = Path(__file__).resolve().parent.parent.parent / "avg_root.pem"
+
 
 def _get_client() -> AsyncOpenAI:
     global _openai_client
     if _openai_client is None:
         if not settings.openai_api_key:
             raise HTTPException(status_code=503, detail="OpenAI API key not configured")
-        _openai_client = AsyncOpenAI(api_key=settings.openai_api_key)
+        http_client = None
+        if AVG_CERT.exists():
+            ctx = ssl.create_default_context(cafile=str(AVG_CERT))
+            http_client = httpx.AsyncClient(verify=ctx)
+        _openai_client = AsyncOpenAI(
+            api_key=settings.openai_api_key,
+            http_client=http_client,
+        )
     return _openai_client
 
 
@@ -45,7 +57,7 @@ class STTResponse(BaseModel):
 
 
 @router.post("/tts", response_model=TTSResponse)
-async def text_to_speech(req: TTSRequest):
+async def text_to_speech(req: TTSRequest, _user: CurrentUser):
     AUDIO_DIR.mkdir(parents=True, exist_ok=True)
     TTS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -79,7 +91,7 @@ async def text_to_speech(req: TTSRequest):
 
 
 @router.post("/stt", response_model=STTResponse)
-async def speech_to_text(audio: UploadFile = File(...)):
+async def speech_to_text(_user: CurrentUser, audio: UploadFile = File(...)):
     if not audio.content_type or not audio.content_type.startswith("audio/"):
         raise HTTPException(status_code=400, detail="File must be an audio file")
 
@@ -105,12 +117,15 @@ async def speech_to_text(audio: UploadFile = File(...)):
 
         logger.info("stt.transcribed", chars=len(transcript), file=temp_name)
         return STTResponse(text=transcript.strip())
+    except Exception as exc:
+        logger.error("stt.failed", error=str(exc), file=temp_name)
+        raise HTTPException(status_code=502, detail=f"Transcription failed: {exc}")
     finally:
         temp_path.unlink(missing_ok=True)
 
 
 @router.post("/upload")
-async def upload_audio(audio: UploadFile = File(...)):
+async def upload_audio(_user: CurrentUser, audio: UploadFile = File(...)):
     if not audio.content_type or not audio.content_type.startswith("audio/"):
         raise HTTPException(status_code=400, detail="File must be an audio file")
 

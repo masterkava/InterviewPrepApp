@@ -122,6 +122,8 @@ class Evaluation(BaseModel):
     problem_solving: Mapped[float] = mapped_column(Float, nullable=False)
     completeness: Mapped[float] = mapped_column(Float, nullable=False)
     overall_score: Mapped[float] = mapped_column(Float, nullable=False)
+    concepts_identified: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
+    concepts_missed: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
     feedback: Mapped[str] = mapped_column(Text, nullable=False)
     strengths: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)
     weaknesses: Mapped[dict | None] = mapped_column(JSONType(), nullable=True)

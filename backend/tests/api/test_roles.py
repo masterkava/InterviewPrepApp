@@ -32,16 +32,16 @@ async def _seed_role(db: AsyncSession) -> tuple[Role, list[Skill]]:
     return role, [skill_python, skill_sql]
 
 
-async def test_list_roles_empty(client: AsyncClient):
-    resp = await client.get("/api/v1/roles")
+async def test_list_roles_empty(client: AsyncClient, auth_headers: dict):
+    resp = await client.get("/api/v1/roles", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert data["roles"] == []
 
 
-async def test_list_roles(client: AsyncClient, db_session: AsyncSession):
+async def test_list_roles(client: AsyncClient, db_session: AsyncSession, auth_headers: dict):
     role, skills = await _seed_role(db_session)
-    resp = await client.get("/api/v1/roles")
+    resp = await client.get("/api/v1/roles", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert len(data["roles"]) == 1
@@ -50,9 +50,9 @@ async def test_list_roles(client: AsyncClient, db_session: AsyncSession):
     assert len(r["skills"]) == 2
 
 
-async def test_get_role_skills(client: AsyncClient, db_session: AsyncSession):
+async def test_get_role_skills(client: AsyncClient, db_session: AsyncSession, auth_headers: dict):
     role, skills = await _seed_role(db_session)
-    resp = await client.get(f"/api/v1/roles/{role.id}/skills")
+    resp = await client.get(f"/api/v1/roles/{role.id}/skills", headers=auth_headers)
     assert resp.status_code == 200
     data = resp.json()
     assert data["role_name"] == "Backend Developer"
@@ -62,7 +62,7 @@ async def test_get_role_skills(client: AsyncClient, db_session: AsyncSession):
     assert "sql" in slugs
 
 
-async def test_get_role_skills_not_found(client: AsyncClient):
+async def test_get_role_skills_not_found(client: AsyncClient, auth_headers: dict):
     fake_id = uuid.uuid4()
-    resp = await client.get(f"/api/v1/roles/{fake_id}/skills")
+    resp = await client.get(f"/api/v1/roles/{fake_id}/skills", headers=auth_headers)
     assert resp.status_code == 404
